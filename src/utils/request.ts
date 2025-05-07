@@ -1,3 +1,5 @@
+import { API_URL } from "./env"
+
 export async function request<T>(
   endpoint: string,
   method: 'GET' | 'POST' = 'GET',
@@ -8,7 +10,7 @@ export async function request<T>(
     params = '?' + new URLSearchParams(payload as Record<string, string>).toString()
   }
 
-  const proxyUrl = `/api/proxy?url=${encodeURIComponent(`https://phimapi.com/${endpoint}${params}`)}`
+  const proxyUrl = `/api/proxy?url=${encodeURIComponent(`${API_URL}${endpoint}${params}`)}`
 
   const res = await fetch(proxyUrl)
   try {
