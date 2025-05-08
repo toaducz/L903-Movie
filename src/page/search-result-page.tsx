@@ -9,6 +9,8 @@ import { getSearchByName } from '@/api/search/getSearch'
 import Pagination from '@/component/pagination'
 import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
+import Image from 'next/image'
+import errorImage from '@/assets/error.jpg'
 
 interface SearchProps {
   keyword: string
@@ -19,6 +21,8 @@ export default function SearchResultPage({ keyword, page }: SearchProps) {
   const router = useRouter()
   const [pageSearch, setPageSearch] = useState(page ?? 1)
   const { data: result, isLoading, isError } = useQuery(getSearchByName({ keyword: keyword, page: pageSearch }))
+
+  console.log(result?.data.items)
 
   const handlePageChange = (newPage: number) => {
     setPageSearch(newPage)
@@ -46,6 +50,19 @@ export default function SearchResultPage({ keyword, page }: SearchProps) {
         <h6 className='font-semibold text-gray-100 mb-6 italic'>
           Có {result?.data.params.pagination.totalItems} kết quả
         </h6>
+        {result?.data.items.length === 0 ? (
+          <div>
+            <Image
+              unoptimized
+              src={errorImage}
+              alt='Loading...'
+              width={200}
+              height={200}
+              className='object-contain'
+              priority
+            />
+          </div>
+        ) : (<div></div>)}
       </div>
       <div className='flex justify-center items-center '>
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 sm:gap-5 gap-3 p-3 w-full [grid-template-columns:repeat(auto-fill,minmax(120px,1fr))] sm:[grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]'>

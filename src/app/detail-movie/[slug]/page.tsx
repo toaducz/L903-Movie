@@ -16,6 +16,7 @@ export default function WatchPage() {
   const { data, isLoading, isError } = useQuery(getDetailMovie({ slug: String(slug) }))
   const [selectedEpisode, setSelectedEpisode] = useState<string | null>(null)
   const [isWatching, setIsWatching] = useState(false)
+  const isAvailable = data?.movie?.episode_current === "Trailer"
 
   // Đặt lại selectedEpisode khi slug thay đổi
   useEffect(() => {
@@ -225,18 +226,20 @@ export default function WatchPage() {
                   }
                 }}
                 className="w-full"
+                playing
                 light={thumbnail.src}
               />
             </div>
           ) : (
             <div className="flex items-center justify-center h-96 text-xl">
+              {!isAvailable ? (
               <div className="flex items-center">
                 <svg className="animate-spin -ml-1 mr-3 h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
                 Đang tải tập phim...
-              </div>
+              </div>) : (<div>Phim chưa cập nhật...</div>)}
             </div>
           )}
         </div>
@@ -309,14 +312,18 @@ export default function WatchPage() {
           <div className="md:col-span-2">
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 shadow-lg">
               <h3 className="text-xl font-bold mb-4 border-l-4 border-blue-500 pl-3">Danh sách tập</h3>
-
-              {data?.episodes && (
-                <EpisodeList
-                  episodes={data.episodes}
-                  onSelectEpisode={ep => handleSelectEpisode(ep.link_m3u8)}
-                  selectedEpisode={selectedEpisode}
-                />
+              {isAvailable ? (
+                <div className='italic'>Phim sẽ cập nhật trong thời gian sớm nhất, mong bạn thông cảm! </div>
+              ) : (
+                data?.episodes && (
+                  <EpisodeList
+                    episodes={data.episodes}
+                    onSelectEpisode={(ep) => handleSelectEpisode(ep.link_m3u8)}
+                    selectedEpisode={selectedEpisode}
+                  />
+                )
               )}
+
             </div>
           </div>
         </div>
