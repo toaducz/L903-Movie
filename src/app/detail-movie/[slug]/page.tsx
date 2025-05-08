@@ -9,6 +9,7 @@ import ReactPlayer from 'react-player'
 import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
 import Image from 'next/image'
+import thumbnail from '@/assets/gumaKe.png'
 
 export default function WatchPage() {
   const { slug } = useParams()
@@ -47,7 +48,7 @@ export default function WatchPage() {
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white pt-20 pb-16">
         <div className="max-w-6xl mx-auto px-4">
           {/* Header với backdrop */}
-          <div 
+          <div
             className="relative w-full h-80 rounded-xl mb-8 overflow-hidden bg-cover bg-center"
             style={{
               backgroundImage: `url(${movie.poster_url})`,
@@ -75,7 +76,7 @@ export default function WatchPage() {
                   className="w-full h-auto"
                 />
               </div>
-              
+
               <button
                 className="mt-6 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-blue-500/50 w-full flex justify-center items-center gap-2"
                 onClick={() => {
@@ -89,7 +90,7 @@ export default function WatchPage() {
                 </svg>
                 Xem phim
               </button>
-              
+
               <div className="mt-6 bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 shadow-lg">
                 <div className="flex items-center justify-center mb-2">
                   {/* <div className="bg-yellow-500 text-black font-bold rounded-full w-14 h-14 flex items-center justify-center text-xl shadow-lg">
@@ -100,7 +101,7 @@ export default function WatchPage() {
                     <p className="text-sm font-semibold">{movie.tmdb?.vote_count} người</p>
                   </div> */}
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-y-2 mt-4 text-sm text-gray-300">
                   <div><span className="font-semibold text-gray-200">Năm:</span> {movie.year}</div>
                   <div><span className="font-semibold text-gray-200">Chất lượng:</span> {movie.quality}</div>
@@ -109,12 +110,12 @@ export default function WatchPage() {
                 </div>
               </div>
             </div>
-            
+
             {/* Thông tin phim */}
             <div className="md:w-2/3 mt-6 md:mt-0">
               <div className="bg-gray-800/30 backdrop-blur-sm rounded-xl p-6 shadow-lg mb-6">
                 <h2 className="text-2xl font-bold mb-4 border-l-4 border-blue-500 pl-4">Thông tin chi tiết</h2>
-                
+
                 <div className="space-y-3 text-gray-300">
                   <p>
                     <span className="inline-block w-28 font-semibold text-gray-200">Quốc gia:</span>
@@ -138,19 +139,19 @@ export default function WatchPage() {
                   </p>
                 </div>
               </div>
-              
+
               <div className="bg-gray-800/30 backdrop-blur-sm rounded-xl p-6 shadow-lg">
                 <h2 className="text-2xl font-bold mb-4 border-l-4 border-blue-500 pl-4">Nội dung</h2>
                 <p className="text-gray-300 leading-relaxed">{movie.content}</p>
               </div>
-              
+
               {/* Thể loại tags */}
               <div className="mt-6">
                 <h2 className="text-xl font-bold mb-3">Thể loại:</h2>
                 <div className="flex flex-wrap gap-2">
                   {movie.category.map((cat, index) => (
-                    <span 
-                      key={index} 
+                    <span
+                      key={index}
                       className="px-3 py-1 bg-blue-600/20 border border-blue-500/30 text-blue-400 rounded-full text-sm"
                     >
                       {cat.name}
@@ -160,16 +161,16 @@ export default function WatchPage() {
               </div>
             </div>
           </div>
-          
+
           {/* Trailer */}
           {movie.trailer_url && (
             <div className="mt-12">
               <h2 className="text-2xl font-bold mb-4 border-l-4 border-red-500 pl-4">Trailer</h2>
               <div className="rounded-xl overflow-hidden shadow-2xl">
-                <ReactPlayer 
-                  url={movie.trailer_url} 
-                  controls 
-                  width="100%" 
+                <ReactPlayer
+                  url={movie.trailer_url}
+                  controls
+                  width="100%"
                   height="500px"
                   config={{
                     youtube: {
@@ -189,7 +190,7 @@ export default function WatchPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white pt-20 pb-16">
       <div className="max-w-6xl mx-auto px-4">
-        <button 
+        <button
           className="mb-6 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition duration-300 flex items-center gap-2 shadow-lg"
           onClick={() => setIsWatching(false)}
         >
@@ -198,12 +199,12 @@ export default function WatchPage() {
           </svg>
           Quay lại thông tin phim
         </button>
-        
+
         <div className="flex items-center gap-4 mb-6">
           <h1 className="text-3xl font-bold">{movie.name}</h1>
           <span className="text-gray-400 italic">{movie.origin_name}</span>
         </div>
-        
+
         {/* Player trong card */}
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl overflow-hidden shadow-2xl mb-8">
           {selectedEpisode && episodeToPlay ? (
@@ -224,6 +225,7 @@ export default function WatchPage() {
                   }
                 }}
                 className="w-full"
+                light={thumbnail.src}
               />
             </div>
           ) : (
@@ -238,7 +240,7 @@ export default function WatchPage() {
             </div>
           )}
         </div>
-        
+
         {/* Điều hướng tập */}
         {selectedEpisode && episodeToPlay && (
           <div className="flex justify-between mb-8">
@@ -264,13 +266,13 @@ export default function WatchPage() {
             </button>
           </div>
         )}
-        
+
         <div className="grid md:grid-cols-3 gap-8">
           {/* Thông tin phim tóm tắt */}
           <div className="md:col-span-1">
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 shadow-lg mb-6">
               <h3 className="text-xl font-bold mb-4 border-l-4 border-blue-500 pl-3">Thông tin phim</h3>
-              
+
               <div className="space-y-3 text-sm text-gray-300">
                 <div className="flex items-center">
                   <Image
@@ -287,7 +289,7 @@ export default function WatchPage() {
                     <div><span className="font-semibold text-gray-200">Ngôn ngữ:</span> {movie.lang}</div>
                   </div>
                 </div>
-                
+
                 <p>
                   <span className="font-semibold text-gray-200">Quốc gia:</span> {movie.country.map(c => c.name).join(', ')}
                 </p>
@@ -295,19 +297,19 @@ export default function WatchPage() {
                   <span className="font-semibold text-gray-200">Thể loại:</span> {movie.category.map(c => c.name).join(', ')}
                 </p>
               </div>
-              
+
               <div className="mt-4 pt-4 border-t border-gray-700">
                 <p className="text-sm text-gray-300 line-clamp-4">{movie.content}</p>
                 <button className="text-blue-400 text-sm mt-2 hover:text-blue-300">Xem thêm</button>
               </div>
             </div>
           </div>
-          
+
           {/* Danh sách tập */}
           <div className="md:col-span-2">
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 shadow-lg">
               <h3 className="text-xl font-bold mb-4 border-l-4 border-blue-500 pl-3">Danh sách tập</h3>
-              
+
               {data?.episodes && (
                 <EpisodeList
                   episodes={data.episodes}
