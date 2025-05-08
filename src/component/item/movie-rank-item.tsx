@@ -32,7 +32,7 @@ export default function MovieRankItem({ movie, index }: Props) {
       />
       <div className='flex flex-col overflow-hidden'>
         <span className='text-white font-medium text-sm line-clamp-2'>{movie.name}</span>
-        <span className='text-gray-400 italic text-xs truncate'>{movie.origin_name}</span>
+        <span className='text-gray-400 italic text-xs line-clamp-1'>{movie.origin_name}</span>
       </div>
     </div>
   )

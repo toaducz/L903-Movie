@@ -29,7 +29,7 @@ export default function Home() {
           </div>
         </div>
         {/* cục này tạm tạm */}
-        <div className='hidden md:block w-full md:w-1/5 max-w-sm'>
+        <div className='hidden md:block w-full max-w-[19rem]'>
           <h1 className='text-white font-bold text-center py-2'>Phim bộ mới cập nhật</h1>
           {updateMovie?.items.slice(0, 5).map((movie, index) => (
             <div className='flex pb-4' key={movie._id}>
