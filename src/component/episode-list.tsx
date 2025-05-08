@@ -1,3 +1,5 @@
+'use client'
+
 import React from 'react'
 
 type Episode = {
@@ -16,22 +18,27 @@ type Server = {
 type EpisodeListProps = {
   episodes: Server[]
   onSelectEpisode: (episode: Episode) => void
+  selectedEpisode: string | null // link_m3u8
 }
 
-const EpisodeList: React.FC<EpisodeListProps> = ({ episodes, onSelectEpisode }) => {
-  console.log(episodes)
+const EpisodeList: React.FC<EpisodeListProps> = ({ episodes, onSelectEpisode, selectedEpisode }) => {
+  const handleSelectEpisode = (episode: Episode) => {
+    onSelectEpisode(episode)
+  }
 
   return (
-    <div>
-      {episodes.map((server, index) => (
-        <div key={index} className='mb-4'>
-          <h3 className='text-lg font-bold mb-2'>{server.server_name}</h3>
+    <div className='mt-4 space-y-6'>
+      {episodes.map((server, serverIdx) => (
+        <div key={serverIdx}>
+          <h2 className='text-lg font-semibold text-white mb-2'>{server.server_name}</h2>
           <div className='flex flex-wrap gap-2'>
             {server.server_data.map((ep, idx) => (
               <button
                 key={idx}
-                className='px-3 py-1 bg-blue-500 rounded hover:bg-gray-900 transition'
-                onClick={() => onSelectEpisode(ep)}
+                className={`px-3 py-1 rounded transition ${
+                  selectedEpisode === ep.link_m3u8 ? 'bg-gray-900 text-white' : 'bg-blue-500 hover:bg-gray-900'
+                }`}
+                onClick={() => handleSelectEpisode(ep)}
               >
                 {ep.name}
               </button>

@@ -2,17 +2,38 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function Navbar() {
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isVisible, setIsVisible] = useState(true)
+  const [lastScrollY, setLastScrollY] = useState(0)
+
+  // Theo dõi sự kiện cuộn để ẩn/hiện navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Cuộn xuống và vượt quá 100px -> ẩn navbar
+        setIsVisible(false)
+      } else {
+        // Cuộn lên hoặc ở đầu trang -> hiện navbar
+        setIsVisible(true)
+      }
+      setLastScrollY(currentScrollY)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [lastScrollY])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (search.trim()) {
-      router.push(`/search?q=${encodeURIComponent(search.trim())}`)
+      const encoded = encodeURIComponent(search.trim())
+      router.push(`/search?q=${encoded}&page=1`)
       setSearch('')
     }
   }
@@ -22,7 +43,11 @@ export default function Navbar() {
   }
 
   return (
-    <nav className='bg-slate-900 text-white shadow-md w-screen fixed top-0 z-50'>
+    <nav
+      className={`bg-slate-900 text-white shadow-md w-screen fixed top-0 z-50 transition-transform duration-300 ${
+        isVisible ? 'translate-y-0' : '-translate-y-full'
+      }`}
+    >
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between'>
         {/* Logo */}
         <Link

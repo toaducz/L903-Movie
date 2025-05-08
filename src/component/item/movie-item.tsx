@@ -15,6 +15,14 @@ export default function MovieItem({ movie }: Props) {
   const handleClick = () => {
     router.push(`/detail-movie/${movie.slug}`)
   }
+  const normalizePosterUrl = (posterUrl: string) => {
+    if (!posterUrl.startsWith('http')) {
+      return `https://phimimg.com/${posterUrl.replace(/^\/+/, '')}`
+    }
+    return posterUrl
+  }
+
+  const poster = normalizePosterUrl(movie.poster_url)
   return (
     <div
       onClick={handleClick}
@@ -22,13 +30,13 @@ export default function MovieItem({ movie }: Props) {
     >
       <Image
         unoptimized
-        src={movie.poster_url}
+        priority // Thêm dòng này
+        src={poster}
         alt={movie.name}
-        width={200}
+        width={270}
         height={300}
         onLoad={() => setIsLoaded(false)}
         className={`w-full object-cover h-[270px] ${isLoaded ? 'opacity-0' : 'opacity-100'}`}
-        // style={{ maxHeight: '18.5rem', minHeight: '17rem' }}
       />
 
       <div className='p-4'>
@@ -38,7 +46,9 @@ export default function MovieItem({ movie }: Props) {
           <span>{movie.year}</span> · <span>{movie.quality}</span>
         </div>
 
-        <div className='text-xs text-gray-500 mt-2 line-clamp-2'>{movie.category.map(cat => cat.name).join(', ')}</div>
+        <div className='text-xs text-gray-500 mt-2 line-clamp-2 h-12'>
+          {movie.category.map(cat => cat.name).join(', ')}
+        </div>
       </div>
     </div>
   )

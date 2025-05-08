@@ -4,9 +4,19 @@ import MovieItem from '@/component/item/movie-item'
 import MovieRankItem from '@/component/item/movie-rank-item'
 import { useQuery } from '@tanstack/react-query'
 import { getLatestUpdateMovieList } from '@/api/getUpdatedMovie'
+import Loading from '@/component/status/loading'
+import Error from '@/component/status/error'
 
 export default function Home() {
-  const { data: updateMovie } = useQuery(getLatestUpdateMovieList({ page: 1 }))
+  const { data: updateMovie, isLoading, isError } = useQuery(getLatestUpdateMovieList({ page: 1 }))
+
+  if (isLoading) {
+    return <Loading />
+  }
+
+  if (isError) {
+    return <Error />
+  }
 
   return (
     <main className='min-h-screen p-2 sm:py-2 sm:px-4 bg-gray-900 text-gray-900'>
@@ -19,7 +29,7 @@ export default function Home() {
           </div>
         </div>
         {/* cục này tạm tạm */}
-        <div className='w-1/5 hidden md:block'>
+        <div className='hidden md:block w-full md:w-1/5 max-w-sm'>
           <h1 className='text-white font-bold text-center py-2'>Phim bộ mới cập nhật</h1>
           {updateMovie?.items.slice(0, 5).map((movie, index) => (
             <div className='flex pb-4' key={movie._id}>
