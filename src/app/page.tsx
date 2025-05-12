@@ -3,13 +3,30 @@
 import MovieItem from '@/component/item/movie-item'
 import MovieRankItem from '@/component/item/movie-rank-item'
 import { useQuery } from '@tanstack/react-query'
-import { getLatestUpdateMovieList } from '@/api/getUpdatedMovie'
+import { getLatestUpdateMovieList, Movie } from '@/api/getUpdatedMovie'
 import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
+import { useRouter } from 'next/navigation'
+import { getListMovie } from '@/api/getListMovie'
 
 export default function Home() {
+  const router = useRouter()
   const { data: updateMovie, isLoading, isError } = useQuery(getLatestUpdateMovieList({ page: 1 }))
-
+  const {
+    data: phimbo,
+    isLoading: isLoadingPhimBo,
+    isError: isErrorPhimBo
+  } = useQuery(getListMovie({ typeList: 'phim-bo', page: 1, limit: 5 }))
+  const {
+    data: phimle,
+    isLoading: isLoadingPhimLe,
+    isError: isErrorPhimLe
+  } = useQuery(getListMovie({ typeList: 'phim-le', page: 1, limit: 5 }))
+  const {
+    data: hoathinh,
+    isLoading: isLoadingHoatHinh,
+    isError: isErrorHoatHinh
+  } = useQuery(getListMovie({ typeList: 'hoat-hinh', page: 1, limit: 5 }))
   if (isLoading) {
     return <Loading />
   }
@@ -31,36 +48,49 @@ export default function Home() {
         {/* cục này tạm tạm */}
         <div className='hidden md:block w-full max-w-[19rem]'>
           <h1 className='text-white font-bold text-center py-2'>Phim bộ mới cập nhật</h1>
-          {updateMovie?.items.slice(0, 5).map((movie, index) => (
-            <div className='flex pb-4' key={movie._id}>
-              <MovieRankItem index={index} movie={movie} />
-            </div>
-          ))}
+          {renderMovieList(isLoadingPhimBo, isErrorPhimBo, phimbo?.data.items)}
           <div className='pb-2 px-5'>
-            <button className='text-white hover:text-blue-500 underline cursor-pointer'>{`Xem thêm`}</button>
+            <button
+              onClick={() => {
+                router.push('/list-movie?typeList=phim-bo')
+              }}
+              className='text-white hover:text-blue-500 underline cursor-pointer'
+            >{`Xem thêm`}</button>
           </div>
 
           <h1 className='text-white font-bold text-center py-2'>Phim lẻ mới cập nhật</h1>
-          {updateMovie?.items.slice(6, 11).map((movie, index) => (
-            <div className='flex pb-4' key={movie._id}>
-              <MovieRankItem index={index} movie={movie} />
-            </div>
-          ))}
+          {renderMovieList(isLoadingPhimLe, isErrorPhimLe, phimle?.data.items)}
           <div className='pb-2 px-5'>
-            <button className='text-white hover:text-blue-500 underline cursor-pointer'>{`Xem thêm`}</button>
+            <button
+              onClick={() => {
+                router.push('/list-movie?typeList=phim-le')
+              }}
+              className='text-white hover:text-blue-500 underline cursor-pointer'
+            >{`Xem thêm`}</button>
           </div>
 
           <h1 className='text-white font-bold text-center py-2'>Hoạt hình mới cập nhật</h1>
-          {updateMovie?.items.slice(12, 16).map((movie, index) => (
-            <div className='flex pb-4' key={movie._id}>
-              <MovieRankItem index={index} movie={movie} />
-            </div>
-          ))}
+          {renderMovieList(isLoadingHoatHinh, isErrorHoatHinh, hoathinh?.data.items)}
           <div className='pb-2 px-5'>
-            <button className='text-white hover:text-blue-500 underline cursor-pointer'>{`Xem thêm`}</button>
+            <button
+              onClick={() => {
+                router.push('/list-movie?typeList=hoat-hinh')
+              }}
+              className='text-white hover:text-blue-500 underline cursor-pointer'
+            >{`Xem thêm`}</button>
           </div>
         </div>
       </div>
     </main>
   )
+}
+
+function renderMovieList(isLoading: boolean, isError: boolean, items?: Movie[]) {
+  if (isLoading) return <Loading />
+  if (isError) return <Error />
+  return items?.map((movie, index) => (
+    <div className='flex pb-4' key={movie._id}>
+      <MovieRankItem index={index} movie={movie} />
+    </div>
+  ))
 }

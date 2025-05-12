@@ -3,25 +3,27 @@
 
 import { Suspense } from 'react'
 import { notFound, useSearchParams } from 'next/navigation'
-import SearchResultPage from '@/page/search-result-page'
+import MovieListPage from '@/page/movie-list-page'
 
 // Bọc phần tử cần sử dụng useSearchParams() bằng Suspense
-export default function SearchPage() {
+export default function MoviePage() {
   return (
     <Suspense>
-      <SearchPageContent />
+      <MovieListPageContent />
     </Suspense>
   )
 }
 
-function SearchPageContent() {
+function MovieListPageContent() {
   const searchParams = useSearchParams()
-  const query = searchParams?.get('q')?.trim()
+  const query = searchParams?.get('typeList')?.trim()
   const pageParam = Number(searchParams.get('page') ?? '1')
 
   if (!query) {
     notFound()
   }
 
-  return <SearchResultPage keyword={query} page={pageParam} />
+  console.log(query)
+
+  return <MovieListPage typeList={query} page={pageParam} />
 }

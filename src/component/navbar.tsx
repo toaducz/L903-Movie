@@ -91,9 +91,7 @@ export default function Navbar() {
           className='lg:hidden text-white text-2xl focus:outline-none'
           onClick={toggleMenu}
           aria-label='Toggle menu'
-        >
-          {/* {isMenuOpen ? <FaTimes /> : <FaBars />} */}
-        </button>
+        ></button>
       </div>
 
       {/* Mobile & Tablet Menu */}

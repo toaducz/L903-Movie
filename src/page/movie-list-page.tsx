@@ -5,28 +5,61 @@ import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 // import { useMemo } from 'react'
 import MovieItem from '@/component/item/movie-item'
-import { getSearchByName } from '@/api/search/getSearch'
+import { getListMovie } from '@/api/getListMovie'
 import Pagination from '@/component/pagination'
 import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
 import Image from 'next/image'
 import errorImage from '@/assets/error.jpg'
 
-interface SearchProps {
-  keyword: string
+interface MovieListProps {
+  typeList: string
   page?: number
+  sort_field?: string
+  sort_type?: string
+  sort_lang?: string
+  category?: string
+  country?: string
+  year?: string
+  limit?: number
 }
 
-export default function SearchResultPage({ keyword, page }: SearchProps) {
+export default function MovieListPage({
+  typeList,
+  page,
+  sort_field,
+  sort_type,
+  sort_lang,
+  category,
+  country,
+  year,
+  limit
+}: MovieListProps) {
   const router = useRouter()
   const [pageSearch, setPageSearch] = useState(page ?? 1)
-  const { data: result, isLoading, isError } = useQuery(getSearchByName({ keyword: keyword, page: pageSearch }))
+  const {
+    data: listMovie,
+    isLoading,
+    isError
+  } = useQuery(
+    getListMovie({
+      typeList: typeList,
+      page: pageSearch,
+      sort_field,
+      sort_type,
+      sort_lang,
+      category,
+      country,
+      year,
+      limit
+    })
+  )
 
-  // console.log(result?.data.items)
+  //   console.log(listMovie?.data.items)
 
   const handlePageChange = (newPage: number) => {
     setPageSearch(newPage)
-    router.push(`/search?q=${encodeURIComponent(keyword)}&page=${newPage}`)
+    router.push(`/list-movie?typeList=${encodeURIComponent(typeList)}&page=${newPage}`)
   }
 
   useEffect(() => {
@@ -46,11 +79,9 @@ export default function SearchResultPage({ keyword, page }: SearchProps) {
   return (
     <div className='min-h-screen flex flex-col items-center justify-center p-4'>
       <div className='flex flex-col pt-20 items-center justify-content'>
-        <h2 className='text-2xl font-semibold text-gray-100'>{result?.data.titlePage}</h2>
-        <h6 className='font-semibold text-gray-100 mb-6 italic'>
-          Có {result?.data.params.pagination.totalItems} kết quả
-        </h6>
-        {result?.data.items.length === 0 ? (
+        <h2 className='text-2xl font-semibold text-gray-100'>{listMovie?.data.titlePage}</h2>
+        <h6 className='font-semibold text-gray-100 mb-6 italic'>{listMovie?.data.seoOnPage.descriptionHead}</h6>
+        {listMovie?.data.items.length === 0 ? (
           <div>
             <Image
               unoptimized
@@ -68,7 +99,7 @@ export default function SearchResultPage({ keyword, page }: SearchProps) {
       </div>
       <div className='flex justify-center items-center '>
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 sm:gap-5 gap-3 p-3 w-full [grid-template-columns:repeat(auto-fill,minmax(120px,1fr))] sm:[grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]'>
-          {result?.data?.items.map((movie, index) => (
+          {listMovie?.data?.items.map((movie, index) => (
             <div key={index}>
               <MovieItem movie={movie} />
             </div>
@@ -76,8 +107,8 @@ export default function SearchResultPage({ keyword, page }: SearchProps) {
         </div>
       </div>
       <Pagination
-        currentPage={result?.data.params.pagination.currentPage ?? 1}
-        totalPages={result?.data.params.pagination.totalPages ?? 1}
+        currentPage={listMovie?.data.params.pagination.currentPage ?? 1}
+        totalPages={listMovie?.data.params.pagination.totalPages ?? 1}
         onPageChange={handlePageChange}
       />
     </div>

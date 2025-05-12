@@ -14,6 +14,10 @@ export default function MovieRankItem({ movie, index }: Props) {
     router.push(`/detail-movie/${movie.slug}`)
   }
 
+  if (!movie.thumb_url.includes('https://phimimg.com/')) {
+    movie.thumb_url = 'https://phimimg.com/' + movie.thumb_url
+  }
+
   return (
     <div
       className='flex items-center gap-4 py-2 px-2 bg-stale-500 cursor-pointer hover:opacity-70'
