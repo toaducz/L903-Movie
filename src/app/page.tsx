@@ -42,7 +42,10 @@ export default function Home() {
         <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 md:w-4/5 '>
           {updateMovie?.items.map(movie => <MovieItem key={movie._id} movie={movie} />)}
           <div className='py-2'>
-            <button className='text-white hover:text-blue-500 underline cursor-pointer'>{`Xem thêm`}</button>
+            <button
+              onClick={() => router.push('/all-movie')}
+              className='text-white hover:text-blue-500 underline cursor-pointer'
+            >{`Xem thêm`}</button>
           </div>
         </div>
         {/* cục này tạm tạm */}

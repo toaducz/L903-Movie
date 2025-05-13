@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/component/navbar'
 import QueryProvider from '@/app/provider'
+import { Suspense } from 'react'
+import NProgressInit from '@/component/NProgressInit'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -28,6 +30,10 @@ export default function RootLayout({
     <html lang='en'>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <QueryProvider>
+          <Suspense>
+            {' '}
+            <NProgressInit />
+          </Suspense>
           <Navbar />
           {/* <div className='pb-25'></div> */}
           {children}

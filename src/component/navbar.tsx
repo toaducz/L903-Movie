@@ -59,13 +59,46 @@ export default function Navbar() {
 
         {/* Navigation Items - Desktop */}
         <div className='hidden lg:flex items-center gap-8 text-base font-medium'>
-          {/* <Link
-            href='/trending'
+          <Link
+            href={{
+              pathname: '/list-movie',
+              query: { typeList: 'phim-vietsub', page: 1 }
+            }}
             className='relative text-white hover:text-slate-300 transition-colors duration-200 group'
           >
-            Trending
+            Phim Vietsub
             <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-slate-300 transition-all duration-300 group-hover:w-full'></span>
-          </Link> */}
+          </Link>
+          <Link
+            href={{
+              pathname: '/list-movie',
+              query: { typeList: 'phim-long-tieng', page: 1 }
+            }}
+            className='relative text-white hover:text-slate-300 transition-colors duration-200 group'
+          >
+            Phim Lồng tiếng
+            <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-slate-300 transition-all duration-300 group-hover:w-full'></span>
+          </Link>
+          <Link
+            href={{
+              pathname: '/list-movie',
+              query: { typeList: 'phim-thuyet-minh', page: 1 }
+            }}
+            className='relative text-white hover:text-slate-300 transition-colors duration-200 group'
+          >
+            Phim Lồng tiếng
+            <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-slate-300 transition-all duration-300 group-hover:w-full'></span>
+          </Link>
+          <Link
+            href={{
+              pathname: '/list-movie',
+              query: { typeList: 'tv-shows', page: 1 }
+            }}
+            className='relative text-white hover:text-slate-300 transition-colors duration-200 group'
+          >
+            TV Shows
+            <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-slate-300 transition-all duration-300 group-hover:w-full'></span>
+          </Link>
         </div>
 
         {/* Search - Desktop & Tablet */}

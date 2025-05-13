@@ -11,6 +11,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.75.4",
     "next": "15.3.2",
+    "nprogress": "^0.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-player": "^2.16.0"
@@ -19,6 +20,7 @@
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/nprogress": "^0.2.3",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
