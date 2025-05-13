@@ -2,6 +2,10 @@
 
 **L903-Movie** sử dụng dữ liệu từ [kkphim](https://kkphim.com/)
 
+![demo_1](./src/assets/demo1.png) <!-- [image] -->
+
+![demo_2](./src/assets/demo2.png) <!-- [image] -->
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
