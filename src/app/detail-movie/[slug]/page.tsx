@@ -10,6 +10,7 @@ import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
 import Image from 'next/image'
 import thumbnail from '@/assets/gumaKe.png'
+import CustomPlayer from '@/component/player/custom-player'
 
 export default function WatchPage() {
   const { slug } = useParams()
@@ -230,7 +231,8 @@ export default function WatchPage() {
               <div className='bg-gray-700 p-4'>
                 <h2 className='text-xl font-semibold'>{episodeToPlay.name}</h2>
               </div>
-              <ReactPlayer
+              <CustomPlayer src={selectedEpisode} poster={thumbnail.src} />
+              {/* <ReactPlayer
                 url={selectedEpisode}
                 controls
                 width='100%'
@@ -245,7 +247,7 @@ export default function WatchPage() {
                 className='w-full'
                 playing
                 light={thumbnail.src}
-              />
+              /> */}
             </div>
           ) : (
             <div className='flex items-center justify-center h-96 text-xl'>
