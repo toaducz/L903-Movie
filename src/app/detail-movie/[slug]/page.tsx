@@ -231,8 +231,9 @@ export default function WatchPage() {
               <div className='bg-gray-700 p-4'>
                 <h2 className='text-xl font-semibold'>{episodeToPlay.name}</h2>
               </div>
-              <CustomPlayer src={selectedEpisode} poster={thumbnail.src} />
-              {/* <ReactPlayer
+              {/* cái custom player này đang bug fullscreen*/}
+              {/* <CustomPlayer src={selectedEpisode} poster={thumbnail.src} /> */} 
+              <ReactPlayer
                 url={selectedEpisode}
                 controls
                 width='100%'
@@ -247,7 +248,7 @@ export default function WatchPage() {
                 className='w-full'
                 playing
                 light={thumbnail.src}
-              /> */}
+              />
             </div>
           ) : (
             <div className='flex items-center justify-center h-96 text-xl'>
