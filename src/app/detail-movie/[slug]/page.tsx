@@ -10,7 +10,7 @@ import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
 import Image from 'next/image'
 import thumbnail from '@/assets/gumaKe.png'
-import CustomPlayer from '@/component/player/custom-player'
+// import CustomPlayer from '@/component/player/custom-player'
 
 export default function WatchPage() {
   const { slug } = useParams()
