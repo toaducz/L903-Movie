@@ -51,7 +51,7 @@ export default function AllMoviePage({ page }: Props) {
   }
 
   return (
-    <div className='min-h-screen flex flex-col items-center justify-center p-4'>
+    <div className='min-h-screen flex flex-col items-center justify-center p-4 bg-slate-900'>
       <div className='flex flex-col pt-20 items-center justify-content'>
         <h2 className='text-2xl font-semibold text-gray-100'>{'Phim mới cập nhật'}</h2>
         <h6 className='font-semibold text-gray-100 mb-6 italic'>{'L903 Movie'}</h6>

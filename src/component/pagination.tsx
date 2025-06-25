@@ -35,18 +35,18 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
   if (totalPages <= 1) return null
 
   return (
-    <div className='flex flex-wrap items-center justify-center gap-2 mt-6 text-sm scale-110'>
+    <div className='flex flex-wrap items-center justify-center gap-2 mt-6 text-sm scale-110 text-white'>
       <button
         onClick={() => onPageChange(1)}
         disabled={currentPage === 1}
-        className='px-2 py-1 bg-stale-700 rounded disabled:opacity-50'
+        className='px-2 py-1 bg-stale-700 rounded disabled:opacity-50 '
       >
         ⏮
       </button>
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className='px-2 py-1 bg-stale-700 rounded disabled:opacity-50'
+        className='px-2 py-1 bg-stale-700 rounded disabled:opacity-50 '
       >
         «
       </button>
