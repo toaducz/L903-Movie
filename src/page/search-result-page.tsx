@@ -50,7 +50,7 @@ export default function SearchResultPage({ keyword, page }: SearchProps) {
         <h6 className='font-semibold text-gray-100 mb-6 italic'>
           Có {result?.data.params.pagination.totalItems} kết quả
         </h6>
-        {result?.data.items.length === 0 ? (
+        {result?.data?.params?.pagination?.totalItems === 0 ? (
           <div>
             <Image
               unoptimized
@@ -68,7 +68,7 @@ export default function SearchResultPage({ keyword, page }: SearchProps) {
       </div>
       <div className='flex justify-center items-center '>
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 sm:gap-5 gap-3 p-3 w-full [grid-template-columns:repeat(auto-fill,minmax(120px,1fr))] sm:[grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]'>
-          {result?.data?.items.map((movie, index) => (
+          {result?.data?.items?.map((movie, index) => (
             <div key={index}>
               <MovieItem movie={movie} />
             </div>
