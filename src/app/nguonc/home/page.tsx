@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter, useSearchParams } from 'next/navigation'
 import MovieItem from '@/component/item/movie-item'
@@ -10,9 +10,7 @@ import Error from '@/component/status/error'
 import Image from 'next/image'
 import errorImage from '@/assets/error.jpg'
 import { getLatestUpdateMovieList } from '@/api/nguonc/getUpdateMovie'
-import { useEffect } from 'react'
 
-// Force dynamic rendering to avoid static optimization issues
 export const dynamic = 'force-dynamic'
 
 function MovieListContent() {
@@ -26,7 +24,6 @@ function MovieListContent() {
     router.push(`/nguonc/home?page=${newPage}`)
   }
 
-  // Scroll to top when page changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [page])

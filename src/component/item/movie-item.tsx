@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Movie } from '@/api/kkphim/getUpdatedMovie'
 import React, { useState } from 'react'
+import ouguricap from '@/assets/xin-loi-ouguri-cap-cua-toi-an-het-anh-roi.jpg'
 
 type Props = {
   movie: Movie
@@ -14,12 +15,19 @@ type Props = {
 export default function MovieItem({ movie, color }: Readonly<Props>) {
   const [isLoaded, setIsLoaded] = useState(false)
 
-  const normalizePosterUrl = (posterUrl: string) => {
-    if (!posterUrl.startsWith('http')) {
-      return `https://phimimg.com/${posterUrl.replace(/^\/+/, '')}`
-    }
-    return posterUrl
+  const normalizePosterUrl = (posterUrl: string | object | null | undefined) => {
+  if (!posterUrl) return ouguricap; // null, undefined, empty
+  if (typeof posterUrl === 'object') return ouguricap; // object trả về ouguricap
+
+  const temp = String(posterUrl).trim();
+  if (temp === '{}' || temp === '') return ouguricap; // object stringify hoặc empty string
+
+  if (!temp.startsWith('http')) {
+    return `https://phimimg.com/${temp.replace(/^\/+/, '')}`;
   }
+  return temp;
+};
+
 
   const poster = normalizePosterUrl(movie.poster_url)
 
@@ -31,7 +39,7 @@ export default function MovieItem({ movie, color }: Readonly<Props>) {
       <Image
         unoptimized
         priority
-        src={poster}
+        src={poster ?? ""}
         alt={movie.name}
         width={270}
         height={300}

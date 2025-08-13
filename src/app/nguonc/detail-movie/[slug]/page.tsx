@@ -5,30 +5,29 @@ import { useParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { getDetailMovie } from '@/api/nguonc/getDetailMovie'
 import EpisodeList from '@/component/episode-list'
-import ReactPlayer from 'react-player'
 import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
 import Image from 'next/image'
-import thumbnail from '@/assets/gumaKe.png'
-// import CustomPlayer from '@/component/player/custom-player'
+import ReactPlayer from 'react-player'
 
 export default function WatchPage() {
   const { slug } = useParams()
   const { data, isLoading, isError } = useQuery(getDetailMovie({ slug: String(slug) }))
   const [selectedEpisode, setSelectedEpisode] = useState<string | null>(null)
   const [isWatching, setIsWatching] = useState(false)
+
   const isAvailable = data?.movie?.movie.episode_current === 'Trailer'
 
-  // Đặt lại selectedEpisode khi slug thay đổi
+  // Reset khi slug thay đổi
   useEffect(() => {
     setSelectedEpisode(null)
-    setIsWatching(false) // Quay về giao diện thông tin khi đổi phim
+    setIsWatching(false)
   }, [slug])
 
-  // Tự động chọn tập 1 khi data được tải và đang ở chế độ xem phim
+  // Tự động chọn tập đầu
   useEffect(() => {
     if (isWatching && data?.movie?.episodes?.[0]?.server_data?.[0] && !selectedEpisode) {
-      setSelectedEpisode(data.movie.episodes[0].server_data[0].link_m3u8)
+      setSelectedEpisode(data.movie.episodes[0].server_data[0].link_embed)
     }
   }, [data, selectedEpisode, isWatching])
 
@@ -36,25 +35,22 @@ export default function WatchPage() {
   if (isError || !data?.movie || data.status !== 'success') return <Error message={''} />
 
   const flatEpisodes = data.movie.episodes.flatMap(server => server.server_data)
-  const currentIndex = flatEpisodes.findIndex(ep => ep.link_m3u8 === selectedEpisode)
+  const currentIndex = flatEpisodes.findIndex(ep => ep.link_embed === selectedEpisode)
   const episodeToPlay = flatEpisodes[currentIndex]
   const movie = data.movie
 
-  const handleSelectEpisode = (ep: string) => {
-    setSelectedEpisode(ep)
-  }
+  const handleSelectEpisode = (ep: string) => setSelectedEpisode(ep)
 
   // Giao diện thông tin phim
   if (!isWatching) {
     return (
       <div className='min-h-screen bg-gradient-to-b from-gray-900 to-black text-white pt-20 pb-16'>
         <div className='max-w-6xl mx-auto px-4'>
-          {/* Header với backdrop */}
           <div
             className='relative w-full h-80 rounded-xl mb-8 overflow-hidden bg-cover bg-center'
             style={{
               backgroundImage: `url(${movie.movie.poster_url})`,
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)'
+              boxShadow: '0 20px 25px -5px rgba(0,0,0,0.3)'
             }}
           >
             <div className='absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent' />
@@ -84,7 +80,7 @@ export default function WatchPage() {
                 onClick={() => {
                   setIsWatching(true)
                   const firstEp = movie.episodes?.[0]?.server_data?.[0]
-                  if (firstEp) handleSelectEpisode(firstEp.link_m3u8)
+                  if (firstEp) handleSelectEpisode(firstEp.link_embed)
                   window.scrollTo({ top: 0, behavior: 'smooth' })
                 }}
               >
@@ -150,8 +146,11 @@ export default function WatchPage() {
                   </p>
                   <p>
                     <span className='inline-block w-28 font-semibold text-gray-200'>Tập hiện tại:</span>
-                    {movie.movie.episode_current}
+                    {movie.movie.episode_current === 'FULL'
+                      ? 'Full'
+                      : `${movie.movie.episode_current} / ${movie.movie.episode_total}`}
                   </p>
+
                 </div>
               </div>
 
@@ -201,7 +200,7 @@ export default function WatchPage() {
     )
   }
 
-  // Giao diện phát video
+  // Giao diện xem phim
   return (
     <div className='min-h-screen bg-gradient-to-b from-gray-900 to-black text-white pt-20 pb-16'>
       <div className='max-w-6xl mx-auto px-4'>
@@ -209,13 +208,6 @@ export default function WatchPage() {
           className='mb-6 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition duration-300 flex items-center gap-2 shadow-lg'
           onClick={() => setIsWatching(false)}
         >
-          <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
-            <path
-              fillRule='evenodd'
-              d='M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z'
-              clipRule='evenodd'
-            />
-          </svg>
           Quay lại thông tin phim
         </button>
 
@@ -224,162 +216,61 @@ export default function WatchPage() {
           <span className='text-gray-400 italic'>{movie.movie.origin_name}</span>
         </div>
 
-        {/* Player trong card */}
-        <div className='bg-gray-800/50 backdrop-blur-sm rounded-xl overflow-hidden shadow-2xl mb-8'>
-          {selectedEpisode && episodeToPlay ? (
-            <div>
-              <div className='bg-gray-700 p-4'>
-                <h2 className='text-xl font-semibold'>{episodeToPlay.name}</h2>
-              </div>
-              {/* cái custom player này đang bug fullscreen*/}
-              {/* <CustomPlayer src={selectedEpisode} poster={thumbnail.src} /> */}
-              <ReactPlayer
-                url={selectedEpisode}
-                controls
-                width='100%'
-                height='600px'
-                onError={e => console.error('ReactPlayer error:', e)}
-                key={selectedEpisode}
-                config={{
-                  file: {
-                    forceHLS: true
-                  }
-                }}
-                className='w-full'
-                playing
-                light={thumbnail.src}
-              />
+        {/* Player iframe */}
+        {selectedEpisode && episodeToPlay ? (
+          <div className='mb-8'>
+            <div className='bg-gray-700 p-4 mb-2'>
+              <h2 className='text-xl font-semibold'>Tập {episodeToPlay.name}</h2>
             </div>
-          ) : (
-            <div className='flex items-center justify-center h-96 text-xl'>
-              {!isAvailable ? (
-                <div className='flex items-center'>
-                  <svg
-                    className='animate-spin -ml-1 mr-3 h-8 w-8 text-blue-500'
-                    xmlns='http://www.w3.org/2000/svg'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                  >
-                    <circle
-                      className='opacity-25'
-                      cx='12'
-                      cy='12'
-                      r='10'
-                      stroke='currentColor'
-                      strokeWidth='4'
-                    ></circle>
-                    <path
-                      className='opacity-75'
-                      fill='currentColor'
-                      d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                    ></path>
-                  </svg>
-                  Đang tải tập phim...
-                </div>
-              ) : (
-                <div>Phim chưa cập nhật...</div>
-              )}
+            <div className='relative pt-[56.25%] rounded-xl overflow-hidden shadow-2xl'>
+              <iframe
+                src={selectedEpisode}
+                title={episodeToPlay.name}
+                allowFullScreen
+                className='absolute top-0 left-0 w-full h-full'
+              ></iframe>
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className='flex items-center justify-center h-96 text-xl'>
+            {!isAvailable ? 'Đang tải tập phim...' : 'Phim chưa cập nhật...'}
+          </div>
+        )}
 
         {/* Điều hướng tập */}
         {selectedEpisode && episodeToPlay && (
           <div className='flex justify-between mb-8'>
             <button
-              className='px-5 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition duration-300 flex items-center gap-2 shadow-lg disabled:cursor-not-allowed'
+              className='px-5 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition duration-300'
               disabled={currentIndex <= 0}
-              onClick={() => setSelectedEpisode(flatEpisodes[currentIndex - 1].link_m3u8)}
+              onClick={() => setSelectedEpisode(flatEpisodes[currentIndex - 1].link_embed)}
             >
-              <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
-                <path
-                  fillRule='evenodd'
-                  d='M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z'
-                  clipRule='evenodd'
-                />
-              </svg>
               Tập trước
             </button>
             <button
-              className='px-5 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition duration-300 flex items-center gap-2 shadow-lg disabled:cursor-not-allowed'
+              className='px-5 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition duration-300'
               disabled={currentIndex >= flatEpisodes.length - 1}
-              onClick={() => setSelectedEpisode(flatEpisodes[currentIndex + 1].link_m3u8)}
+              onClick={() => setSelectedEpisode(flatEpisodes[currentIndex + 1].link_embed)}
             >
               Tập sau
-              <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
-                <path
-                  fillRule='evenodd'
-                  d='M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z'
-                  clipRule='evenodd'
-                />
-              </svg>
             </button>
           </div>
         )}
 
-        <div className='grid md:grid-cols-3 gap-8'>
-          {/* Thông tin phim tóm tắt */}
-          <div className='md:col-span-1'>
-            <div className='bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 shadow-lg mb-6'>
-              <h3 className='text-xl font-bold mb-4 border-l-4 border-blue-500 pl-3'>Thông tin phim</h3>
-
-              <div className='space-y-3 text-sm text-gray-300'>
-                <div className='flex items-center'>
-                  <Image
-                    unoptimized
-                    width={100}
-                    height={150}
-                    src={movie.movie.poster_url}
-                    alt={movie.movie.name}
-                    className='w-20 h-auto rounded-lg mr-4'
-                  />
-                  <div>
-                    <div>
-                      <span className='font-semibold text-gray-200'>Năm:</span> {movie.movie.year}
-                    </div>
-                    <div>
-                      <span className='font-semibold text-gray-200'>Chất lượng:</span> {movie.movie.quality}
-                    </div>
-                    <div>
-                      <span className='font-semibold text-gray-200'>Ngôn ngữ:</span> {movie.movie.lang}
-                    </div>
-                  </div>
-                </div>
-
-                <p>
-                  <span className='font-semibold text-gray-200'>Quốc gia:</span>{' '}
-                  {movie.movie.country.map(c => c.name).join(', ')}
-                </p>
-                <p>
-                  <span className='font-semibold text-gray-200'>Thể loại:</span>{' '}
-                  {movie.movie.category.map(c => c.name).join(', ')}
-                </p>
-              </div>
-
-              <div className='mt-4 pt-4 border-t border-gray-700'>
-                <p className='text-sm text-gray-300 line-clamp-4'>{movie.movie.content}</p>
-                <button className='text-blue-400 text-sm mt-2 hover:text-blue-300'>Xem thêm</button>
-              </div>
-            </div>
-          </div>
-
-          {/* Danh sách tập */}
-          <div className='md:col-span-2'>
-            <div className='bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 shadow-lg'>
-              <h3 className='text-xl font-bold mb-4 border-l-4 border-blue-500 pl-3'>Danh sách tập</h3>
-              {isAvailable ? (
-                <div className='italic'>Phim sẽ cập nhật trong thời gian sớm nhất, mong bạn thông cảm! </div>
-              ) : (
-                movie.episodes && (
-                  <EpisodeList
-                    episodes={movie.episodes}
-                    onSelectEpisode={ep => handleSelectEpisode(ep.link_m3u8)}
-                    selectedEpisode={selectedEpisode}
-                  />
-                )
-              )}
-            </div>
-          </div>
+        {/* Danh sách tập */}
+        <div className='bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 shadow-lg'>
+          <h3 className='text-xl font-bold mb-4 border-l-4 border-blue-500 pl-3'>Danh sách tập</h3>
+          {isAvailable ? (
+            <div className='italic'>Phim sẽ cập nhật trong thời gian sớm nhất!</div>
+          ) : (
+            movie.episodes && (
+              <EpisodeList
+                episodes={movie.episodes}
+                onSelectEpisode={ep => handleSelectEpisode(ep.link_embed)}
+                selectedEpisode={selectedEpisode}
+              />
+            )
+          )}
         </div>
       </div>
     </div>

@@ -150,7 +150,9 @@ export default function WatchPage() {
                   </p>
                   <p>
                     <span className='inline-block w-28 font-semibold text-gray-200'>Tập hiện tại:</span>
-                    {movie.episode_current}
+                    {movie.episode_current === 'Full'
+                      ? 'Full'
+                      : `${movie.episode_current} / ${movie.episode_total}`}
                   </p>
                 </div>
               </div>
