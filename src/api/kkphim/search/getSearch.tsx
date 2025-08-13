@@ -1,4 +1,4 @@
-import { Pagination } from '../pagination'
+import { Pagination } from '@/api/pagination'
 import { Movie } from '../getUpdatedMovie'
 import { request } from '@/utils/request'
 import { queryOptions } from '@tanstack/react-query'
