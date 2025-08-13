@@ -99,6 +99,16 @@ export default function Navbar() {
             TV Shows
             <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-slate-300 transition-all duration-300 group-hover:w-full'></span>
           </Link>
+          <Link
+            href={{
+              pathname: '/nguonc/home',
+              query: { page: 1 }
+            }}
+            className='relative text-white hover:text-slate-300 transition-colors duration-200 group'
+          >
+            Nguonc.com
+            <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-slate-300 transition-all duration-300 group-hover:w-full'></span>
+          </Link>
         </div>
 
         {/* Search - Desktop & Tablet */}

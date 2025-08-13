@@ -1,1 +1,2 @@
-export const API_URL = 'https://phimapi.com/'
+export const kkphim = 'https://phimapi.com/'
+export const nguonc = 'https://phim.nguonc.com/'

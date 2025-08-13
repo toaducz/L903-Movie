@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 // import { useMemo } from 'react'
 import MovieItem from '@/component/item/movie-item'
-import { getListMovie } from '@/api/getListMovie'
+import { getListMovie } from '@/api/kkphim/getListMovie'
 import Pagination from '@/component/pagination'
 import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
@@ -34,7 +34,7 @@ export default function MovieListPage({
   country,
   year,
   limit
-}: MovieListProps) {
+}: Readonly<MovieListProps>) {
   const router = useRouter()
   const [pageSearch, setPageSearch] = useState(page ?? 1)
   const {
@@ -98,9 +98,9 @@ export default function MovieListPage({
         )}
       </div>
       <div className='flex justify-center items-center '>
-        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 sm:gap-5 gap-3 p-3 w-full [grid-template-columns:repeat(auto-fill,minmax(120px,1fr))] sm:[grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]'>
-          {listMovie?.data?.items.map((movie, index) => (
-            <div key={index}>
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 sm:gap-5 gap-3 p-3 w-full'>
+          {listMovie?.data?.items.map(movie => (
+            <div key={movie._id}>
               <MovieItem movie={movie} />
             </div>
           ))}

@@ -1,6 +1,5 @@
-import { API_URL } from './env'
-
 export async function request<T>(
+  apiUrl: string, // nhận base API_URL từ parameter
   endpoint: string,
   method: 'GET' | 'POST' = 'GET',
   payload?: Record<string, unknown>
@@ -10,7 +9,7 @@ export async function request<T>(
     params = '?' + new URLSearchParams(payload as Record<string, string>).toString()
   }
 
-  const proxyUrl = `/api/proxy?url=${encodeURIComponent(`${API_URL}${endpoint}${params}`)}`
+  const proxyUrl = `/api/proxy?url=${encodeURIComponent(`${apiUrl}${endpoint}${params}`)}`
 
   const res = await fetch(proxyUrl)
   try {

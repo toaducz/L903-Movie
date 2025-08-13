@@ -1,7 +1,8 @@
 import { Movie } from './getUpdatedMovie'
 import { request } from '@/utils/request'
 import { queryOptions } from '@tanstack/react-query'
-import { Pagination } from './pagination'
+import { Pagination } from '../pagination'
+import { kkphim } from '@/utils/env'
 
 type Param = {
   type_slug: string
@@ -82,6 +83,6 @@ export const getListMovie = ({
 
   return queryOptions({
     queryKey: ['get-list-movie', typeList, page, limit],
-    queryFn: () => request<ListMovieResponse>(`v1/api/danh-sach/${typeList}`, 'GET', params)
+    queryFn: () => request<ListMovieResponse>(kkphim, `v1/api/danh-sach/${typeList}`, 'GET', params)
   })
 }

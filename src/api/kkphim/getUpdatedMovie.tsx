@@ -1,22 +1,23 @@
-import { Pagination } from './pagination'
+import { Pagination } from '../pagination'
 import { queryOptions } from '@tanstack/react-query'
 import { request } from '@/utils/request'
+import { kkphim } from '@/utils/env'
 
 export type Movie = {
-  tmdb: {
+  tmdb?: {
     type: string | null
     id: number | null
     season: number | null
     vote_average: number
     vote_count: number
   }
-  imdb: {
+  imdb?: {
     id: string | null
   }
-  modified: {
+  modified?: {
     time: string // format: "YYYY-MM-DD HH:mm:ss"
   }
-  _id: string
+  _id?: string
   name: string
   slug: string
   origin_name: string
@@ -29,12 +30,12 @@ export type Movie = {
   quality: string
   lang: string
   year: number
-  category: {
+  category?: {
     id: string
     name: string
     slug: string
   }[]
-  country: {
+  country?: {
     id: string
     name: string
     slug: string
@@ -55,7 +56,7 @@ export const getLatestUpdateMovieList = ({ page }: LatestUpdateMovieListRequest)
   return queryOptions({
     queryKey: ['get-lasted-update-movie-list', page],
     queryFn: () =>
-      request<LatestUpdateMovieList>(`danh-sach/phim-moi-cap-nhat-v3`, 'GET', {
+      request<LatestUpdateMovieList>(kkphim, `danh-sach/phim-moi-cap-nhat-v3`, 'GET', {
         page: page
       })
   })

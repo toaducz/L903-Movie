@@ -1,20 +1,19 @@
 'use client'
 
 import Image from 'next/image'
-import { Movie } from '@/api/getUpdatedMovie'
+import Link from 'next/link'
+import { Movie } from '@/api/kkphim/getUpdatedMovie'
 import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
 
 type Props = {
   movie: Movie
+  color?: string
+  source?: string
 }
 
-export default function MovieItem({ movie }: Props) {
+export default function MovieItem({ movie, color }: Readonly<Props>) {
   const [isLoaded, setIsLoaded] = useState(false)
-  const router = useRouter()
-  const handleClick = () => {
-    router.push(`/detail-movie/${movie.slug}`)
-  }
+
   const normalizePosterUrl = (posterUrl: string) => {
     if (!posterUrl.startsWith('http')) {
       return `https://phimimg.com/${posterUrl.replace(/^\/+/, '')}`
@@ -23,14 +22,15 @@ export default function MovieItem({ movie }: Props) {
   }
 
   const poster = normalizePosterUrl(movie.poster_url)
+
   return (
-    <div
-      onClick={handleClick}
-      className='bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition duration-300 overflow-hidden hover:opacity-80 cursor-pointer'
+    <Link
+      href={`detail-movie/${movie.slug}`}
+      className={`block ${color ?? 'bg-slate-800'} rounded-xl shadow-md hover:shadow-lg transition duration-300 overflow-hidden hover:opacity-80 cursor-pointer`}
     >
       <Image
         unoptimized
-        priority // Thêm dòng này
+        priority
         src={poster}
         alt={movie.name}
         width={270}
@@ -47,9 +47,9 @@ export default function MovieItem({ movie }: Props) {
         </div>
 
         <div className='text-xs text-gray-500 mt-2 line-clamp-2 h-12'>
-          {movie.category.map(cat => cat.name).join(', ')}
+          {movie.category?.map(cat => cat.name).join(', ')}
         </div>
       </div>
-    </div>
+    </Link>
   )
 }

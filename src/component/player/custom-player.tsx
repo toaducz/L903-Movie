@@ -19,7 +19,7 @@ const CustomPlayer: React.FC<CustomPlayerProps> = ({ src, poster }) => {
   const [isMuted, setIsMuted] = useState(false)
   const [showControls, setShowControls] = useState(true)
 
-  // initialize HLS.js 
+  // initialize HLS.js
   useEffect(() => {
     const video = videoRef.current
     if (!video || !src) return

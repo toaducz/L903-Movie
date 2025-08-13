@@ -1,6 +1,7 @@
 // import { Pagination } from './pagination'
 import { queryOptions } from '@tanstack/react-query'
 import { request } from '@/utils/request'
+import { kkphim } from '@/utils/env'
 
 export type DetailMovie = {
   movie: {
@@ -65,15 +66,28 @@ export type DetailMovie = {
       link_m3u8: string
     }[]
   }[]
+  status: boolean
+  msg: string
 }
 
 type DetailMovieSlug = {
   slug: string
 }
 
+export type Episode = {
+  server_name: string
+  server_data: {
+    name: string
+    slug: string
+    filename: string
+    link_embed: string
+    link_m3u8: string
+  }[]
+}
+
 export const getDetailMovie = ({ slug }: DetailMovieSlug) => {
   return queryOptions({
     queryKey: ['get-detail-movie', slug],
-    queryFn: () => request<DetailMovie>(`phim/${slug}`, 'GET')
+    queryFn: () => request<DetailMovie>(kkphim, `phim/${slug}`, 'GET')
   })
 }

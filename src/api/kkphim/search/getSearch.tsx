@@ -2,6 +2,7 @@ import { Pagination } from '../pagination'
 import { Movie } from '../getUpdatedMovie'
 import { request } from '@/utils/request'
 import { queryOptions } from '@tanstack/react-query'
+import { kkphim } from '@/utils/env'
 
 type Param = {
   type_slug: string
@@ -57,7 +58,7 @@ export const getSearchByName = ({ keyword, page = 1 }: SearchByNameRequest) => {
   return queryOptions({
     queryKey: ['get-search-by-name', keyword, page],
     queryFn: () =>
-      request<SearchResponse>(`v1/api/tim-kiem`, 'GET', {
+      request<SearchResponse>(kkphim, `v1/api/tim-kiem`, 'GET', {
         keyword: keyword,
         page: page
       })
