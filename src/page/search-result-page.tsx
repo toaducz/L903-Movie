@@ -74,7 +74,7 @@ export default function SearchResultPage({ keyword, page }: Readonly<SearchProps
         )}
       </div>
       <div className='flex justify-center items-center '>
-        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 sm:gap-5 gap-3 p-3 w-full'>
+        <div className='grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-6 sm:gap-5 gap-3 p-3 w-full'>
           {result?.data?.items?.map(movie => (
             <div key={movie._id}>
               <MovieItem movie={movie} />
