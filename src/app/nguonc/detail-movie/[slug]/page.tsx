@@ -150,7 +150,6 @@ export default function WatchPage() {
                       ? 'Full'
                       : `${movie.movie.episode_current} / ${movie.movie.episode_total}`}
                   </p>
-
                 </div>
               </div>
 
@@ -241,7 +240,7 @@ export default function WatchPage() {
         {selectedEpisode && episodeToPlay && (
           <div className='flex justify-between mb-8'>
             <button
-              className='px-5 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition duration-300 cursor-pointer' 
+              className='px-5 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition duration-300 cursor-pointer'
               disabled={currentIndex <= 0}
               onClick={() => setSelectedEpisode(flatEpisodes[currentIndex - 1].link_embed)}
             >

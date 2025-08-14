@@ -16,18 +16,17 @@ export default function MovieItem({ movie, color }: Readonly<Props>) {
   const [isLoaded, setIsLoaded] = useState(false)
 
   const normalizePosterUrl = (posterUrl: string | object | null | undefined) => {
-  if (!posterUrl) return ouguricap; // null, undefined, empty
-  if (typeof posterUrl === 'object') return ouguricap; // object trả về ouguricap
+    if (!posterUrl) return ouguricap // null, undefined, empty
+    if (typeof posterUrl === 'object') return ouguricap // object trả về ouguricap
 
-  const temp = String(posterUrl).trim();
-  if (temp === '{}' || temp === '') return ouguricap; // object stringify hoặc empty string
+    const temp = String(posterUrl).trim()
+    if (temp === '{}' || temp === '') return ouguricap // object stringify hoặc empty string
 
-  if (!temp.startsWith('http')) {
-    return `https://phimimg.com/${temp.replace(/^\/+/, '')}`;
+    if (!temp.startsWith('http')) {
+      return `https://phimimg.com/${temp.replace(/^\/+/, '')}`
+    }
+    return temp
   }
-  return temp;
-};
-
 
   const poster = normalizePosterUrl(movie.poster_url)
 
@@ -39,7 +38,7 @@ export default function MovieItem({ movie, color }: Readonly<Props>) {
       <Image
         unoptimized
         priority
-        src={poster ?? ""}
+        src={poster ?? ''}
         alt={movie.name}
         width={270}
         height={300}

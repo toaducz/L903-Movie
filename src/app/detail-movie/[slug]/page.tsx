@@ -155,9 +155,7 @@ export default function WatchPage() {
                   </p>
                   <p>
                     <span className='inline-block w-28 font-semibold text-gray-200'>Tập hiện tại:</span>
-                    {movie.episode_current === 'Full'
-                      ? 'Full'
-                      : `${movie.episode_current} / ${movie.episode_total}`}
+                    {movie.episode_current === 'Full' ? 'Full' : `${movie.episode_current} / ${movie.episode_total}`}
                   </p>
                 </div>
               </div>
@@ -238,13 +236,11 @@ export default function WatchPage() {
               <div className='bg-gray-700 p-4'>
                 <h2 className='text-xl font-semibold'>{episodeToPlay.name}</h2>
               </div>
-              <div className="flex justify-center my-4">
+              <div className='flex justify-center my-4'>
                 <button
-                  onClick={() => setUseBackupPlayer((prev) => !prev)}
+                  onClick={() => setUseBackupPlayer(prev => !prev)}
                   className={`px-4 py-2 text-sm font-medium rounded transition cursor-pointer
-      ${useBackupPlayer
-                      ? 'bg-green-500 hover:bg-green-600 text-white'
-                      : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+      ${useBackupPlayer ? 'bg-green-500 hover:bg-green-600 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
                 >
                   {useBackupPlayer ? 'Nếu vẫn lỗi thì đỗi server (nếu có) nha' : 'Link dự phòng'}
                 </button>
@@ -252,7 +248,7 @@ export default function WatchPage() {
               <div className='relative pt-[56.25%] rounded-xl overflow-hidden shadow-2xl'>
                 {useBackupPlayer ? (
                   <ReactPlayer
-                    url={useBackup ?? ""}
+                    url={useBackup ?? ''}
                     controls
                     width='100%'
                     height='100%'

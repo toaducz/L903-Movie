@@ -11,7 +11,7 @@ import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
 import Image from 'next/image'
 import errorImage from '@/assets/error.jpg'
-import Link from 'next/link';
+import Link from 'next/link'
 
 interface SearchProps {
   keyword: string
@@ -52,14 +52,14 @@ export default function SearchResultPage({ keyword, page }: Readonly<SearchProps
           Có {result?.data.params.pagination.totalItems} kết quả
         </h6>
         {result?.data?.params?.pagination?.totalItems === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-4">
+          <div className='flex flex-col items-center justify-center gap-4'>
             <Image
               unoptimized
               src={errorImage}
-              alt="Loading..."
+              alt='Loading...'
               width={200}
               height={200}
-              className="object-contain"
+              className='object-contain'
               priority
             />
             <Link

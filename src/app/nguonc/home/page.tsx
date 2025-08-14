@@ -46,10 +46,10 @@ function MovieListContent() {
           <p className='text-gray-100 mt-4'>Không tìm thấy phim nào!</p>
         </div>
       ) : (
-        <div className='grid grid-cols-2 sm:grid-cols-3 poderes lg:grid-cols-5 xl:grid-cols-5 gap-3 sm:gap-5 p-3 w-full px-24'>
+        <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 gap-3 sm:gap-5 p-3 w-full lg:px-24'>
           {listMovie?.movies.map(movie => (
             <div key={movie.slug}>
-              <MovieItem movie={movie} color={'bg-slate-900'} source='nguonc' />
+              <MovieItem movie={movie} color='bg-slate-900' source='nguonc' />
             </div>
           ))}
         </div>
@@ -65,7 +65,6 @@ function MovieListContent() {
 }
 
 export default function MovieListPage() {
-
   const [search, setSearch] = useState('')
   const router = useRouter()
 

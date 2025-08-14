@@ -1,8 +1,10 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import menu from '@/assets/menu.png'
 
 export default function Navbar() {
   const router = useRouter()
@@ -11,20 +13,16 @@ export default function Navbar() {
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
 
-  // Theo dõi sự kiện cuộn để ẩn/hiện navbar
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        // Cuộn xuống và vượt quá 100px -> ẩn navbar
         setIsVisible(false)
       } else {
-        // Cuộn lên hoặc ở đầu trang -> hiện navbar
         setIsVisible(true)
       }
       setLastScrollY(currentScrollY)
     }
-
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [lastScrollY])
@@ -35,17 +33,32 @@ export default function Navbar() {
       const encoded = encodeURIComponent(search.trim())
       router.push(`/search?q=${encoded}&page=1`)
       setSearch('')
+      setIsMenuOpen(false)
     }
   }
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen)
+    setIsMenuOpen(prev => !prev)
   }
+
+  const navLinks = [
+    { href: { pathname: '/list-movie', query: { typeList: 'phim-vietsub', page: 1 } }, label: 'Phim Vietsub' },
+    { href: { pathname: '/list-movie', query: { typeList: 'phim-long-tieng', page: 1 } }, label: 'Phim Lồng tiếng' },
+    { href: { pathname: '/list-movie', query: { typeList: 'phim-thuyet-minh', page: 1 } }, label: 'Phim Thuyết minh' },
+    { href: { pathname: '/list-movie', query: { typeList: 'tv-shows', page: 1 } }, label: 'TV Shows' },
+    { href: {}, label: 'Năm' },
+    {
+      href: { pathname: '/nguonc/home', query: { page: 1 } },
+      label: 'Nguonc.com',
+      tooltip: 'Ở đây cũng nhiều phim chất lắm'
+    }
+  ]
 
   return (
     <nav
-      className={`bg-slate-900 text-white shadow-md w-screen fixed top-0 z-50 transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'
-        }`}
+      className={`bg-slate-900 text-white shadow-md w-screen fixed top-0 z-50 transition-transform duration-300 ${
+        isVisible ? 'translate-y-0' : '-translate-y-full'
+      }`}
     >
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between'>
         {/* Logo */}
@@ -58,74 +71,24 @@ export default function Navbar() {
 
         {/* Navigation Items - Desktop */}
         <div className='hidden lg:flex items-center gap-8 text-base font-medium'>
-          <Link
-            href={{
-              pathname: '/list-movie',
-              query: { typeList: 'phim-vietsub', page: 1 }
-            }}
-            className='relative text-white hover:text-slate-300 transition-colors duration-200 group'
-          >
-            Phim Vietsub
-            <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-slate-300 transition-all duration-300 group-hover:w-full'></span>
-          </Link>
-          <Link
-            href={{
-              pathname: '/list-movie',
-              query: { typeList: 'phim-long-tieng', page: 1 }
-            }}
-            className='relative text-white hover:text-slate-300 transition-colors duration-200 group'
-          >
-            Phim Lồng tiếng
-            <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-slate-300 transition-all duration-300 group-hover:w-full'></span>
-          </Link>
-          <Link
-            href={{
-              pathname: '/list-movie',
-              query: { typeList: 'phim-thuyet-minh', page: 1 }
-            }}
-            className='relative text-white hover:text-slate-300 transition-colors duration-200 group'
-          >
-            Phim Thuyết minh
-            <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-slate-300 transition-all duration-300 group-hover:w-full'></span>
-          </Link>
-          <Link
-            href={{
-              pathname: '/list-movie',
-              query: { typeList: 'tv-shows', page: 1 }
-            }}
-            className='relative text-white hover:text-slate-300 transition-colors duration-200 group'
-          >
-            TV Shows
-            <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-slate-300 transition-all duration-300 group-hover:w-full'></span>
-          </Link>
-          <Link
-            href={{
-              // pathname: '/list-movie',
-              // query: { typeList: 'tv-shows', page: 1 }
-            }}
-            className='relative text-white hover:text-slate-300 transition-colors duration-200 group'
-          >
-            Năm
-            <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-slate-300 transition-all duration-300 group-hover:w-full'></span>
-          </Link>
-          <Link
-            href={{
-              pathname: '/nguonc/home',
-              query: { page: 1 }
-            }}
-            className='relative text-white hover:text-slate-300 transition-colors duration-200 group'
-          >
-            Nguonc.com
-            <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-slate-300 transition-all duration-300 group-hover:w-full'></span>
-
-            {/* Tooltip hiển thị bên dưới */}
-            <div className="absolute left-1/2 top-full mt-2 w-max p-2 bg-gray-700 text-white text-sm rounded opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100 -translate-x-1/2">
-              Ở đây cũng nhiều phim chất lắm
-            </div>
-          </Link>
+          {navLinks.map((link, i) => (
+            <Link
+              key={i}
+              href={link.href}
+              className='relative text-white hover:text-slate-300 transition-colors duration-200 group'
+            >
+              {link.label}
+              <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-slate-300 transition-all duration-300 group-hover:w-full'></span>
+              {link.tooltip && (
+                <div className='absolute left-1/2 top-full mt-2 w-max p-2 bg-gray-700 text-white text-sm rounded opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100 -translate-x-1/2'>
+                  {link.tooltip}
+                </div>
+              )}
+            </Link>
+          ))}
         </div>
 
-        {/* Search - Desktop & Tablet */}
+        {/* Search - Desktop */}
         <form onSubmit={handleSearch} className='hidden sm:flex items-center space-x-2'>
           <input
             type='text'
@@ -143,17 +106,24 @@ export default function Navbar() {
           </button>
         </form>
 
-        {/* Hamburger Menu - Mobile & Tablet */}
-        <button
-          className='lg:hidden text-white text-2xl focus:outline-none'
-          onClick={toggleMenu}
-          aria-label='Toggle menu'
-        ></button>
+        {/* Hamburger Menu - Mobile */}
+        <button className='lg:hidden focus:outline-none' onClick={toggleMenu} aria-label='Toggle menu'>
+          {isMenuOpen ? (
+            // Icon đóng (dùng dấu X bằng CSS)
+            <span className='block w-6 h-6 relative'>
+              <span className='absolute left-0 top-1/2 w-6 h-0.5 bg-white rotate-45'></span>
+              <span className='absolute left-0 top-1/2 w-6 h-0.5 bg-white -rotate-45'></span>
+            </span>
+          ) : (
+            // Icon menu từ file PNG
+            <Image src={menu} alt='Menu' width={24} height={24} />
+          )}
+        </button>
       </div>
 
-      {/* Mobile & Tablet Menu */}
+      {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className='lg:hidden bg-slate-900 px-4 py-4 flex flex-col gap-4 text-base font-medium border-t border-slate-800 transition-all duration-300 ease-in-out'>
+        <div className='lg:hidden bg-slate-900 px-4 py-4 flex flex-col gap-4 text-base font-medium border-t border-slate-800'>
           {/* Search - Mobile */}
           <form onSubmit={handleSearch} className='flex items-center space-x-2'>
             <input
@@ -173,13 +143,16 @@ export default function Navbar() {
           </form>
 
           {/* Navigation Items - Mobile */}
-          {/* <Link
-            href='/trending'
-            className='text-white hover:text-slate-300 transition-colors duration-200'
-            onClick={toggleMenu}
-          >
-            Trending
-          </Link> */}
+          {navLinks.map((link, i) => (
+            <Link
+              key={i}
+              href={link.href}
+              className='text-white hover:text-slate-300 transition-colors duration-200'
+              onClick={() => setIsMenuOpen(false)}
+            >
+              {link.label}
+            </Link>
+          ))}
         </div>
       )}
     </nav>
