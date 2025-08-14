@@ -52,14 +52,14 @@ export default function SearchResultPage({ keyword, page }: Readonly<SearchProps
           Có {result?.data.params.pagination.totalItems} kết quả
         </h6>
         {result?.data?.params?.pagination?.totalItems === 0 ? (
-          <div>
+          <div className="flex flex-col items-center justify-center gap-2">
             <Image
               unoptimized
               src={errorImage}
-              alt='Loading...'
+              alt="Loading..."
               width={200}
               height={200}
-              className='object-contain'
+              className="object-contain"
               priority
             />
             <Link
