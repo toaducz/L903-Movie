@@ -11,6 +11,7 @@ import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
 import Image from 'next/image'
 import errorImage from '@/assets/error.jpg'
+import Link from 'next/link';
 
 interface SearchProps {
   keyword: string
@@ -61,6 +62,12 @@ export default function SearchResultPage({ keyword, page }: Readonly<SearchProps
               className='object-contain'
               priority
             />
+            <Link
+              href={`/nguonc/search?q=${encodeURIComponent(keyword)}&page=1`}
+              style={{ color: 'blue', textDecoration: 'underline' }}
+            >
+              Không có kết quả? Thử với Nguonc.com nha
+            </Link>
           </div>
         ) : (
           <div></div>
