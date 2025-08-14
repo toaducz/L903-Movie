@@ -52,7 +52,7 @@ export default function SearchResultPage({ keyword, page }: Readonly<SearchProps
           Có {result?.data.params.pagination.totalItems} kết quả
         </h6>
         {result?.data?.params?.pagination?.totalItems === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-2">
+          <div className="flex flex-col items-center justify-center gap-4">
             <Image
               unoptimized
               src={errorImage}
@@ -64,7 +64,7 @@ export default function SearchResultPage({ keyword, page }: Readonly<SearchProps
             />
             <Link
               href={`/nguonc/search?q=${encodeURIComponent(keyword)}&page=1`}
-              style={{ color: 'blue', textDecoration: 'underline' }}
+              style={{ color: 'white', textDecoration: 'underline' }}
             >
               Không có kết quả? Thử với Nguonc.com nha
             </Link>
