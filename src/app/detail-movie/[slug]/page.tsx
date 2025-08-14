@@ -19,6 +19,7 @@ export default function WatchPage() {
   const [useBackup, setUseBackup] = useState<string | null>(null)
   const [useBackupPlayer, setUseBackupPlayer] = useState(false)
   const [isWatching, setIsWatching] = useState(false)
+  const [iframeLoading, setIframeLoading] = useState(true)
   const isAvailable = data?.movie?.episode_current === 'Trailer'
 
   // Đặt lại selectedEpisode khi slug thay đổi
@@ -47,6 +48,7 @@ export default function WatchPage() {
   const handleSelectEpisode = (ep: string, backup: string) => {
     setSelectedEpisode(ep)
     setUseBackup(backup)
+    setIframeLoading(true)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -259,12 +261,22 @@ export default function WatchPage() {
                     className='absolute top-0 left-0'
                   />
                 ) : (
-                  <iframe
-                    src={selectedEpisode}
-                    title={episodeToPlay.name}
-                    allowFullScreen
-                    className='absolute top-0 left-0 w-full h-full'
-                  ></iframe>
+                  <div className="absolute top-0 left-0 w-full h-full">
+                    {iframeLoading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-10">
+                        <span className="text-white text-xs italic opacity-70">
+                          (Đang tải video...)
+                        </span>
+                      </div>
+                    )}
+                    <iframe
+                      src={selectedEpisode}
+                      title={episodeToPlay.name}
+                      allowFullScreen
+                      onLoad={() => setIframeLoading(false)}
+                      className="w-full h-full"
+                    ></iframe>
+                  </div>
                 )}
               </div>
             </div>
