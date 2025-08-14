@@ -50,7 +50,7 @@ export default function Navbar() {
     {
       href: { pathname: '/nguonc/home', query: { page: 1 } },
       label: 'Nguonc.com',
-      tooltip: 'Ở đây cũng nhiều phim chất lắm'
+      tooltip: 'Ở đây cũng nhiều phim chất lắm, mỗi tội có quảng cáo :v'
     }
   ]
 

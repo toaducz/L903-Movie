@@ -81,8 +81,11 @@ export default function MovieListPage() {
     <div className='min-h-screen flex flex-col items-center justify-center p-4 bg-slate-800'>
       <div className='flex flex-col pt-20 items-center'>
         <h2 className='text-2xl font-semibold text-blue-400'>Nguonc.com</h2>
+        <div className="text-center italic text-white/70 text-[10px]">
+          (Có quảng cáo 1s)
+        </div>
 
-        <form onSubmit={handleSearch} className='hidden sm:flex items-center space-x-2 py-5'>
+        <form onSubmit={handleSearch} className='flex items-center space-x-2 py-5'>
           <input
             type='text'
             placeholder='Tìm theo tên phim (Nguonc)'
