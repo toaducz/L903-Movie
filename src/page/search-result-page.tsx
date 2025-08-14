@@ -17,7 +17,7 @@ interface SearchProps {
   page?: number
 }
 
-export default function SearchResultPage({ keyword, page }: SearchProps) {
+export default function SearchResultPage({ keyword, page }: Readonly<SearchProps>) {
   const router = useRouter()
   const [pageSearch, setPageSearch] = useState(page ?? 1)
   const { data: result, isLoading, isError } = useQuery(getSearchByName({ keyword: keyword, page: pageSearch }))

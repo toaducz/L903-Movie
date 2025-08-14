@@ -39,14 +39,14 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
       <button
         onClick={() => onPageChange(1)}
         disabled={currentPage === 1}
-        className='px-2 py-1 bg-stale-700 rounded disabled:opacity-50 '
+        className='px-2 py-1 bg-stale-700 rounded disabled:opacity-50 cursor-pointer'
       >
         ⏮
       </button>
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className='px-2 py-1 bg-stale-700 rounded disabled:opacity-50 '
+        className='px-2 py-1 bg-stale-700 rounded disabled:opacity-50 cursor-pointer'
       >
         «
       </button>
@@ -60,7 +60,7 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
           <button
             key={idx}
             onClick={() => onPageChange(page as number)}
-            className={`px-2 py-1 rounded ${page === currentPage ? 'bg-blue-500 text-white' : 'bg-stale-200 text-white'}`}
+            className={`px-2 py-1 rounded ${page === currentPage ? 'bg-blue-500 text-white' : 'bg-stale-200 text-white'} cursor-pointer`}
           >
             {page}
           </button>
@@ -70,14 +70,14 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className='px-2 py-1 bg-stale-200 rounded disabled:opacity-50'
+        className='px-2 py-1 bg-stale-200 rounded disabled:opacity-50 cursor-pointer'
       >
         »
       </button>
       <button
         onClick={() => onPageChange(totalPages)}
         disabled={currentPage === totalPages}
-        className='px-2 py-1 bg-stale-200 rounded disabled:opacity-50'
+        className='px-2 py-1 bg-stale-200 rounded disabled:opacity-50 cursor-pointer'
       >
         ⏭
       </button>
@@ -91,7 +91,7 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
         className='w-16 px-2 py-1 border border-gray-300 rounded no-spinner'
         placeholder='Trang'
       />
-      <button onClick={handleJump} className='px-3 py-1 bg-blue-500 text-white rounded'>
+      <button onClick={handleJump} className='px-3 py-1 bg-blue-500 text-white rounded cursor-pointer'>
         Đi
       </button>
     </div>

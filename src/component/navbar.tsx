@@ -44,9 +44,8 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`bg-slate-900 text-white shadow-md w-screen fixed top-0 z-50 transition-transform duration-300 ${
-        isVisible ? 'translate-y-0' : '-translate-y-full'
-      }`}
+      className={`bg-slate-900 text-white shadow-md w-screen fixed top-0 z-50 transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'
+        }`}
     >
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between'>
         {/* Logo */}
@@ -101,6 +100,16 @@ export default function Navbar() {
           </Link>
           <Link
             href={{
+              // pathname: '/list-movie',
+              // query: { typeList: 'tv-shows', page: 1 }
+            }}
+            className='relative text-white hover:text-slate-300 transition-colors duration-200 group'
+          >
+            Năm
+            <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-slate-300 transition-all duration-300 group-hover:w-full'></span>
+          </Link>
+          <Link
+            href={{
               pathname: '/nguonc/home',
               query: { page: 1 }
             }}
@@ -108,6 +117,11 @@ export default function Navbar() {
           >
             Nguonc.com
             <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-slate-300 transition-all duration-300 group-hover:w-full'></span>
+
+            {/* Tooltip hiển thị bên dưới */}
+            <div className="absolute left-1/2 top-full mt-2 w-max p-2 bg-gray-700 text-white text-sm rounded opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100 -translate-x-1/2">
+              Ở đây cũng nhiều phim chất lắm
+            </div>
           </Link>
         </div>
 

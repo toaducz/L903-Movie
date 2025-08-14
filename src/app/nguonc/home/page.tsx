@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useEffect } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter, useSearchParams } from 'next/navigation'
 import MovieItem from '@/component/item/movie-item'
@@ -17,7 +17,6 @@ function MovieListContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const page = parseInt(searchParams.get('page') ?? '1', 10)
-
   const { data: listMovie, isLoading, isError } = useQuery(getLatestUpdateMovieList({ page }))
 
   const handlePageChange = (newPage: number) => {
@@ -66,11 +65,41 @@ function MovieListContent() {
 }
 
 export default function MovieListPage() {
+
+  const [search, setSearch] = useState('')
+  const router = useRouter()
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (search.trim()) {
+      const encoded = encodeURIComponent(search.trim())
+      router.push(`/nguonc/search?q=${encoded}&page=1`)
+      setSearch('')
+    }
+  }
+
   return (
     <div className='min-h-screen flex flex-col items-center justify-center p-4 bg-slate-800'>
       <div className='flex flex-col pt-20 items-center'>
         <h2 className='text-2xl font-semibold text-blue-400'>Nguonc.com</h2>
-        <h6 className='font-semibold text-gray-100 mb-6 italic'>Chả biết ghi gì nên để tạm, chắc thanh search ở đây</h6>
+
+        <form onSubmit={handleSearch} className='hidden sm:flex items-center space-x-2 py-5'>
+          <input
+            type='text'
+            placeholder='Tìm theo tên phim (Nguonc)'
+            className='px-4 py-2 rounded-lg bg-slate-800 text-white border border-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-600 placeholder-slate-400 text-sm transition-all duration-200'
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          <button
+            type='submit'
+            className='px-4 py-2 bg-slate-800 text-white rounded-lg shadow-md hover:bg-slate-900 hover:scale-105 disabled:bg-slate-600 disabled:text-slate-400 disabled:shadow-none transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-600'
+            disabled={!search.trim()}
+          >
+            Tìm
+          </button>
+        </form>
+
         <Suspense fallback={<Loading />}>
           <MovieListContent />
         </Suspense>

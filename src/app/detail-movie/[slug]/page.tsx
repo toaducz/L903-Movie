@@ -16,6 +16,8 @@ export default function WatchPage() {
   const { slug } = useParams()
   const { data, isLoading, isError } = useQuery(getDetailMovie({ slug: String(slug) }))
   const [selectedEpisode, setSelectedEpisode] = useState<string | null>(null)
+  const [useBackup, setUseBackup] = useState<string | null>(null)
+  const [useBackupPlayer, setUseBackupPlayer] = useState(false)
   const [isWatching, setIsWatching] = useState(false)
   const isAvailable = data?.movie?.episode_current === 'Trailer'
 
@@ -28,7 +30,8 @@ export default function WatchPage() {
   // Tự động chọn tập 1 khi data được tải và đang ở chế độ xem phim
   useEffect(() => {
     if (isWatching && data?.episodes?.[0]?.server_data?.[0] && !selectedEpisode) {
-      setSelectedEpisode(data.episodes[0].server_data[0].link_m3u8)
+      setSelectedEpisode(data.episodes[0].server_data[0].link_embed)
+      setUseBackup(data.episodes[0].server_data[0].link_embed)
     }
   }, [data, selectedEpisode, isWatching])
 
@@ -36,12 +39,14 @@ export default function WatchPage() {
   if (isError || !data || data.status === false) return <Error message={data?.msg} />
 
   const flatEpisodes = data.episodes.flatMap(server => server.server_data)
-  const currentIndex = flatEpisodes.findIndex(ep => ep.link_m3u8 === selectedEpisode)
+  const currentIndex = flatEpisodes.findIndex(ep => ep.link_embed === selectedEpisode)
+  // const backupIndex = flatEpisodes.findIndex(ep => ep.link_m3u8 === selectedEpisode)
   const episodeToPlay = flatEpisodes[currentIndex]
   const movie = data.movie
 
-  const handleSelectEpisode = (ep: string) => {
+  const handleSelectEpisode = (ep: string, backup: string) => {
     setSelectedEpisode(ep)
+    setUseBackup(backup)
   }
 
   // Giao diện thông tin phim
@@ -80,11 +85,11 @@ export default function WatchPage() {
               </div>
 
               <button
-                className='mt-6 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-blue-500/50 w-full flex justify-center items-center gap-2'
+                className='mt-6 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-blue-500/50 w-full flex justify-center items-center gap-2 cursor-pointer'
                 onClick={() => {
                   setIsWatching(true)
                   const firstEp = data?.episodes?.[0]?.server_data?.[0]
-                  if (firstEp) handleSelectEpisode(firstEp.link_m3u8)
+                  if (firstEp) handleSelectEpisode(firstEp.link_embed, firstEp.link_m3u8)
                   window.scrollTo({ top: 0, behavior: 'smooth' })
                 }}
               >
@@ -233,24 +238,38 @@ export default function WatchPage() {
               <div className='bg-gray-700 p-4'>
                 <h2 className='text-xl font-semibold'>{episodeToPlay.name}</h2>
               </div>
-              {/* cái custom player này đang bug fullscreen*/}
-              {/* <CustomPlayer src={selectedEpisode} poster={thumbnail.src} /> */}
-              <ReactPlayer
-                url={selectedEpisode}
-                controls
-                width='100%'
-                height='600px'
-                onError={e => console.error('ReactPlayer error:', e)}
-                key={selectedEpisode}
-                config={{
-                  file: {
-                    forceHLS: true
-                  }
-                }}
-                className='w-full'
-                playing
-                light={thumbnail.src}
-              />
+              <div className="flex justify-center my-4">
+                <button
+                  onClick={() => setUseBackupPlayer((prev) => !prev)}
+                  className={`px-4 py-2 text-sm font-medium rounded transition cursor-pointer
+      ${useBackupPlayer
+                      ? 'bg-green-500 hover:bg-green-600 text-white'
+                      : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+                >
+                  {useBackupPlayer ? 'Nếu vẫn lỗi thì đỗi server (nếu có) nha' : 'Link dự phòng'}
+                </button>
+              </div>
+              <div className='relative pt-[56.25%] rounded-xl overflow-hidden shadow-2xl'>
+                {useBackupPlayer ? (
+                  <ReactPlayer
+                    url={useBackup ?? ""}
+                    controls
+                    width='100%'
+                    height='100%'
+                    config={{ file: { forceHLS: true } }}
+                    playing
+                    light={thumbnail?.src}
+                    className='absolute top-0 left-0'
+                  />
+                ) : (
+                  <iframe
+                    src={selectedEpisode}
+                    title={episodeToPlay.name}
+                    allowFullScreen
+                    className='absolute top-0 left-0 w-full h-full'
+                  ></iframe>
+                )}
+              </div>
             </div>
           ) : (
             <div className='flex items-center justify-center h-96 text-xl'>
@@ -289,9 +308,9 @@ export default function WatchPage() {
         {selectedEpisode && episodeToPlay && (
           <div className='flex justify-between mb-8'>
             <button
-              className='px-5 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition duration-300 flex items-center gap-2 shadow-lg disabled:cursor-not-allowed'
+              className='px-5 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition duration-300 flex items-center gap-2 shadow-lg disabled:cursor-not-allowed cursor-pointer'
               disabled={currentIndex <= 0}
-              onClick={() => setSelectedEpisode(flatEpisodes[currentIndex - 1].link_m3u8)}
+              onClick={() => setSelectedEpisode(flatEpisodes[currentIndex - 1].link_embed)}
             >
               <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
                 <path
@@ -303,9 +322,9 @@ export default function WatchPage() {
               Tập trước
             </button>
             <button
-              className='px-5 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition duration-300 flex items-center gap-2 shadow-lg disabled:cursor-not-allowed'
+              className='px-5 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition duration-300 flex items-center gap-2 shadow-lg disabled:cursor-not-allowed cursor-pointer'
               disabled={currentIndex >= flatEpisodes.length - 1}
-              onClick={() => setSelectedEpisode(flatEpisodes[currentIndex + 1].link_m3u8)}
+              onClick={() => setSelectedEpisode(flatEpisodes[currentIndex + 1].link_embed)}
             >
               Tập sau
               <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
@@ -375,7 +394,7 @@ export default function WatchPage() {
                 data?.episodes && (
                   <EpisodeList
                     episodes={data.episodes}
-                    onSelectEpisode={ep => handleSelectEpisode(ep.link_m3u8)}
+                    onSelectEpisode={ep => handleSelectEpisode(ep.link_embed, ep.link_m3u8)}
                     selectedEpisode={selectedEpisode}
                   />
                 )

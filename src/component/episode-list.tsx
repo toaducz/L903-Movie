@@ -18,7 +18,8 @@ type Server = {
 type EpisodeListProps = {
   episodes: Server[]
   onSelectEpisode: (episode: Episode) => void
-  selectedEpisode: string | null // link_m3u8
+  selectedEpisode: string | null // link_nhúng
+  // backup?: string // link nhúng
 }
 
 const EpisodeList: React.FC<EpisodeListProps> = ({ episodes, onSelectEpisode, selectedEpisode }) => {
@@ -35,8 +36,8 @@ const EpisodeList: React.FC<EpisodeListProps> = ({ episodes, onSelectEpisode, se
             {server.server_data.map((ep, idx) => (
               <button
                 key={idx}
-                className={`px-3 py-1 rounded transition ${
-                  selectedEpisode === ep.link_m3u8 ? 'bg-gray-900 text-white' : 'bg-blue-500 hover:bg-gray-900'
+                className={`px-3 py-1 rounded transition cursor-pointer ${
+                  selectedEpisode === ep.link_embed ? 'bg-gray-900 text-white' : 'bg-blue-500 hover:bg-gray-900'
                 }`}
                 onClick={() => handleSelectEpisode(ep)}
               >

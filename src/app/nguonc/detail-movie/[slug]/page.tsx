@@ -76,7 +76,7 @@ export default function WatchPage() {
               </div>
 
               <button
-                className='mt-6 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-blue-500/50 w-full flex justify-center items-center gap-2'
+                className='mt-6 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-blue-500/50 w-full flex justify-center items-center gap-2 cursor-pointer'
                 onClick={() => {
                   setIsWatching(true)
                   const firstEp = movie.episodes?.[0]?.server_data?.[0]
@@ -241,14 +241,14 @@ export default function WatchPage() {
         {selectedEpisode && episodeToPlay && (
           <div className='flex justify-between mb-8'>
             <button
-              className='px-5 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition duration-300'
+              className='px-5 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition duration-300 cursor-pointer' 
               disabled={currentIndex <= 0}
               onClick={() => setSelectedEpisode(flatEpisodes[currentIndex - 1].link_embed)}
             >
               Tập trước
             </button>
             <button
-              className='px-5 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition duration-300'
+              className='px-5 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition duration-300 cursor-pointer'
               disabled={currentIndex >= flatEpisodes.length - 1}
               onClick={() => setSelectedEpisode(flatEpisodes[currentIndex + 1].link_embed)}
             >
