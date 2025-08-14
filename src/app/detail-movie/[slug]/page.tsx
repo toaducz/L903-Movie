@@ -47,6 +47,7 @@ export default function WatchPage() {
   const handleSelectEpisode = (ep: string, backup: string) => {
     setSelectedEpisode(ep)
     setUseBackup(backup)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   // Giao diện thông tin phim
