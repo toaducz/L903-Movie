@@ -99,7 +99,7 @@ function MovieListPageContent() {
   if (isError) return <Error />
 
   return (
-    <div className='space-y-4'>
+    <div className='space-y-4 bg-black'>
       <MovieFilter
         type='category'
         country={filterDraft.country}

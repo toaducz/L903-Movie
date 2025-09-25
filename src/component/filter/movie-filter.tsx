@@ -36,7 +36,7 @@ export default function MovieFilter({
   })).reverse()
 
   return (
-    <div className='p-4 bg-slate-800  flex flex-wrap gap-4 items-end mt-22 px-10'>
+    <div className='p-4 bg-slate-800  flex flex-wrap gap-4 items-end pt-26 px-10'>
       {/* Country */}
       {type !== 'country' && (
         <div>

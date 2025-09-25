@@ -95,7 +95,7 @@ function MovieListPageContent() {
   if (isError) return <Error />
 
   return (
-    <div className='space-y-4'>
+    <div className='space-y-4 bg-black'>
       <MovieFilter
         country={countryParam}
         year={filterDraft.year}
