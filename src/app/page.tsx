@@ -16,17 +16,17 @@ export default function Home() {
     data: phimbo,
     isLoading: isLoadingPhimBo,
     isError: isErrorPhimBo
-  } = useQuery(getListMovie({ typeList: 'phim-bo', page: 1, limit: 5 }))
+  } = useQuery(getListMovie({ typelist: 'phim-bo', page: 1, limit: 5 }))
   const {
     data: phimle,
     isLoading: isLoadingPhimLe,
     isError: isErrorPhimLe
-  } = useQuery(getListMovie({ typeList: 'phim-le', page: 1, limit: 5 }))
+  } = useQuery(getListMovie({ typelist: 'phim-le', page: 1, limit: 5 }))
   const {
     data: hoathinh,
     isLoading: isLoadingHoatHinh,
     isError: isErrorHoatHinh
-  } = useQuery(getListMovie({ typeList: 'hoat-hinh', page: 1, limit: 5 }))
+  } = useQuery(getListMovie({ typelist: 'hoat-hinh', page: 1, limit: 5 }))
   if (isLoading) {
     return <Loading />
   }

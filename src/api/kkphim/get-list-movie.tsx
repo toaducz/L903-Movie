@@ -42,7 +42,7 @@ export type SearchResult = {
 }
 
 type ListMovieRequest = {
-  typeList: string
+  typelist: string
   page: number
   sort_field?: string
   sort_type?: string
@@ -60,7 +60,7 @@ type ListMovieResponse = {
 }
 
 export const getListMovie = ({
-  typeList,
+  typelist,
   page = 1,
   sort_field,
   sort_type,
@@ -82,7 +82,7 @@ export const getListMovie = ({
   }
 
   return queryOptions({
-    queryKey: ['get-list-movie', typeList, page, limit, year, sort_type, category, country],
-    queryFn: () => request<ListMovieResponse>(kkphim, `v1/api/danh-sach/${typeList}`, 'GET', params)
+    queryKey: ['get-list-movie', typelist, page, limit, year, sort_type, category, country],
+    queryFn: () => request<ListMovieResponse>(kkphim, `v1/api/danh-sach/${typelist}`, 'GET', params)
   })
 }
