@@ -57,7 +57,7 @@ export default function Home() {
           <div className='pb-2 px-5'>
             <button
               onClick={() => {
-                router.push('/list-movie?typeList=phim-bo')
+                router.push('/list-movie?typelist=phim-bo')
               }}
               className='text-white hover:text-blue-500 underline cursor-pointer'
             >{`Xem thêm`}</button>
@@ -68,7 +68,7 @@ export default function Home() {
           <div className='pb-2 px-5'>
             <button
               onClick={() => {
-                router.push('/list-movie?typeList=phim-le')
+                router.push('/list-movie?typelist=phim-le')
               }}
               className='text-white hover:text-blue-500 underline cursor-pointer'
             >{`Xem thêm`}</button>
@@ -79,7 +79,7 @@ export default function Home() {
           <div className='pb-2 px-5'>
             <button
               onClick={() => {
-                router.push('/list-movie?typeList=hoat-hinh')
+                router.push('/list-movie?typelist=hoat-hinh')
               }}
               className='text-white hover:text-blue-500 underline cursor-pointer'
             >{`Xem thêm`}</button>
