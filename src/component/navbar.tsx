@@ -126,7 +126,7 @@ export default function Navbar() {
 
                   {openMenu === menuKey && (
                     <div className='absolute left-0 top-full mt-2 w-48 max-h-72 overflow-y-auto bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-50'>
-                      {getItems().map((item, _) => (
+                      {getItems().map((item) => (
                         <button
                           key={item.slug}
                           onClick={() => item.slug !== 'loading' && handleSelect(item.slug, menuKey)}

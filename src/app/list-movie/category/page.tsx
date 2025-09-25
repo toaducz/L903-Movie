@@ -111,7 +111,7 @@ function MovieListPageContent() {
         onSubmit={handleFilter} // chỉ khi bấm lọc mới fetch
         onReset={handleReset}
       />
-      <MovieListPage listMovie={listMovie} country={filter.country} onPageChange={handlePageChange} headTitle={true} />
+      <MovieListPage listMovie={listMovie!} country={filter.country} onPageChange={handlePageChange} headTitle={true} />
     </div>
   )
 }

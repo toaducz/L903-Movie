@@ -6,9 +6,10 @@ import Image from 'next/image'
 import errorImage from '@/assets/error.jpg'
 import Error from '@/component/status/error'
 import { Movie } from '@/api/kkphim/get-update-movie'
+import { ListMovieResponse } from '@/api/kkphim/list-movie/get-list-movie-by-year'
 
 interface MovieListPageProps {
-  listMovie: any
+  listMovie: ListMovieResponse
   country?: string
   onPageChange: (page: number) => void
   headTitle?: boolean

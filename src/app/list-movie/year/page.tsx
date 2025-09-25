@@ -106,7 +106,7 @@ function MovieListPageContent() {
         onSubmit={handleFilterSubmit}
         onReset={handleFilterReset}
       />
-      <MovieListPage listMovie={listMovie} onPageChange={handlePageChange} headTitle={true} />
+      <MovieListPage listMovie={listMovie!} onPageChange={handlePageChange} headTitle={true} />
     </div>
   )
 }

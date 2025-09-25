@@ -113,7 +113,7 @@ function MovieListPageContent() {
         onReset={handleReset}
         type='country'
       />
-      <MovieListPage listMovie={listMovie} country={countryParam} onPageChange={handlePageChange} headTitle={true} />
+      <MovieListPage listMovie={listMovie!} country={countryParam} onPageChange={handlePageChange} headTitle={true} />
     </div>
   )
 }

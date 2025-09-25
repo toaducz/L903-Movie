@@ -52,7 +52,7 @@ type ListMovieByYearRequest = {
   limit?: number
 }
 
-type ListMovieResponse = {
+export type ListMovieResponse = {
   data: SearchResult
   msg: string
   status: string
