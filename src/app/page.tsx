@@ -3,11 +3,11 @@
 import MovieItem from '@/component/item/movie-item'
 import MovieRankItem from '@/component/item/movie-rank-item'
 import { useQuery } from '@tanstack/react-query'
-import { getLatestUpdateMovieList, Movie } from '@/api/kkphim/getUpdatedMovie'
+import { getLatestUpdateMovieList, Movie } from '@/api/kkphim/get-update-movie'
 import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
 import { useRouter } from 'next/navigation'
-import { getListMovie } from '@/api/kkphim/getListMovie'
+import { getListMovie } from '@/api/kkphim/get-list-movie'
 
 export default function Home() {
   const router = useRouter()

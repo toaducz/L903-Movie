@@ -1,8 +1,8 @@
 import { Pagination } from '@/api/pagination'
-import { Movie } from '@/api/kkphim/getUpdatedMovie'
-import { MovieItems, Paginate } from '@/api/nguonc/getUpdateMovie'
-import { DetailMovie } from '@/api/kkphim/getDetailMovie'
-import { MovieNguonc, EpisodeNguonc } from '@/api/nguonc/getDetailMovie'
+import { Movie } from '@/api/kkphim/get-update-movie'
+import { MovieItems, Paginate } from '@/api/nguonc/get-update-movie'
+import { DetailMovie } from '@/api/kkphim/get-detail-movie'
+import { MovieNguonc, EpisodeNguonc } from '@/api/nguonc/get-detail-movie'
 
 export function mapPaginate(apiPaginate: Paginate): Pagination {
   return {

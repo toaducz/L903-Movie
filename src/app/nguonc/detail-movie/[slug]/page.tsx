@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { getDetailMovie } from '@/api/nguonc/getDetailMovie'
+import { getDetailMovie } from '@/api/nguonc/get-detail-movie'
 import EpisodeList from '@/component/episode-list'
 import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'

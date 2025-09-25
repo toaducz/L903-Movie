@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Movie } from '@/api/kkphim/getUpdatedMovie'
+import { Movie } from '@/api/kkphim/get-update-movie'
 import React, { useState } from 'react'
 import ouguricap from '@/assets/xin-loi-ouguri-cap-cua-toi-an-het-anh-roi.jpg'
 
@@ -12,7 +12,7 @@ type Props = {
   source?: string
 }
 
-export default function MovieItem({ movie, color }: Readonly<Props>) {
+export default function MovieItem({ movie, color, source }: Readonly<Props>) {
   const [isLoaded, setIsLoaded] = useState(false)
 
   const normalizePosterUrl = (posterUrl: string | object | null | undefined) => {
@@ -32,7 +32,7 @@ export default function MovieItem({ movie, color }: Readonly<Props>) {
 
   return (
     <Link
-      href={`detail-movie/${movie.slug}`}
+      href={source ? `/${source}/detail-movie/${movie.slug}` : `/detail-movie/${movie.slug}`}
       className={`block ${color ?? 'bg-slate-800'} rounded-xl shadow-md hover:shadow-lg transition duration-300 overflow-hidden hover:opacity-80 cursor-pointer`}
     >
       <Image

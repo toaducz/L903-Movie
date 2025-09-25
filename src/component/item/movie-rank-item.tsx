@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { Movie } from '@/api/kkphim/getUpdatedMovie'
+import { Movie } from '@/api/kkphim/get-update-movie'
 import { useRouter } from 'next/navigation'
 
 type Props = {

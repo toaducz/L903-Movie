@@ -9,7 +9,7 @@ import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
 import Image from 'next/image'
 import errorImage from '@/assets/error.jpg'
-import { getLatestUpdateMovieList } from '@/api/nguonc/getUpdateMovie'
+import { getLatestUpdateMovieList } from '@/api/nguonc/get-update-movie'
 
 export const dynamic = 'force-dynamic'
 
@@ -81,9 +81,7 @@ export default function MovieListPage() {
     <div className='min-h-screen flex flex-col items-center justify-center p-4 bg-slate-800'>
       <div className='flex flex-col pt-20 items-center'>
         <h2 className='text-2xl font-semibold text-blue-400'>Nguonc.com</h2>
-        <div className="text-center italic text-white/70 text-[10px]">
-          (Có quảng cáo 1s)
-        </div>
+        <div className='text-center italic text-white/70 text-[10px]'>(Có quảng cáo 1s)</div>
 
         <form onSubmit={handleSearch} className='flex items-center space-x-2 py-5'>
           <input

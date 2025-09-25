@@ -1,5 +1,5 @@
 import { Pagination } from '@/api/pagination'
-import { Movie } from '../getUpdatedMovie'
+import { Movie } from '../get-update-movie'
 import { request } from '@/utils/request'
 import { queryOptions } from '@tanstack/react-query'
 import { kkphim } from '@/utils/env'

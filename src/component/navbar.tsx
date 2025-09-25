@@ -5,6 +5,11 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import menu from '@/assets/menu.png'
+import { useQuery } from '@tanstack/react-query'
+import { getCategorySlug } from '@/api/kkphim/filter/get-category-slug'
+import { getCountrySlug } from '@/api/kkphim/filter/get-country-slug'
+
+type DropdownItem = { _id: string; slug: string; name: string }
 
 export default function Navbar() {
   const router = useRouter()
@@ -12,11 +17,38 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
+  const [openMenu, setOpenMenu] = useState<'category' | 'country' | 'year' | null>(null)
+  const { data: categoryData, isLoading: categoryLoading } = useQuery(getCategorySlug())
+  const { data: countryData, isLoading: countryLoading } = useQuery(getCountrySlug())
+  const years = Array.from({ length: new Date().getFullYear() - 1970 + 1 }, (_, i) => ({
+    _id: String(1970 + i),
+    slug: String(1970 + i),
+    name: String(1970 + i)
+  })).reverse()
+
+  const handleSelect = (slug: string, type: string) => {
+    setOpenMenu(null)
+    router.push(`/list-movie/${type}?${type}=${slug}&page=1`)
+  }
+
+  const getItems = (): DropdownItem[] => {
+    if (openMenu === 'category') {
+      if (categoryLoading) return [{ _id: 'loading', slug: 'loading', name: 'Đang tải...' }]
+      return categoryData ?? []
+    }
+    if (openMenu === 'country') {
+      if (countryLoading) return [{ _id: 'loading', slug: 'loading', name: 'Đang tải...' }]
+      return countryData ?? []
+    }
+    if (openMenu === 'year') return years
+    return []
+  }
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setOpenMenu(null)
         setIsVisible(false)
       } else {
         setIsVisible(true)
@@ -42,11 +74,16 @@ export default function Navbar() {
   }
 
   const navLinks = [
-    { href: { pathname: '/list-movie', query: { typeList: 'phim-vietsub', page: 1 } }, label: 'Phim Vietsub' },
-    { href: { pathname: '/list-movie', query: { typeList: 'phim-long-tieng', page: 1 } }, label: 'Phim Lồng tiếng' },
-    { href: { pathname: '/list-movie', query: { typeList: 'phim-thuyet-minh', page: 1 } }, label: 'Phim Thuyết minh' },
-    { href: { pathname: '/list-movie', query: { typeList: 'tv-shows', page: 1 } }, label: 'TV Shows' },
-    { href: {}, label: 'Năm' },
+    { href: { pathname: '/list-movie', query: { typelist: 'phim-vietsub', page: 1 } }, label: 'Vietsub' },
+    { href: { pathname: '/list-movie', query: { typelist: 'phim-long-tieng', page: 1 } }, label: 'Lồng tiếng' },
+    {
+      href: { pathname: '/list-movie', query: { typelist: 'hoat-hinh', country: 'nhat-ban', page: 1 } },
+      label: 'Anime',
+      tooltip: 'Anime'
+    },
+    { href: { pathname: '/list-movie/category', query: { category: 'hanh-dong', page: 1 } }, label: 'Thể loại' },
+    { href: { pathname: '/list-movie/country', query: { country: 'han-quoc', page: 1 } }, label: 'Quốc Gia' },
+    { href: { pathname: '/list-movie/year', query: { year: '2025', page: 1 } }, label: 'Năm' },
     {
       href: { pathname: '/nguonc/home', query: { page: 1 } },
       label: 'Nguonc.com',
@@ -70,22 +107,52 @@ export default function Navbar() {
         </Link>
 
         {/* Navigation Items - Desktop */}
-        <div className='hidden lg:flex items-center gap-8 text-base font-medium'>
-          {navLinks.map((link, i) => (
-            <Link
-              key={i}
-              href={link.href}
-              className='relative text-white hover:text-slate-300 transition-colors duration-200 group'
-            >
-              {link.label}
-              <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-slate-300 transition-all duration-300 group-hover:w-full'></span>
-              {link.tooltip && (
-                <div className='absolute left-1/2 top-full mt-2 w-max p-2 bg-gray-700 text-white text-sm rounded opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100 -translate-x-1/2'>
-                  {link.tooltip}
+        <div className='hidden lg:flex items-center gap-8 text-base font-medium relative'>
+          {navLinks.map((link, i) => {
+            const isDropdown = ['Thể loại', 'Quốc Gia', 'Năm'].includes(link.label)
+
+            if (isDropdown) {
+              const menuKey = link.label === 'Thể loại' ? 'category' : link.label === 'Quốc Gia' ? 'country' : 'year'
+
+              return (
+                <div key={i} className='relative group'>
+                  <button
+                    onClick={() => setOpenMenu(openMenu === menuKey ? null : (menuKey as any))}
+                    className='flex items-center gap-1 text-white hover:text-slate-300 transition-colors duration-200 cursor-pointer '
+                  >
+                    {link.label}
+                    <span className='transition-transform duration-200 text-[10px] leading-none'>▼</span>
+                    <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-slate-300 transition-all duration-300 group-hover:w-full'></span>
+                  </button>
+
+                  {openMenu === menuKey && (
+                    <div className='absolute left-0 top-full mt-2 w-48 max-h-72 overflow-y-auto bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-50'>
+                      {getItems().map((item: any) => (
+                        <button
+                          key={item.slug}
+                          onClick={() => item.slug !== 'loading' && handleSelect(item.slug, menuKey)}
+                          className={`block w-full text-left px-4 py-2 text-sm text-white hover:bg-slate-700 ${item.slug === 'loading' ? 'opacity-50 cursor-default' : ''}`}
+                        >
+                          {item.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </Link>
-          ))}
+              )
+            }
+
+            return (
+              <Link
+                key={i}
+                href={link.href}
+                className='relative text-white hover:text-slate-300 transition-colors duration-200 group'
+              >
+                {link.label}
+                <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-slate-300 transition-all duration-300 group-hover:w-full'></span>
+              </Link>
+            )
+          })}
         </div>
 
         {/* Search - Desktop */}

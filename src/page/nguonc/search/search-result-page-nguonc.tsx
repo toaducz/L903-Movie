@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import MovieItem from '@/component/item/movie-item'
-import { getSearchMovieListNguonc } from '@/api/nguonc/getSearchMovie'
+import { getSearchMovieListNguonc } from '@/api/nguonc/get-search-movie'
 import Pagination from '@/component/pagination'
 import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
@@ -100,7 +100,7 @@ export default function SearchResultPageNguonc({ keyword, page }: Readonly<Searc
         <div className='grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 sm:gap-5 gap-3 p-3 w-full'>
           {result?.movies.map(movie => (
             <div key={movie._id}>
-              <MovieItem movie={movie} />
+              <MovieItem movie={movie} source='nguonc' />
             </div>
           ))}
         </div>

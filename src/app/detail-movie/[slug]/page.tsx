@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { getDetailMovie } from '@/api/kkphim/getDetailMovie'
+import { getDetailMovie } from '@/api/kkphim/get-detail-movie'
 import EpisodeList from '@/component/episode-list'
 import ReactPlayer from 'react-player'
 import Loading from '@/component/status/loading'
@@ -261,12 +261,10 @@ export default function WatchPage() {
                     className='absolute top-0 left-0'
                   />
                 ) : (
-                  <div className="absolute top-0 left-0 w-full h-full">
+                  <div className='absolute top-0 left-0 w-full h-full'>
                     {iframeLoading && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-10">
-                        <span className="text-white text-xs italic opacity-70">
-                          (Đang tải video...)
-                        </span>
+                      <div className='absolute inset-0 flex items-center justify-center bg-black/80 z-10'>
+                        <span className='text-white text-xs italic opacity-70'>(Đang tải video...)</span>
                       </div>
                     )}
                     <iframe
@@ -274,7 +272,7 @@ export default function WatchPage() {
                       title={episodeToPlay.name}
                       allowFullScreen
                       onLoad={() => setIframeLoading(false)}
-                      className="w-full h-full"
+                      className='w-full h-full'
                     ></iframe>
                   </div>
                 )}
