@@ -35,7 +35,7 @@ function MovieListPageContent() {
     isError
   } = useQuery(
     getListMovie({
-      typeList: query!,
+      typelist: query!,
       page: pageSearch,
       country
     })
