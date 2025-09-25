@@ -79,7 +79,7 @@ export default function Navbar() {
     {
       href: { pathname: '/list-movie', query: { typelist: 'hoat-hinh', country: 'nhat-ban', page: 1 } },
       label: 'Anime',
-      tooltip: 'Anime'
+      tooltip: 'Tất nhiên là phải có Anime rồi!'
     },
     { href: { pathname: '/list-movie/category', query: { category: 'hanh-dong', page: 1 } }, label: 'Thể loại' },
     { href: { pathname: '/list-movie/country', query: { country: 'han-quoc', page: 1 } }, label: 'Quốc Gia' },
@@ -98,7 +98,6 @@ export default function Navbar() {
       }`}
     >
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between'>
-        {/* Logo */}
         <Link
           href='/'
           className='text-2xl font-bold text-white hover:text-slate-300 transition-colors duration-200 hover:scale-105'
@@ -117,7 +116,7 @@ export default function Navbar() {
               return (
                 <div key={i} className='relative group'>
                   <button
-                    onClick={() => setOpenMenu(openMenu === menuKey ? null : (menuKey as any))}
+                    onClick={() => setOpenMenu(openMenu === menuKey ? null : (menuKey))}
                     className='flex items-center gap-1 text-white hover:text-slate-300 transition-colors duration-200 cursor-pointer '
                   >
                     {link.label}
@@ -127,7 +126,7 @@ export default function Navbar() {
 
                   {openMenu === menuKey && (
                     <div className='absolute left-0 top-full mt-2 w-48 max-h-72 overflow-y-auto bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-50'>
-                      {getItems().map((item: any) => (
+                      {getItems().map((item, _) => (
                         <button
                           key={item.slug}
                           onClick={() => item.slug !== 'loading' && handleSelect(item.slug, menuKey)}
@@ -182,7 +181,6 @@ export default function Navbar() {
               <span className='absolute left-0 top-1/2 w-6 h-0.5 bg-white -rotate-45'></span>
             </span>
           ) : (
-            // Icon menu từ file PNG
             <Image src={menu} alt='Menu' width={24} height={24} />
           )}
         </button>

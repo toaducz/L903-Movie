@@ -5,6 +5,7 @@ import Pagination from '@/component/pagination'
 import Image from 'next/image'
 import errorImage from '@/assets/error.jpg'
 import Error from '@/component/status/error'
+import { Movie } from '@/api/kkphim/get-update-movie'
 
 interface MovieListPageProps {
   listMovie: any
@@ -52,7 +53,7 @@ export default function MovieListPage({
 
       <div className='flex justify-center items-center'>
         <div className='grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-6 sm:gap-5 gap-3 p-3 w-full'>
-          {listMovie?.data?.items.map((movie: any) => (
+          {listMovie?.data?.items.map((movie: Movie) => (
             <div key={movie._id}>
               <MovieItem movie={movie} />
             </div>
