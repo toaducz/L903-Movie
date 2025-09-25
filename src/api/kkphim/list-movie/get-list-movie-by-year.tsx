@@ -75,7 +75,8 @@ export const getListMovieByYear = ({
     ...(sort_lang && { sort_lang }),
     ...(category && { category }),
     ...(year && { year }),
-    ...(limit !== undefined && { limit })
+    ...(limit !== undefined && { limit }),
+    ...(country !== undefined && { country })
   }
 
   return queryOptions({
