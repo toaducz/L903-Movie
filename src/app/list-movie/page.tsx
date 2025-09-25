@@ -58,5 +58,5 @@ function MovieListPageContent() {
   if (isLoading) return <Loading />
   if (isError) return <Error />
 
-  return <MovieListPage listMovie={listMovie} country={country} onPageChange={handlePageChange} />
+  return <MovieListPage listMovie={listMovie!} country={country} onPageChange={handlePageChange} />
 }

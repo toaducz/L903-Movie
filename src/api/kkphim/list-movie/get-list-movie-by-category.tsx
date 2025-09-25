@@ -1,7 +1,7 @@
-import { Movie } from './get-update-movie'
+import { Movie } from '../get-update-movie'
 import { request } from '@/utils/request'
 import { queryOptions } from '@tanstack/react-query'
-import { Pagination } from '../pagination'
+import { Pagination } from '@/api/pagination'
 import { kkphim } from '@/utils/env'
 
 type Param = {
