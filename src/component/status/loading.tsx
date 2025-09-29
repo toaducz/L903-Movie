@@ -1,4 +1,3 @@
-'use client'
 import loading from '@/assets/gif/loading.gif'
 import Image from 'next/image'
 

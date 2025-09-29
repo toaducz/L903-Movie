@@ -40,7 +40,7 @@ export default function MovieItem({ movie, color, source }: Readonly<Props>) {
         {!isLoaded && <div className='absolute inset-0 bg-gray-700 animate-pulse rounded-lg' />}
         <Image
           unoptimized
-          priority
+          loading='lazy'
           src={poster ?? ouguricap}
           alt={movie.name}
           width={270}

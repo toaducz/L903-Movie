@@ -1,4 +1,3 @@
-'use client'
 import error from '@/assets/gif/error.gif'
 import Image from 'next/image'
 
