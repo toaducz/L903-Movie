@@ -18,6 +18,7 @@ export default function MovieRankItem({ movie, index }: Props) {
         <div className='text-4xl font-extrabold text-blue-500 w-8 text-center px-1'>{index + 1}</div>
         <Image
           unoptimized
+          priority
           src={movie.thumb_url}
           alt={movie.name}
           width={80}
