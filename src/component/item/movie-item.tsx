@@ -36,10 +36,8 @@ export default function MovieItem({ movie, color, source }: Readonly<Props>) {
       href={source ? `/${source}/detail-movie/${movie.slug}` : `/detail-movie/${movie.slug}`}
       className={`block ${color ?? 'bg-slate-800'} rounded-xl shadow-md hover:shadow-lg transition duration-300 overflow-hidden hover:opacity-80 cursor-pointer`}
     >
-      <div className="relative w-[auto] h-[300px]">
-        {!isLoaded && (
-          <div className="absolute inset-0 bg-gray-700 animate-pulse rounded-lg" />
-        )}
+      <div className='relative w-[auto] h-[300px]'>
+        {!isLoaded && <div className='absolute inset-0 bg-gray-700 animate-pulse rounded-lg' />}
         <Image
           unoptimized
           priority
@@ -48,8 +46,9 @@ export default function MovieItem({ movie, color, source }: Readonly<Props>) {
           width={270}
           height={300}
           onLoad={() => setIsLoaded(true)}
-          className={`w-full h-full object-cover transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
+          className={`w-full h-full object-cover transition-opacity duration-500 ${
+            isLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
         />
       </div>
 

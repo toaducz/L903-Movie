@@ -13,11 +13,9 @@ export default function MovieRankItem({ movie, index }: Props) {
   }
 
   return (
-    <Link href={`/detail-movie/${movie.slug}`} className="block">
+    <Link href={`/detail-movie/${movie.slug}`} className='block'>
       <div className='flex items-center gap-4 py-2 px-2 bg-stale-500 cursor-pointer hover:opacity-70'>
-        <div className='text-4xl font-extrabold text-blue-500 w-8 text-center px-1'>
-          {index + 1}
-        </div>
+        <div className='text-4xl font-extrabold text-blue-500 w-8 text-center px-1'>{index + 1}</div>
         <Image
           unoptimized
           src={movie.thumb_url}

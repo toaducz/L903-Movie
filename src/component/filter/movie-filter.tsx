@@ -47,7 +47,7 @@ export default function MovieFilter({
             className='px-2 py-1 rounded text-white bg-slate-700'
           >
             <option value=''>Tất cả</option>
-            {countryData?.map((item) => (
+            {countryData?.map(item => (
               <option key={item.slug} value={item.slug}>
                 {item.name}
               </option>
@@ -66,7 +66,7 @@ export default function MovieFilter({
             className='px-2 py-1 rounded text-white bg-slate-700'
           >
             <option value=''>Tất cả</option>
-            {categoryData?.map((item) => (
+            {categoryData?.map(item => (
               <option key={item.slug} value={item.slug}>
                 {item.name}
               </option>

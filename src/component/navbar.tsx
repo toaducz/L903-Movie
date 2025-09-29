@@ -26,11 +26,6 @@ export default function Navbar() {
     name: String(1970 + i)
   })).reverse()
 
-  const handleSelect = (slug: string, type: string) => {
-    setOpenMenu(null)
-    router.push(`/list-movie/${type}?${type}=${slug}&page=1`)
-  }
-
   const getItems = (): DropdownItem[] => {
     if (openMenu === 'category') {
       if (categoryLoading) return [{ _id: 'loading', slug: 'loading', name: 'Đang tải...' }]
@@ -116,7 +111,7 @@ export default function Navbar() {
               return (
                 <div key={i} className='relative group'>
                   <button
-                    onClick={() => setOpenMenu(openMenu === menuKey ? null : (menuKey))}
+                    onClick={() => setOpenMenu(openMenu === menuKey ? null : menuKey)}
                     className='flex items-center gap-1 text-white hover:text-slate-300 transition-colors duration-200 cursor-pointer '
                   >
                     {link.label}
@@ -126,15 +121,22 @@ export default function Navbar() {
 
                   {openMenu === menuKey && (
                     <div className='absolute left-0 top-full mt-2 w-48 max-h-72 overflow-y-auto bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-50'>
-                      {getItems().map((item) => (
-                        <button
-                          key={item.slug}
-                          onClick={() => item.slug !== 'loading' && handleSelect(item.slug, menuKey)}
-                          className={`block w-full text-left px-4 py-2 text-sm text-white hover:bg-slate-700 ${item.slug === 'loading' ? 'opacity-50 cursor-default' : ''}`}
-                        >
-                          {item.name}
-                        </button>
-                      ))}
+                      {getItems().map(item => {
+                        const href = `/list-movie/${menuKey}?${menuKey}=${item.slug}&page=1`
+
+                        return (
+                          <Link
+                            key={item.slug}
+                            href={item.slug === 'loading' ? '#' : href}
+                            onClick={() => setOpenMenu(null)}
+                            className={`block w-full text-left px-4 py-2 text-sm text-white hover:bg-slate-700 ${
+                              item.slug === 'loading' ? 'opacity-50 pointer-events-none' : ''
+                            }`}
+                          >
+                            {item.name}
+                          </Link>
+                        )
+                      })}
                     </div>
                   )}
                 </div>
