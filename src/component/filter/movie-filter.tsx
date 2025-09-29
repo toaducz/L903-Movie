@@ -125,7 +125,7 @@ export default function MovieFilter({
 
       <button
         onClick={onReset}
-        className='ml-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded cursor-pointer'
+        className='ml-auto px-4 py-2 bg-red-600 hover:bg-blue-700 text-white rounded cursor-pointer'
       >
         Reset
       </button>
