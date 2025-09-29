@@ -22,7 +22,6 @@ export default function MovieRankItem({ movie, index }: Props) {
           alt={movie.name}
           width={80}
           height={80}
-          loading='lazy'
           className='rounded-md h-[80px] w-[80px] object-cover'
         />
         <div className='flex flex-col overflow-hidden'>
