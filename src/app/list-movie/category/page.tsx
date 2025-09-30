@@ -20,10 +20,7 @@ export default function MovieByCategoryPage() {
 function MovieListPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-
   const pageParam = Number(searchParams.get('page') ?? '1')
-  const [pageSearch, setPageSearch] = useState(pageParam)
-
   const [filterDraft, setFilterDraft] = useState({
     year: searchParams.get('year') ?? '',
     country: searchParams.get('country') ?? '',
@@ -45,7 +42,7 @@ function MovieListPageContent() {
   } = useQuery(
     getListMovieByCategory({
       category: filter.category!,
-      page: pageSearch,
+      page: pageParam,
       country: filter.country || undefined,
       year: filter.year || undefined,
       sort_field: filter.sortField || undefined,
@@ -54,12 +51,10 @@ function MovieListPageContent() {
   )
 
   const handlePageChange = (newPage: number) => {
-    setPageSearch(newPage)
     pushFilterParams(newPage, filter)
   }
 
   const handleFilter = () => {
-    setPageSearch(1)
     setFilter(filterDraft) // chỉ khi bấm nút thì sync filterDraft -> filter
     pushFilterParams(1, filterDraft)
   }
@@ -70,11 +65,11 @@ function MovieListPageContent() {
       country: '',
       category: filter.category,
       sortField: '',
-      sortType: ''
+      sortType: '',
+      page: 1
     }
     setFilterDraft(resetFilter)
     setFilter(resetFilter)
-    setPageSearch(1)
     router.replace(`/list-movie/category?category=${filter.category}&page=1`)
   }
 
@@ -93,7 +88,7 @@ function MovieListPageContent() {
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [pageSearch])
+  }, [pageParam])
 
   if (isLoading) return <Loading />
   if (isError) return <Error />

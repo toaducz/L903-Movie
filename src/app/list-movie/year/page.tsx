@@ -20,12 +20,9 @@ export default function MovieByYearPage() {
 function MovieListPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-
   const pageParam = Number(searchParams.get('page') ?? '1')
   const yearParam = searchParams?.get('year')?.trim()
   if (!yearParam) notFound()
-
-  const [pageSearch, setPageSearch] = useState(pageParam)
   const [filterDraft, setFilterDraft] = useState({
     country: searchParams.get('country') ?? '',
     category: searchParams.get('category') ?? '',
@@ -42,7 +39,7 @@ function MovieListPageContent() {
   } = useQuery(
     getListMovieByYear({
       year: yearParam!,
-      page: pageSearch,
+      page: pageParam,
       country: filter.country || undefined,
       category: filter.category || undefined,
       sort_field: filter.sortField || undefined,
@@ -63,12 +60,10 @@ function MovieListPageContent() {
   }
 
   const handlePageChange = (newPage: number) => {
-    setPageSearch(newPage)
     router.push(`/list-movie/year?${buildQuery(newPage, filter)}`)
   }
 
   const handleFilterSubmit = () => {
-    setPageSearch(1)
     setFilter(filterDraft) // sync filter thật
     router.push(`/list-movie/year?${buildQuery(1, filterDraft)}`)
   }
@@ -78,17 +73,17 @@ function MovieListPageContent() {
       country: '',
       category: '',
       sortField: '',
-      sortType: ''
+      sortType: '',
+      page: 1
     }
     setFilterDraft(resetFilter)
     setFilter(resetFilter)
-    setPageSearch(1)
     router.push(`/list-movie/year?${buildQuery(1, resetFilter)}`)
   }
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [pageSearch])
+  }, [pageParam])
 
   if (isLoading) return <Loading />
   if (isError) return <Error />

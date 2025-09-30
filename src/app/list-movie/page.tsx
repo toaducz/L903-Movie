@@ -27,7 +27,7 @@ function MovieListPageContent() {
     notFound()
   }
 
-  const [pageSearch, setPageSearch] = useState(pageParam)
+  // const [pageSearch, setPageSearch] = useState(pageParam)
 
   const {
     data: listMovie,
@@ -36,13 +36,12 @@ function MovieListPageContent() {
   } = useQuery(
     getListMovie({
       typelist: query!,
-      page: pageSearch,
+      page: pageParam,
       country
     })
   )
 
   const handlePageChange = (newPage: number) => {
-    setPageSearch(newPage)
     const params = new URLSearchParams({
       typelist: query!,
       page: String(newPage)
@@ -53,7 +52,7 @@ function MovieListPageContent() {
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [pageSearch])
+  }, [pageParam])
 
   if (isLoading) return <Loading />
   if (isError) return <Error />

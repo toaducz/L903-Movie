@@ -20,12 +20,9 @@ export default function MovieByCountryPage() {
 function MovieListPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-
   const pageParam = Number(searchParams.get('page') ?? '1')
   const countryParam = searchParams?.get('country')?.trim()
   if (!countryParam) notFound()
-
-  const [pageSearch, setPageSearch] = useState(pageParam)
   const [filterDraft, setFilterDraft] = useState({
     year: searchParams.get('year') ?? '',
     category: searchParams.get('category') ?? '',
@@ -42,7 +39,7 @@ function MovieListPageContent() {
   } = useQuery(
     getListMovieByCountry({
       country: countryParam!,
-      page: pageSearch,
+      page: pageParam,
       sort_field: filter.sortField || undefined,
       sort_type: filter.sortType || undefined,
       category: filter.category || undefined,
@@ -51,12 +48,10 @@ function MovieListPageContent() {
   )
 
   const handlePageChange = (newPage: number) => {
-    setPageSearch(newPage)
     pushFilterParams(newPage, filter)
   }
 
   const handleFilter = () => {
-    setPageSearch(1)
     setFilter(filterDraft) // sync filter thật với filterDraft
     pushFilterParams(1, filterDraft)
   }
@@ -66,11 +61,11 @@ function MovieListPageContent() {
       year: '',
       category: '',
       sortField: '',
-      sortType: ''
+      sortType: '',
+      page: 1
     }
     setFilterDraft(resetFilter)
     setFilter(resetFilter)
-    setPageSearch(1)
     router.push(`/list-movie/country?country=${countryParam}&page=1`)
   }
 
@@ -89,7 +84,7 @@ function MovieListPageContent() {
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [pageSearch])
+  }, [pageParam])
 
   if (isLoading) return <Loading />
   if (isError) return <Error />
