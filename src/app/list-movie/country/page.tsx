@@ -79,7 +79,7 @@ function MovieListPageContent() {
     if (f.sortField) params.set('sort_field', f.sortField)
     if (f.sortType) params.set('sort_type', f.sortType)
 
-    router.replace(`/list-movie/country?${params.toString()}`)
+    router.push(`/list-movie/country?${params.toString()}`)
   }
 
   useEffect(() => {

@@ -21,6 +21,7 @@ function MovieListPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pageParam = Number(searchParams.get('page') ?? '1')
+  const category = searchParams.get('category') ?? ''
   const [filterDraft, setFilterDraft] = useState({
     year: searchParams.get('year') ?? '',
     country: searchParams.get('country') ?? '',
@@ -41,7 +42,7 @@ function MovieListPageContent() {
     isError
   } = useQuery(
     getListMovieByCategory({
-      category: filter.category!,
+      category: category!,
       page: pageParam,
       country: filter.country || undefined,
       year: filter.year || undefined,
