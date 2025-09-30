@@ -5,6 +5,7 @@ import Navbar from '@/component/navbar'
 import QueryProvider from '@/app/provider'
 import { Suspense } from 'react'
 import NProgressInit from '@/component/NProgressInit'
+import { AuthProvider } from './auth-provider'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -33,9 +34,11 @@ export default function RootLayout({
           <Suspense>
             <NProgressInit />
           </Suspense>
-          <Navbar />
-          {/* <div className='pb-25'></div> */}
-          {children}
+          <AuthProvider>
+            <Navbar />
+            {/* <div className='pb-25'></div> */}
+            {children}
+          </AuthProvider>
         </QueryProvider>
       </body>
     </html>

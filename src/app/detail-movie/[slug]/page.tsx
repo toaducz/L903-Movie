@@ -10,6 +10,7 @@ import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
 import Image from 'next/image'
 import thumbnail from '@/assets/gumaKe.png'
+import FavoriteButton from '@/component/favorite-button'
 // import CustomPlayer from '@/component/player/custom-player'
 
 export default function WatchPage() {
@@ -105,6 +106,11 @@ export default function WatchPage() {
                 </svg>
                 Xem phim
               </button>
+
+              <div 
+                >
+                < FavoriteButton slug={data?.movie?.slug}/>
+              </div>
 
               <div className='mt-6 bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 shadow-lg'>
                 <div className='flex items-center justify-center mb-2'>
