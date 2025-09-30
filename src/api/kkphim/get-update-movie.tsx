@@ -57,7 +57,8 @@ export const getLatestUpdateMovieList = ({ page }: LatestUpdateMovieListRequest)
     queryKey: ['get-lasted-update-movie-list', page],
     queryFn: () =>
       request<LatestUpdateMovieList>(kkphim, `danh-sach/phim-moi-cap-nhat-v3`, 'GET', {
-        page: page
+        page: page,
+        limit: 12
       })
   })
 }

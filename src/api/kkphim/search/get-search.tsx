@@ -60,7 +60,8 @@ export const getSearchByName = ({ keyword, page = 1 }: SearchByNameRequest) => {
     queryFn: () =>
       request<SearchResponse>(kkphim, `v1/api/tim-kiem`, 'GET', {
         keyword: keyword,
-        page: page
+        page: page,
+        limit: 12
       })
   })
 }
