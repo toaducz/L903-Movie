@@ -13,8 +13,8 @@ export default function LoginPage() {
   const { user } = useAuth()
 
   useEffect(() => {
-    if (user?.id !== null) {
-      router.push(`/`)
+    if (user !== null) {
+      router.replace(`/`)
     }
   }, [])
 
@@ -27,7 +27,7 @@ export default function LoginPage() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password })
       })
 
       const result = await res.json()
@@ -35,7 +35,7 @@ export default function LoginPage() {
       if (!res.ok) {
         setError('Đăng nhập thất bại')
       } else {
-        router.push('/')
+        window.location.href = '/'
       }
     } catch (err: any) {
       setError('Đăng nhập thất bại')
@@ -44,44 +44,42 @@ export default function LoginPage() {
     setLoading(false)
   }
 
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-900">
-      {!user?.id ? (<form
-        onSubmit={handleLogin}
-        className="bg-slate-800 p-6 rounded-lg shadow-md w-80"
-      >
-        <h2 className="text-xl font-bold mb-4 text-center">Đăng nhập</h2>
+    <div className='flex min-h-screen items-center justify-center bg-slate-900'>
+      {!user?.id ? (
+        <form onSubmit={handleLogin} className='bg-slate-800 p-6 rounded-lg shadow-md w-80'>
+          <h2 className='text-xl font-bold mb-4 text-center'>Đăng nhập</h2>
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full mb-3 px-3 py-2 border rounded"
-          required
-        />
+          <input
+            type='email'
+            placeholder='Email'
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            className='w-full mb-3 px-3 py-2 border rounded'
+            required
+          />
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full mb-3 px-3 py-2 border rounded"
-          required
-        />
+          <input
+            type='password'
+            placeholder='Mật khẩu'
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            className='w-full mb-3 px-3 py-2 border rounded'
+            required
+          />
 
-        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+          {error && <p className='text-red-500 text-sm mb-2'>{error}</p>}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:opacity-50"
-        >
-          {loading ? 'Đang đăng nhập...' : 'Login'}
-        </button>
-        <div className='italic items-center pt-6 text-center underline cursor-pointer hover:opacity-80'>Đăng kí</div>
-      </form>) : null}
+          <button
+            type='submit'
+            disabled={loading}
+            className='w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:opacity-50'
+          >
+            {loading ? 'Đang đăng nhập...' : 'Login'}
+          </button>
+          <div className='italic items-center pt-6 text-center underline cursor-pointer hover:opacity-80'>Đăng kí</div>
+        </form>
+      ) : null}
     </div>
   )
 }

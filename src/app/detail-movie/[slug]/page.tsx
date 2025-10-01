@@ -107,9 +107,8 @@ export default function WatchPage() {
                 Xem phim
               </button>
 
-              <div 
-                >
-                < FavoriteButton slug={data?.movie?.slug}/>
+              <div>
+                <FavoriteButton slug={data?.movie?.slug} />
               </div>
 
               <div className='mt-6 bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 shadow-lg'>
