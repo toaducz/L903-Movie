@@ -32,7 +32,7 @@ export async function getSession(req: NextRequest) {
 
 /** POST /favorite - thêm vào yêu thích */
 export async function POST(req: NextRequest) {
-  const session = await getSession(req)
+  await getSession(req)
 
   const user_id = await getUserId(req)
   if (!user_id) {
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
 
 /** DELETE /favorite - xóa khỏi yêu thích */
 export async function DELETE(req: NextRequest) {
-  const session = await getSession(req)
+  await getSession(req)
 
   const user_id = await getUserId(req)
   if (!user_id) {
@@ -80,7 +80,7 @@ export async function DELETE(req: NextRequest) {
 
 /** GET /favorite?page=1&limit=10 - danh sách yêu thích có phân trang */
 export async function GET(req: NextRequest) {
-  const session = await getSession(req)
+  await getSession(req)
 
   const user_id = await getUserId(req)
   if (!user_id) {
