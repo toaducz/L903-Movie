@@ -30,14 +30,14 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password })
       })
 
-      const result = await res.json()
+      // const result = await res.json()
 
       if (!res.ok) {
         setError('Đăng nhập thất bại')
       } else {
         window.location.href = '/'
       }
-    } catch (err: any) {
+    } catch (err) {
       setError('Đăng nhập thất bại')
     }
 
