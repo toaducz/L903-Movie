@@ -1,18 +1,9 @@
 // api/favorite/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '../../../../lib/supabaseClient'
+import { getUserId } from '../../../../lib/auth-helper'
 
-// Lấy user_id từ cookie token
-export async function getUserId(req: NextRequest) {
-  const access_token = req.cookies.get('sb-access-token')?.value
-  if (!access_token) return null
-
-  const { data, error } = await supabase.auth.getUser(access_token)
-  if (error || !data.user) return null
-  return data.user.id
-}
-
-export async function getSession(req: NextRequest) {
+async function getSession(req: NextRequest) {
   const access_token = req.cookies.get('sb-access-token')?.value
   const refresh_token = req.cookies.get('sb-refresh-token')?.value
   if (!access_token) {
