@@ -38,7 +38,7 @@ export default function LoginPage() {
         window.location.href = '/'
       }
     } catch (err) {
-      setError('Đăng nhập thất bại')
+      setError('Đăng nhập thất bại' + err)
     }
 
     setLoading(false)
