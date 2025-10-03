@@ -47,6 +47,5 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // 3. Nếu không còn token nào hợp lệ → coi như logout
   return NextResponse.json({ user: null })
 }
