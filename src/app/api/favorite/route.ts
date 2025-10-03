@@ -1,7 +1,7 @@
 // api/favorite/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '../../../../lib/supabaseClient'
-import { getUserId } from '../../../../lib/auth-helper'
+import { supabase } from '../../../lib/supabaseClient'
+import { getUserId } from '../../../lib/auth-helper'
 
 async function getSession(req: NextRequest) {
   const access_token = req.cookies.get('sb-access-token')?.value
@@ -30,12 +30,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Không xác thực được' }, { status: 401 })
   }
 
-  const { slug } = await req.json()
+  const { slug, name, image } = await req.json()
   if (!slug) {
     return NextResponse.json({ error: 'Thiếu slug' }, { status: 400 })
   }
 
-  const { data, error } = await supabase.from('favorite').insert([{ user_id: user_id, slug: slug }])
+  const { data, error } = await supabase
+    .from('favorite')
+    .insert([{ user_id: user_id, slug: slug, name: name, image: image }])
 
   if (error) {
     console.error('Lỗi Supabase:', error)

@@ -5,9 +5,11 @@ import { useAuth } from '@/app/auth-provider'
 
 type FavoriteButtonProps = {
   slug: string
+  name: string
+  image: string
 }
 
-export default function FavoriteButton({ slug }: FavoriteButtonProps) {
+export default function FavoriteButton({ slug, name, image }: FavoriteButtonProps) {
   const { user } = useAuth()
   const [isFavorite, setIsFavorite] = useState<boolean | null>(null)
   const [loading, setLoading] = useState(false)
@@ -54,7 +56,7 @@ export default function FavoriteButton({ slug }: FavoriteButtonProps) {
         const res = await fetch('/api/favorite', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ slug })
+          body: JSON.stringify({ slug, name, image })
         })
         const result = await res.json()
         if (!result.error) {

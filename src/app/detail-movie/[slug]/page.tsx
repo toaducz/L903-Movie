@@ -11,6 +11,7 @@ import Error from '@/component/status/error'
 import Image from 'next/image'
 import thumbnail from '@/assets/gumaKe.png'
 import FavoriteButton from '@/component/favorite-button'
+import { saveViewHistory } from '@/utils/local-storage'
 // import CustomPlayer from '@/component/player/custom-player'
 
 export default function WatchPage() {
@@ -31,6 +32,11 @@ export default function WatchPage() {
 
   // Tự động chọn tập 1 khi data được tải và đang ở chế độ xem phim
   useEffect(() => {
+    saveViewHistory({
+      name: data?.movie?.name ?? '',
+      image: data?.movie?.poster_url ?? '',
+      slug: data?.movie?.slug ?? ''
+    })
     if (isWatching && data?.episodes?.[0]?.server_data?.[0] && !selectedEpisode) {
       setSelectedEpisode(data.episodes[0].server_data[0].link_embed)
       setUseBackup(data.episodes[0].server_data[0].link_embed)
@@ -108,7 +114,7 @@ export default function WatchPage() {
               </button>
 
               <div>
-                <FavoriteButton slug={data?.movie?.slug} />
+                <FavoriteButton slug={movie?.slug} image={movie?.poster_url} name={movie.name} />
               </div>
 
               <div className='mt-6 bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 shadow-lg'>

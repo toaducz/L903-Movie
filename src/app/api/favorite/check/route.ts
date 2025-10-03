@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server'
-import { supabase } from '../../../../../lib/supabaseClient'
-import { getUserId } from '../../../../../lib/auth-helper'
+import { supabase } from '../../../../lib/supabaseClient'
+import { getUserId } from '../../../../lib/auth-helper'
 
 export async function POST(req: NextRequest) {
   const user_id = await getUserId(req)
