@@ -1,5 +1,3 @@
-// utils/viewHistory.ts
-
 type Movie = {
   name: string
   image: string
