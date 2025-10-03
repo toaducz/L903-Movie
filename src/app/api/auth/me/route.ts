@@ -1,23 +1,52 @@
-// app/api/auth/me/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '../../../../lib/supabaseClient'
+import { supabase } from '@/lib/supabaseClient'
 
 export async function GET(req: NextRequest) {
-  const access_token = req.cookies.get('sb-access-token')?.value
+  const accessToken = req.cookies.get('sb-access-token')?.value
+  const refreshToken = req.cookies.get('sb-refresh-token')?.value
 
-  if (!access_token) {
-    return NextResponse.json({ user: null }, { status: 200 })
+  if (accessToken) {
+    const { data, error } = await supabase.auth.getUser(accessToken)
+    if (data?.user && !error) {
+      return NextResponse.json({
+        user: {
+          id: data.user.id,
+          email: data.user.email
+        }
+      })
+    }
   }
 
-  const { data, error } = await supabase.auth.getUser(access_token)
-  if (error || !data.user) {
-    return NextResponse.json({ user: null }, { status: 200 })
+  // thử refresh
+  if (refreshToken) {
+    const { data, error } = await supabase.auth.refreshSession({ refresh_token: refreshToken })
+
+    if (data?.session && !error) {
+      const res = NextResponse.json({
+        user: {
+          id: data.session.user.id,
+          email: data.session.user.email
+        }
+      })
+
+      res.cookies.set('sb-access-token', data.session.access_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: data.session.expires_in
+      })
+
+      res.cookies.set('sb-refresh-token', data.session.refresh_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7, // 7 ngày
+      })
+
+      return res
+    }
   }
 
-  const safeUser = {
-    id: data.user.id,
-    email: data.user.email
-  }
-
-  return NextResponse.json({ user: safeUser }, { status: 200 })
+  // 3. Nếu không còn token nào hợp lệ → coi như logout
+  return NextResponse.json({ user: null })
 }
