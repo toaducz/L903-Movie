@@ -21,13 +21,13 @@ export async function POST(req: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       path: '/',
-      maxAge: data.session.expires_in
+      maxAge: 60 * 60 * 24 * 7, // 7 ngày
     })
     res.cookies.set('sb-refresh-token', data.session.refresh_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       path: '/',
-      maxAge: 60 * 60 * 24 // 24h thôi
+      maxAge: 60 * 60 * 24 * 7, // 7 ngày
     })
     return res
   }
