@@ -60,7 +60,7 @@ export default function FavoritePage() {
   }
 
   return (
-    <div className='pt-25 px-4 max-w-5xl mx-auto'>
+    <div className='pt-25 px-4 max-w-5xl mx-auto min-h-screen'>
       <h1 className='text-2xl font-bold mb-6'>Phim yêu thích</h1>
 
       {loading && <p className='text-gray-500'>Đang tải...</p>}

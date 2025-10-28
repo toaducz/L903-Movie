@@ -42,26 +42,26 @@ export default function FavoritePage() {
   }
 
   return (
-    <div className='pt-25 px-4 max-w-5xl mx-auto'>
+    <div className='pt-25 px-4 max-w-5xl mx-auto min-h-screen'>
       <h1 className='text-2xl font-bold mb-6'>Lịch sử xem</h1>
 
       {visibleMovies.length > 0 ? (
-        <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4'>
+        <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 min-h-screen'>
           {visibleMovies.map(movie => (
             <HistoryItem key={movie.slug} slug={movie.slug} name={movie.name} image={movie.image} />
           ))}
         </div>
       ) : (
-        <p className='text-gray-500'>Bạn chưa xem phim nào.</p>
+        <p className='text-gray-500 min-h-screen'>Bạn chưa xem phim nào.</p>
       )}
 
       {visibleMovies.length < allMovies.length && <p className='text-center mt-4 text-gray-400'>Đang tải thêm...</p>}
 
-      <div className='mt-6 text-center'>
-        <button onClick={clearHistory} className='px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition'>
+      {visibleMovies.length > 0 && (<div className='mt-6 text-center'>
+        <button onClick={clearHistory} className='px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition mb-10 cursor-pointer'>
           Xóa hết lịch sử xem
         </button>
-      </div>
+      </div>)}
     </div>
   )
 }

@@ -21,7 +21,7 @@ export default function MovieListPage({
   onPageChange,
   headTitle = false
 }: Readonly<MovieListPageProps>) {
-  if (listMovie?.data.items === null || listMovie.status === 'error') {
+  if (listMovie?.data?.items === null || listMovie.status === 'error') {
     return <Error />
   }
 
@@ -32,12 +32,12 @@ export default function MovieListPage({
           <h2 className='text-2xl font-semibold text-gray-100 mb-6'>Anime</h2>
         ) : (
           <>
-            <h2 className='text-2xl font-semibold text-gray-100'>{listMovie?.data.titlePage}</h2>
-            <h6 className='font-semibold text-gray-100 mb-6 italic'>{listMovie?.data.seoOnPage.descriptionHead}</h6>
+            <h2 className='text-2xl font-semibold text-gray-100'>{listMovie?.data?.titlePage ?? ""}</h2>
+            <h6 className='font-semibold text-gray-100 mb-6 italic'>{listMovie?.data?.seoOnPage.descriptionHead ?? ""}</h6>
           </>
         )}
 
-        {listMovie?.data.items.length === 0 ? (
+        {listMovie?.data?.items.length === 0 ? (
           <div>
             <Image
               unoptimized
@@ -63,8 +63,8 @@ export default function MovieListPage({
       </div>
 
       <Pagination
-        currentPage={listMovie?.data.params.pagination.currentPage ?? 1}
-        totalPages={listMovie?.data.params.pagination.totalPages ?? 1}
+        currentPage={listMovie?.data?.params.pagination.currentPage ?? 1}
+        totalPages={listMovie?.data?.params.pagination.totalPages ?? 1}
         onPageChange={onPageChange}
       />
     </div>

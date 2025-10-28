@@ -47,9 +47,9 @@ export default function SearchResultPage({ keyword, page }: Readonly<SearchProps
   return (
     <div className='min-h-screen flex flex-col items-center justify-center p-4 bg-slate-900'>
       <div className='flex flex-col pt-20 items-center justify-content'>
-        <h2 className='text-2xl font-semibold text-gray-100'>{result?.data.titlePage}</h2>
+        <h2 className='text-2xl font-semibold text-gray-100'>{result?.data?.titlePage}</h2>
         <h6 className='font-semibold text-gray-100 mb-6 italic'>
-          Có {result?.data.params.pagination.totalItems} kết quả
+          Có {result?.data?.params.pagination.totalItems} kết quả
         </h6>
         {result?.data?.params?.pagination?.totalItems === 0 ? (
           <div className='flex flex-col items-center justify-center gap-4'>
