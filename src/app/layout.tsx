@@ -6,6 +6,7 @@ import QueryProvider from '@/app/provider'
 import { Suspense } from 'react'
 import NProgressInit from '@/component/NProgressInit'
 import { AuthProvider } from './auth-provider'
+import Footer from '@/component/footer'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -29,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-stale-900`}>
         <QueryProvider>
           <Suspense>
             <NProgressInit />
@@ -38,6 +39,8 @@ export default function RootLayout({
             <Navbar />
             {/* <div className='pb-25'></div> */}
             {children}
+            {/* <div className='pb-25'></div> */}
+            <Footer />
           </AuthProvider>
         </QueryProvider>
       </body>

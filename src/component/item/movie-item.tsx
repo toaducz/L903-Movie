@@ -50,8 +50,9 @@ export default function MovieItem({ movie, color, source }: Readonly<Props>) {
           height={300}
           loading='lazy'
           onLoad={() => setIsLoaded(true)}
-          className={`w-full h-full object-cover transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
+          className={`w-full h-full object-cover transition-opacity duration-500 ${
+            isLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
         />
       </div>
 
