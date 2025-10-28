@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import bocchiError from '@/assets/image/bocchi-error.jpg'
 
-export default function NotFoundPage() {
+export default function ErrorPage() {
   return (
     <div className='min-h-screen flex flex-col items-center justify-center bg-black text-slate-100 px-6 py-12'>
       <div className='flex flex-col items-center text-center  space-y-6'>
