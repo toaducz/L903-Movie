@@ -20,6 +20,7 @@ export default function Navbar() {
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [openMenu, setOpenMenu] = useState<'category' | 'country' | 'year' | null>(null)
+  const MAX_SEARCH_LENGTH = 100
   const { data: categoryData, isLoading: categoryLoading } = useQuery(getCategorySlug())
   const { data: countryData, isLoading: countryLoading } = useQuery(getCountrySlug())
   const years = Array.from({ length: new Date().getFullYear() - 1970 + 1 }, (_, i) => ({
@@ -60,6 +61,11 @@ export default function Navbar() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
+    if (search.length > MAX_SEARCH_LENGTH) {
+      alert(`Từ khóa quá dài (tối đa ${MAX_SEARCH_LENGTH} ký tự), phá hả mạy?!`)
+      return
+    }
+
     if (search.trim()) {
       const encoded = encodeURIComponent(search.trim())
       router.push(`/search?q=${encoded}&page=1`)
@@ -92,9 +98,8 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`bg-slate-900 text-white shadow-md w-screen fixed top-0 z-50 transition-transform duration-300 ${
-        isVisible ? 'translate-y-0' : '-translate-y-full'
-      }`}
+      className={`bg-slate-900 text-white shadow-md w-screen fixed top-0 z-50 transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'
+        }`}
     >
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between'>
         <Link
@@ -133,9 +138,8 @@ export default function Navbar() {
                             key={item.slug}
                             href={item.slug === 'loading' ? '#' : href}
                             onClick={() => setOpenMenu(null)}
-                            className={`block w-full text-left px-4 py-2 text-sm text-white hover:bg-slate-700 ${
-                              item.slug === 'loading' ? 'opacity-50 pointer-events-none' : ''
-                            }`}
+                            className={`block w-full text-left px-4 py-2 text-sm text-white hover:bg-slate-700 ${item.slug === 'loading' ? 'opacity-50 pointer-events-none' : ''
+                              }`}
                           >
                             {item.name}
                           </Link>
