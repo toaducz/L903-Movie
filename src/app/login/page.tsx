@@ -3,20 +3,30 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../auth-provider'
 import { useRouter } from 'next/navigation'
+import Loading from '@/component/status/loading'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [checkingUser, setCheckingUser] = useState<boolean | null>(null)
   const router = useRouter()
   const { user } = useAuth()
 
   useEffect(() => {
     if (user) {
       router.replace('/')
+    } else {
+      setCheckingUser(false)
     }
   }, [user, router])
+
+  if (checkingUser) {
+    return (
+      < Loading />
+    )
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
