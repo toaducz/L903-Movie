@@ -7,20 +7,20 @@ const securityHeaders = [
     value: 'SAMEORIGIN',
   },
   // Giới hạn ai được phép nhúng trang này (CSP)
-  {
-    key: 'Content-Security-Policy',
-    value: "frame-ancestors 'self';",
-  },
+  // {
+  //   key: 'Content-Security-Policy',
+  //   value: "frame-ancestors 'self';",
+  // },
   // Bật XSS filter cho trình duyệt cũ
   {
     key: 'X-XSS-Protection',
     value: '1; mode=block',
   },
   // Chỉ cho phép tải tài nguyên an toàn (HTTPS)
-  {
-    key: 'Content-Security-Policy',
-    value: "default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';",
-  },
+  // {
+  //   key: 'Content-Security-Policy',
+  //   value: "default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';",
+  // },
   // Giúp ngăn lộ thông tin server
   {
     key: 'X-Content-Type-Options',
