@@ -13,10 +13,10 @@ export default function LoginPage() {
   const { user } = useAuth()
 
   useEffect(() => {
-    if (user !== null) {
-      router.replace(`/`)
+    if (user) {
+      router.replace('/')
     }
-  }, [])
+  }, [user, router])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
