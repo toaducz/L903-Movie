@@ -12,6 +12,7 @@ import Error from '@/component/status/error'
 import Image from 'next/image'
 import errorImage from '@/assets/error.jpg'
 import Link from 'next/link'
+import Warning from '@/component/status/warning'
 
 interface SearchProps {
   keyword: string
@@ -42,6 +43,10 @@ export default function SearchResultPage({ keyword, page }: Readonly<SearchProps
 
   if (isError) {
     return <Error />
+  }
+
+  if (keyword.length > 100) {
+    return <Warning message='Từ khóa quá dài' />
   }
 
   return (
