@@ -5,7 +5,6 @@ import videojs from 'video.js'
 import Player from 'video.js/dist/types/player'
 import 'video.js/dist/video-js.css'
 
-// --- CÁC INTERFACE ĐỂ TRÁNH LỖI ANY CỦA ESLINT ---
 interface HLSSegment {
   resolvedUri?: string
   uri: string
