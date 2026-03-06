@@ -56,6 +56,15 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
               player.exitFullscreen()
             }
           }
+          //space
+          else if (e.key === ' ' || e.code === 'Space') {
+            e.preventDefault()
+            if (player.paused()) {
+              player.play()
+            } else {
+              player.pause()
+            }
+          }
         }
         window.addEventListener('keydown', handleKeyDown)
 
