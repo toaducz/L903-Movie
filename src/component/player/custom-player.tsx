@@ -5,6 +5,7 @@ import videojs from 'video.js'
 import Player from 'video.js/dist/types/player'
 import 'video.js/dist/video-js.css'
 
+// --- CÁC INTERFACE ĐỂ TRÁNH LỖI ANY CỦA ESLINT ---
 interface HLSSegment {
   resolvedUri?: string
   uri: string
@@ -40,8 +41,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
       videoElement.classList.add('vjs-big-play-centered')
       videoRef.current.appendChild(videoElement)
 
-      // bắt bàn phím, sau này có gì hay thì update tiếp
       const player = (playerRef.current = videojs(videoElement, options, () => {
+        // --- XỬ LÝ PHÍM TẮT ---
         const handleKeyDown = (e: KeyboardEvent) => {
           if (e.key === 'ArrowRight') {
             player.currentTime(player.currentTime()! + 10)
@@ -64,16 +65,29 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
           let currentTimeAcc = 0
           const newAdRegions: Array<{ start: number; end: number }> = []
 
+          // bắt các khuôn mẫu quảng cáo phổ biến nhất
+          // ^ : Bắt đầu chuỗi tên file
+          // (segment_.* | ads?_.* | promo_.* | \d{4,}) : Chứa 1 trong các khuôn mẫu
+          // \.ts$ : Kết thúc phải là .ts
+          // i : Không phân biệt hoa/thường
+          const adRegex = /^(segment_.*|ads?_.*|promo_.*|\d{4,})\.ts$/i
+
           media.segments.forEach(segment => {
             const url = segment.resolvedUri || segment.uri || ''
-            if (/[0-9]{5,}\.ts/.test(url)) {
+
+            // bóc tách lấy đúng phần TÊN FILE cuối cùng (bỏ qua domain và các thư mục)
+            // VD: https://s3.abc.com/phim/segment_001.ts -> segment_001.ts
+            const fileName = url.split('/').pop()?.split('?')[0] || ''
+
+            if (adRegex.test(fileName)) {
               newAdRegions.push({
                 start: currentTimeAcc,
-                end: currentTimeAcc + segment.duration + 1.5 // méo hiểu sao bị lệch
+                end: currentTimeAcc + segment.duration + 1.5 // Méo hiểu sao phải 1.5s
               })
             }
             currentTimeAcc += segment.duration
           })
+
           adRegions = newAdRegions
         }
 
@@ -88,8 +102,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
           for (const region of adRegions) {
             if (currentTime >= region.start && currentTime < region.end) {
               isAdPlaying = true
+
+              // skip 1 đoạn và mute âm thanh
               player.currentTime(region.end + 1)
               if (!player.muted()) player.muted(true)
+
               break
             }
           }
