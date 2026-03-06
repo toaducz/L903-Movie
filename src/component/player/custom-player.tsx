@@ -41,7 +41,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
       videoRef.current.appendChild(videoElement)
 
       const player = (playerRef.current = videojs(videoElement, options, () => {
-        // --- XỬ LÝ PHÍM TẮT ---
+        // bắt bàn phím, có gì hay sẽ thêm sau
         const handleKeyDown = (e: KeyboardEvent) => {
           if (e.key === 'ArrowRight') {
             player.currentTime(player.currentTime()! + 10)
