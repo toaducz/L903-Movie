@@ -71,7 +71,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
         const handleMouseMove = () => {
           player.userActive(true)
         }
-        const playerEl = player.el()
+        const playerEl = player.el() as HTMLElement | null
         if (playerEl) {
           playerEl.addEventListener('mousemove', handleMouseMove)
         }
@@ -95,16 +95,18 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
 
         // xoay ngang
         const handleFullscreenChange = () => {
+          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+          
+          if (!isMobile) return
+
           if (player.isFullscreen()) {
             try {
               if (window.screen && window.screen.orientation && 'lock' in window.screen.orientation) {
                 const orientation = window.screen.orientation as ScreenOrientation & { lock: (type: string) => Promise<void> }
-                orientation.lock('landscape').catch((err: Error) => {
-                  console.warn('Trình duyệt không hỗ trợ tự động xoay ngang:', err.message)
-                })
+                orientation.lock('landscape').catch(() => {})
               }
             } catch (error) {
-              console.warn('Lỗi API xoay màn hình:', error)
+              console.warn('Không thể khóa màn hình ngang:', error)
             }
           } else {
             try {
@@ -113,7 +115,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
                 orientation.unlock()
               }
             } catch (error) {
-              console.warn('Lỗi API mở khóa xoay màn hình:', error)
+              console.warn('Không thể mở  khóa màn hình:', error)
             }
           }
         }
@@ -188,7 +190,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
           if (playerEl) {
             playerEl.removeEventListener('mousemove', handleMouseMove)
           }
-
         })
 
         if (onReady) onReady(player)
