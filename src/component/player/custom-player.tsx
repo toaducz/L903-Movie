@@ -48,8 +48,24 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
           } else if (e.key === 'ArrowLeft') {
             player.currentTime(player.currentTime()! - 10)
           }
+          // bắt sự kiện phím F để bật/tắt chế độ toàn màn hình
+          else if (e.key.toLowerCase() === 'f') {
+            if (!player.isFullscreen()) {
+              player.requestFullscreen()
+            } else {
+              player.exitFullscreen()
+            }
+          }
         }
         window.addEventListener('keydown', handleKeyDown)
+
+        const handleMouseMove = () => {
+          player.userActive(true)
+        }
+        const playerEl = player.el()
+        if (playerEl) {
+          playerEl.addEventListener('mousemove', handleMouseMove)
+        }
 
         let adRegions: Array<{ start: number; end: number }> = []
 
@@ -117,6 +133,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
 
         player.on('dispose', () => {
           window.removeEventListener('keydown', handleKeyDown)
+          // [THÊM]: Dọn dẹp sự kiện mousemove khi component unmount
+          if (playerEl) {
+            playerEl.removeEventListener('mousemove', handleMouseMove)
+          }
+          // [KẾT THÚC THÊM]
         })
 
         if (onReady) onReady(player)
