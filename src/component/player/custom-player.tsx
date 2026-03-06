@@ -76,6 +76,49 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
           playerEl.addEventListener('mousemove', handleMouseMove)
         }
 
+        // đúp 2 bên để tua 10s
+        // const handleDoubleClick = (e: MouseEvent) => {
+        //   if (!playerEl) return
+          
+        //   const playerWidth = playerEl.offsetWidth
+        //   const clickX = e.offsetX
+
+        //   if (clickX < playerWidth / 2) {
+        //     player.currentTime(player.currentTime()! - 10)
+        //   } else {
+        //     player.currentTime(player.currentTime()! + 10)
+        //   }
+        // }
+        // if (playerEl) {
+        //   playerEl.addEventListener('dblclick', handleDoubleClick)
+        // }
+
+        // xoay ngang
+        const handleFullscreenChange = () => {
+          if (player.isFullscreen()) {
+            try {
+              if (window.screen && window.screen.orientation && 'lock' in window.screen.orientation) {
+                const orientation = window.screen.orientation as ScreenOrientation & { lock: (type: string) => Promise<void> }
+                orientation.lock('landscape').catch((err: Error) => {
+                  console.warn('Trình duyệt không hỗ trợ tự động xoay ngang:', err.message)
+                })
+              }
+            } catch (error) {
+              console.warn('Lỗi API xoay màn hình:', error)
+            }
+          } else {
+            try {
+              if (window.screen && window.screen.orientation && 'unlock' in window.screen.orientation) {
+                const orientation = window.screen.orientation as ScreenOrientation & { unlock: () => void }
+                orientation.unlock()
+              }
+            } catch (error) {
+              console.warn('Lỗi API mở khóa xoay màn hình:', error)
+            }
+          }
+        }
+        player.on('fullscreenchange', handleFullscreenChange)
+
         let adRegions: Array<{ start: number; end: number }> = []
 
         const calculateAdRegions = () => {
@@ -142,11 +185,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
 
         player.on('dispose', () => {
           window.removeEventListener('keydown', handleKeyDown)
-          // [THÊM]: Dọn dẹp sự kiện mousemove khi component unmount
           if (playerEl) {
             playerEl.removeEventListener('mousemove', handleMouseMove)
           }
-          // [KẾT THÚC THÊM]
+
         })
 
         if (onReady) onReady(player)
