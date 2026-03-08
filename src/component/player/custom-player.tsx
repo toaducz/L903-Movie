@@ -18,6 +18,8 @@ const CustomPlayer: React.FC<CustomPlayerProps> = ({ src, poster }) => {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
   const [showControls, setShowControls] = useState(true)
+  const [playbackSpeed, setPlaybackSpeed] = useState(1)
+  const [showSpeedMenu, setShowSpeedMenu] = useState(false)
 
   // initialize HLS.js
   useEffect(() => {
@@ -99,6 +101,26 @@ const CustomPlayer: React.FC<CustomPlayerProps> = ({ src, poster }) => {
     setVolume(video.muted ? 0 : video.volume)
   }
 
+  const skipBackward = useCallback(() => {
+    const video = videoRef.current
+    if (!video) return
+    video.currentTime = Math.max(0, video.currentTime - 10)
+  }, [])
+
+  const skipForward = useCallback(() => {
+    const video = videoRef.current
+    if (!video) return
+    video.currentTime = Math.min(video.duration, video.currentTime + 10)
+  }, [])
+
+  const changeSpeed = useCallback((speed: number) => {
+    const video = videoRef.current
+    if (!video) return
+    video.playbackRate = speed
+    setPlaybackSpeed(speed)
+    setShowSpeedMenu(false)
+  }, [])
+
   // Toggle fullscreen
   const toggleFullscreen = useCallback(() => {
     const container = containerRef.current
@@ -155,6 +177,15 @@ const CustomPlayer: React.FC<CustomPlayerProps> = ({ src, poster }) => {
       clearTimeout(timeout)
     }
   }, [])
+
+  // Close speed menu on click outside
+  useEffect(() => {
+    const handleClickOutside = () => setShowSpeedMenu(false)
+    if (showSpeedMenu) {
+      document.addEventListener('click', handleClickOutside)
+    }
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [showSpeedMenu])
 
   // fromat time
   const formatTime = (seconds: number): string => {
@@ -213,6 +244,30 @@ const CustomPlayer: React.FC<CustomPlayerProps> = ({ src, poster }) => {
               )}
             </button>
 
+            {/* Skip Backward 10s */}
+            <button
+              onClick={skipBackward}
+              className='p-2 hover:bg-white/20 rounded-full transition-colors'
+              title='Rewind 10s'
+            >
+              <svg className='w-6 h-6' fill='currentColor' viewBox='0 0 24 24'>
+                <path d='M11.99 5V1l-5 5 5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6h-2c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z' />
+                <text x='8' y='15' fontSize='6' fontWeight='bold' fill='currentColor'>10</text>
+              </svg>
+            </button>
+
+            {/* Skip Forward 10s */}
+            <button
+              onClick={skipForward}
+              className='p-2 hover:bg-white/20 rounded-full transition-colors'
+              title='Forward 10s'
+            >
+              <svg className='w-6 h-6' fill='currentColor' viewBox='0 0 24 24'>
+                <path d='M12.01 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z' />
+                <text x='8' y='15' fontSize='6' fontWeight='bold' fill='currentColor'>10</text>
+              </svg>
+            </button>
+
             {/* Volume */}
             <div className='flex items-center space-x-2'>
               <button
@@ -243,6 +298,32 @@ const CustomPlayer: React.FC<CustomPlayerProps> = ({ src, poster }) => {
                 }}
               />
             </div>
+          </div>
+
+          {/* Playback Speed */}
+          <div className='relative'>
+            <button
+              onClick={(e) => { e.stopPropagation(); setShowSpeedMenu(prev => !prev) }}
+              className='px-2 py-1 text-sm hover:bg-white/20 rounded transition-colors font-medium min-w-[44px]'
+              title='Playback speed'
+            >
+              {playbackSpeed}x
+            </button>
+            {showSpeedMenu && (
+              <div className='absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-black/90 rounded shadow-lg overflow-hidden'>
+                {[0.5, 0.75, 1, 1.25, 1.5, 2].map(speed => (
+                  <button
+                    key={speed}
+                    onClick={() => changeSpeed(speed)}
+                    className={`block w-full px-4 py-1.5 text-sm text-left hover:bg-white/20 transition-colors ${
+                      playbackSpeed === speed ? 'text-blue-400 font-semibold' : 'text-white'
+                    }`}
+                  >
+                    {speed}x
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Fullscreen */}
