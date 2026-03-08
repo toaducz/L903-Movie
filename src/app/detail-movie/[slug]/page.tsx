@@ -206,17 +206,21 @@ export default function WatchPage() {
               </div>
 
               <div className='mt-6 bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 shadow-lg'>
-                <div className='flex items-center justify-center mb-2'>
-                  {/* <div className="bg-yellow-500 text-black font-bold rounded-full w-14 h-14 flex items-center justify-center text-xl shadow-lg">
-                    {movie.tmdb?.vote_average?.toFixed(1)}
-                  </div> */}
-                  {/* <div className="ml-4">
-                    <p className="text-sm text-gray-300">Đánh giá từ</p>
-                    <p className="text-sm font-semibold">{movie.tmdb?.vote_count} người</p>
-                  </div> */}
-                </div>
+                {movie.tmdb?.vote_average > 0 && (
+                  <div className='flex items-center gap-3 mb-4 p-3 bg-gray-700/50 rounded-lg'>
+                    <div className='bg-yellow-500 text-black font-bold rounded-full w-14 h-14 flex items-center justify-center text-xl shadow-lg shrink-0'>
+                      {movie.tmdb.vote_average.toFixed(1)}
+                    </div>
+                    <div>
+                      <p className='text-xs text-yellow-400 font-semibold uppercase tracking-wide'>TMDB</p>
+                      <p className='text-sm text-gray-300'>
+                        {movie.tmdb.vote_count.toLocaleString()} lượt đánh giá
+                      </p>
+                    </div>
+                  </div>
+                )}
 
-                <div className='grid grid-cols-2 gap-y-2 mt-4 text-sm text-gray-300'>
+                <div className='grid grid-cols-2 gap-y-2 text-sm text-gray-300'>
                   <div>
                     <span className='font-semibold text-gray-200'>Năm:</span> {movie.year}
                   </div>
