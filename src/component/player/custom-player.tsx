@@ -49,23 +49,23 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
         },
       }
 
-      // Load plugin chất lượng HLS (dynamic import để tránh lỗi SSR)
-      Promise.all([
-        import('videojs-contrib-quality-levels'),
-        import('videojs-hls-quality-selector'),
-      ]).then(([, { default: hlsQualitySelector }]) => {
+      const initPlayer = async () => {
+        // Đợi plugin load xong rồi mới tạo player
         const vjs = videojs as unknown as Record<string, unknown>
         if (!vjs.__hlsQualityRegistered) {
+          const [, { default: hlsQualitySelector }] = await Promise.all([
+            import('videojs-contrib-quality-levels'),
+            import('videojs-hls-quality-selector'),
+          ])
           hlsQualitySelector(videojs)
           vjs.__hlsQualityRegistered = true
         }
-      }).catch(() => {})
 
-      const player = (playerRef.current = videojs(videoElement, mergedOptions, () => {
-        // chọn chất lượng HLS (chỉ hoạt động nếu m3u8 là master playlist)
-        setTimeout(() => {
+        if (playerRef.current || !videoRef.current) return
+
+        const player = (playerRef.current = videojs(videoElement, mergedOptions, () => {
+          // chọn chất lượng HLS (chỉ hoạt động nếu m3u8 là master playlist)
           ;(player as unknown as Record<string, CallableFunction>).hlsQualitySelector?.({ displayCurrentQuality: true })
-        }, 0)
 
         // bắt bàn phím, có gì hay sẽ thêm sau
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -221,7 +221,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
         })
 
         if (onReady) onReady(player)
-      }))
+        }))
+      }
+
+      initPlayer()
     } else if (playerRef.current) {
       const player = playerRef.current
       if (options?.autoplay !== undefined) player.autoplay(options.autoplay)
