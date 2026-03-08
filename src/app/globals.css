@@ -31,3 +31,14 @@ input[type='number']::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
+@keyframes seek-hint {
+  0% { opacity: 0; transform: translateY(-50%) scale(0.8); }
+  20% { opacity: 1; transform: translateY(-50%) scale(1); }
+  80% { opacity: 1; transform: translateY(-50%) scale(1); }
+  100% { opacity: 0; transform: translateY(-50%) scale(0.8); }
+}
+
+.animate-seek-hint {
+  animation: seek-hint 0.7s ease forwards;
+}

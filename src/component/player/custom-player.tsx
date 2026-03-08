@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import videojs from 'video.js'
 import Player from 'video.js/dist/types/player'
 import 'video.js/dist/video-js.css'
@@ -37,6 +37,30 @@ interface VideoPlayerProps {
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, progressKey, onEnded, onProgress }) => {
   const videoRef = useRef<HTMLDivElement>(null)
   const playerRef = useRef<Player | null>(null)
+  const [seekHint, setSeekHint] = useState<{ side: 'left' | 'right'; key: number } | null>(null)
+  const lastTapRef = useRef<{ time: number; side: 'left' | 'right' } | null>(null)
+
+  const handleTap = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    const player = playerRef.current
+    if (!player) return
+
+    const touch = e.changedTouches[0]
+    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
+    const side = touch.clientX - rect.left < rect.width / 2 ? 'left' : 'right'
+    const now = Date.now()
+    const last = lastTapRef.current
+
+    if (last && now - last.time < 300 && last.side === side) {
+      // double-tap detected
+      lastTapRef.current = null
+      const delta = side === 'right' ? 10 : -10
+      player.currentTime(Math.max(0, (player.currentTime() ?? 0) + delta))
+      setSeekHint({ side, key: now })
+      setTimeout(() => setSeekHint(null), 700)
+    } else {
+      lastTapRef.current = { time: now, side }
+    }
+  }, [])
 
   useEffect(() => {
     if (!playerRef.current && videoRef.current) {
@@ -275,8 +299,21 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, prog
   }, [])
 
   return (
-    <div data-vjs-player className='absolute top-0 left-0 w-full h-full overflow-hidden'>
+    <div data-vjs-player className='absolute top-0 left-0 w-full h-full overflow-hidden' onTouchEnd={handleTap}>
       <div ref={videoRef} className='w-full h-full' />
+      {seekHint && (
+        <div
+          key={seekHint.key}
+          className={`pointer-events-none absolute top-1/2 -translate-y-1/2 flex flex-col items-center gap-1 text-white animate-seek-hint ${seekHint.side === 'left' ? 'left-6' : 'right-6'}`}
+        >
+          <div className='rounded-full bg-white/20 p-4 text-2xl'>
+            {seekHint.side === 'left' ? '«' : '»'}
+          </div>
+          <span className='text-sm font-semibold drop-shadow'>
+            {seekHint.side === 'right' ? '+10s' : '-10s'}
+          </span>
+        </div>
+      )}
       <style jsx global>{`
         .video-js {
           width: 100% !important;
