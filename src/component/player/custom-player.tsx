@@ -132,23 +132,33 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
           let currentTimeAcc = 0
           const newAdRegions: Array<{ start: number; end: number }> = []
 
-          const adRegex = /^(segment_.*|ads?_.*|promo_.*|\d{4,})\.ts$/i
+          // segment_\d+ = ad (tên có số thứ tự), content dùng tên random
+          const adRegex = /^(segment_\d+|ads?_.*|promo_.*)\.ts$/i
 
           media.segments.forEach(segment => {
             const url = segment.resolvedUri || segment.uri || ''
             const fileName = url.split('/').pop()?.split('?')[0] || ''
-            console.log('[segment]', fileName, adRegex.test(fileName) ? '← AD' : '')
 
             if (adRegex.test(fileName)) {
               newAdRegions.push({
                 start: currentTimeAcc,
-                end: currentTimeAcc + segment.duration + 1.5
+                end: currentTimeAcc + segment.duration
               })
             }
             currentTimeAcc += segment.duration
           })
 
-          adRegions = newAdRegions
+          // Merge các region liền nhau thành 1 để tránh seek nhiều lần
+          const merged: Array<{ start: number; end: number }> = []
+          for (const region of newAdRegions) {
+            const last = merged[merged.length - 1]
+            if (last && region.start <= last.end + 1) {
+              last.end = Math.max(last.end, region.end)
+            } else {
+              merged.push({ ...region })
+            }
+          }
+          adRegions = merged
         }
 
         player.on('loadedmetadata', calculateAdRegions)
