@@ -222,7 +222,7 @@ export default function Navbar() {
                     setShowSuggestions(false)
                   }}
                 >
-                  <img src={movie.thumb_url?.startsWith('http') ? movie.thumb_url : `https://phimimg.com/${movie.thumb_url?.replace(/^\/+/, '')}`} alt={movie.name} className='w-10 h-14 object-cover rounded flex-shrink-0' />
+                  <img src={`https://wsrv.nl/?url=${encodeURIComponent(movie.thumb_url?.startsWith('http') ? movie.thumb_url : `https://phimimg.com/${movie.thumb_url?.replace(/^\/+/, '')}`)}&w=80&h=112&fit=cover`} alt={movie.name} className='w-10 h-14 object-cover rounded flex-shrink-0' />
                   <div className='min-w-0'>
                     <p className='text-white text-sm font-medium truncate'>{movie.name}</p>
                     <p className='text-slate-400 text-xs truncate'>{movie.origin_name}</p>
@@ -292,7 +292,7 @@ export default function Navbar() {
                       setIsMenuOpen(false)
                     }}
                   >
-                    <img src={movie.thumb_url?.startsWith('http') ? movie.thumb_url : `https://phimimg.com/${movie.thumb_url?.replace(/^\/+/, '')}`} alt={movie.name} className='w-10 h-14 object-cover rounded flex-shrink-0' />
+                    <img src={`https://wsrv.nl/?url=${encodeURIComponent(movie.thumb_url?.startsWith('http') ? movie.thumb_url : `https://phimimg.com/${movie.thumb_url?.replace(/^\/+/, '')}`)}&w=80&h=112&fit=cover`} alt={movie.name} className='w-10 h-14 object-cover rounded flex-shrink-0' />
                     <div className='min-w-0'>
                       <p className='text-white text-sm font-medium truncate'>{movie.name}</p>
                       <p className='text-slate-400 text-xs truncate'>{movie.origin_name}</p>
