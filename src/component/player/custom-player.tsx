@@ -53,8 +53,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
         // bắt bàn phím, có gì hay sẽ thêm sau
         const handleKeyDown = (e: KeyboardEvent) => {
           if (e.key === 'ArrowRight') {
+            e.preventDefault()
             player.currentTime(player.currentTime()! + 10)
           } else if (e.key === 'ArrowLeft') {
+            e.preventDefault()
             player.currentTime(player.currentTime()! - 10)
           }
           // bắt sự kiện phím F để bật/tắt chế độ toàn màn hình
