@@ -30,11 +30,12 @@ interface VideoPlayerProps {
   options: VideoJsPlayerOptions
   onReady?: (player: Player) => void
   progressKey?: string
+  initialTime?: number
   onEnded?: () => void
   onProgress?: (time: number, duration: number) => void
 }
 
-export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, progressKey, onEnded, onProgress }) => {
+export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, progressKey, initialTime, onEnded, onProgress }) => {
   const videoRef = useRef<HTMLDivElement>(null)
   const playerRef = useRef<Player | null>(null)
   const currentSrcRef = useRef<string | undefined>(undefined)
@@ -250,15 +251,13 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, prog
           }
         })
 
-          // Restore vị trí xem (từ "Đang xem dở") và tự phát
-          if (progressKey) {
-            const saved = getWatchProgress(progressKey)
-            if (saved > 0) {
-              player.one('loadedmetadata', () => {
-                player.currentTime(saved)
-                player.play()?.catch(() => {})
-              })
-            }
+          // Restore vị trí xem — ưu tiên giá trị lớn hơn giữa URL (cross-device) và localStorage (same device)
+          const saved = Math.max(initialTime ?? 0, progressKey ? getWatchProgress(progressKey) : 0)
+          if (saved > 0) {
+            player.one('loadedmetadata', () => {
+              player.currentTime(saved)
+              player.play()?.catch(() => {})
+            })
           }
 
           // Lưu vị trí xem mỗi 5s
@@ -294,14 +293,12 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, prog
         currentSrcRef.current = newSrc
         progressKeyRef.current = progressKey
         player.src(options.sources)
-        if (progressKey) {
-          const saved = getWatchProgress(progressKey)
-          if (saved > 0) {
-            player.one('loadedmetadata', () => {
-              player.currentTime(saved)
-              player.play()?.catch(() => {})
-            })
-          }
+        const savedOnChange = Math.max(initialTime ?? 0, progressKey ? getWatchProgress(progressKey) : 0)
+        if (savedOnChange > 0) {
+          player.one('loadedmetadata', () => {
+            player.currentTime(savedOnChange)
+            player.play()?.catch(() => {})
+          })
         }
       }
     }

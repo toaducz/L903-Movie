@@ -45,7 +45,7 @@ export default function ContinueWatchingSection() {
         {items.map(item => (
           <Link
             key={item.slug}
-            href={`/detail-movie/${item.slug}?watch=1&ep=${encodeURIComponent(item.episodeName ?? '')}`}
+            href={`/detail-movie/${item.slug}?watch=1&ep=${encodeURIComponent(item.episodeName ?? '')}&t=${Math.floor(item.progress)}`}
             className='flex-shrink-0 w-36 sm:w-44 group'
           >
             <div className='relative rounded-lg overflow-hidden bg-gray-800'>

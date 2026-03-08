@@ -31,6 +31,7 @@ export default function WatchPage() {
 
   const isWatching = searchParams.get('watch') === '1'
   const epParam = searchParams.get('ep')
+  const tParam = Number(searchParams.get('t') ?? 0) || 0
   const isAvailable = data?.movie?.episode_current === 'Trailer'
 
   const goBack = () => {
@@ -356,6 +357,7 @@ export default function WatchPage() {
                 {!useBackupPlayer ? (
                   <VideoPlayer
                     progressKey={`${slug}_${episodeToPlay.name}`}
+                    initialTime={tParam}
                     onEnded={handleEpisodeEnded}
                     onProgress={user ? (time, duration) => {
                       fetch('/api/history', {
