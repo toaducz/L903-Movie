@@ -4,13 +4,39 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getWatchingInProgress, WatchingItem } from '@/utils/local-storage'
+import { useAuth } from '@/app/auth-provider'
+
+type DbItem = {
+  slug: string
+  name: string
+  image: string
+  episode_name?: string
+  progress: number
+  duration: number
+}
 
 export default function ContinueWatchingSection() {
+  const { user } = useAuth()
   const [items, setItems] = useState<WatchingItem[]>([])
 
   useEffect(() => {
-    setItems(getWatchingInProgress())
-  }, [])
+    if (user) {
+      fetch('/api/history')
+        .then(res => res.json())
+        .then(json => {
+          const dbItems: WatchingItem[] = (json.data ?? [])
+            .filter((d: DbItem) => d.episode_name && d.progress > 30 && d.duration > 0)
+            .map((d: DbItem) => {
+              const percent = Math.min(Math.round((d.progress / d.duration) * 100), 99)
+              return { ...d, episodeName: d.episode_name, percent }
+            })
+            .filter((d: WatchingItem) => d.percent < 95)
+          setItems(dbItems)
+        })
+    } else {
+      setItems(getWatchingInProgress())
+    }
+  }, [user])
 
   if (items.length === 0) return null
 
@@ -33,14 +59,9 @@ export default function ContinueWatchingSection() {
                 unoptimized
                 className='w-full h-52 sm:h-64 object-cover group-hover:opacity-75 transition-opacity duration-200'
               />
-              {/* Progress bar */}
               <div className='absolute bottom-0 left-0 right-0 h-1 bg-gray-600'>
-                <div
-                  className='h-full bg-red-500'
-                  style={{ width: `${item.percent}%` }}
-                />
+                <div className='h-full bg-red-500' style={{ width: `${item.percent}%` }} />
               </div>
-              {/* Play overlay */}
               <div className='absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200'>
                 <div className='bg-black/60 rounded-full p-2'>
                   <svg xmlns='http://www.w3.org/2000/svg' className='h-8 w-8 text-white' viewBox='0 0 20 20' fill='currentColor'>

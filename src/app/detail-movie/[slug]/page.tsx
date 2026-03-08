@@ -357,6 +357,20 @@ export default function WatchPage() {
                   <VideoPlayer
                     progressKey={`${slug}_${episodeToPlay.name}`}
                     onEnded={handleEpisodeEnded}
+                    onProgress={user ? (time, duration) => {
+                      fetch('/api/history', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          slug: movie.slug,
+                          name: movie.name,
+                          image: movie.poster_url,
+                          episode_name: episodeToPlay.name,
+                          progress: time,
+                          duration
+                        })
+                      })
+                    } : undefined}
                     options={{
                       autoplay: false,
                       controls: true,

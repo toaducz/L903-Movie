@@ -15,11 +15,11 @@ export async function POST(req: NextRequest) {
   const user_id = await getUserId(req)
   if (!user_id) return NextResponse.json({ error: 'Chưa đăng nhập' }, { status: 401 })
 
-  const { slug, name, image, episode_name } = await req.json()
+  const { slug, name, image, episode_name, progress, duration } = await req.json()
   if (!slug) return NextResponse.json({ error: 'Thiếu slug' }, { status: 400 })
 
   const { error } = await supabase.from('watch_history').upsert(
-    { user_id, slug, name, image, episode_name, updated_at: new Date().toISOString() },
+    { user_id, slug, name, image, episode_name, progress: progress ?? 0, duration: duration ?? 0, updated_at: new Date().toISOString() },
     { onConflict: 'user_id,slug' }
   )
 

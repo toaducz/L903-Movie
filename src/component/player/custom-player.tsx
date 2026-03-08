@@ -31,9 +31,10 @@ interface VideoPlayerProps {
   onReady?: (player: Player) => void
   progressKey?: string
   onEnded?: () => void
+  onProgress?: (time: number, duration: number) => void
 }
 
-export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, progressKey, onEnded }) => {
+export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, progressKey, onEnded, onProgress }) => {
   const videoRef = useRef<HTMLDivElement>(null)
   const playerRef = useRef<Player | null>(null)
 
@@ -212,7 +213,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, prog
             if (current - lastSaved >= 5) {
               saveWatchProgress(progressKey, current)
               const dur = player.duration() ?? 0
-              if (dur > 0) saveWatchDuration(progressKey, dur)
+              if (dur > 0) {
+                saveWatchDuration(progressKey, dur)
+                onProgress?.(current, dur)
+              }
               lastSaved = current
             }
           })
