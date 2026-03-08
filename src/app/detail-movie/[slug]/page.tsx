@@ -28,20 +28,10 @@ export default function WatchPage() {
   const epParam = searchParams.get('ep')
   const isAvailable = data?.movie?.episode_current === 'Trailer'
 
-  const setIsWatching = (value: boolean) => {
+  const goBack = () => {
     const params = new URLSearchParams(searchParams.toString())
-    if (value) {
-      params.set('watch', '1')
-    } else {
-      params.delete('watch')
-      params.delete('ep')
-    }
-    router.replace(`?${params.toString()}`)
-  }
-
-  const updateEpParam = (epName: string) => {
-    const params = new URLSearchParams(searchParams.toString())
-    params.set('ep', epName)
+    params.delete('watch')
+    params.delete('ep')
     router.replace(`?${params.toString()}`)
   }
 
@@ -90,7 +80,12 @@ export default function WatchPage() {
     setSelectedEpisode(ep)
     setUseBackup(backup)
     setIframeLoading(true)
-    if (epName) updateEpParam(epName)
+    if (epName) {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set('watch', '1')
+      params.set('ep', epName)
+      router.replace(`?${params.toString()}`)
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -132,7 +127,6 @@ export default function WatchPage() {
               <button
                 className='mt-6 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-blue-500/50 w-full flex justify-center items-center gap-2 cursor-pointer'
                 onClick={() => {
-                  setIsWatching(true)
                   const firstEp = data?.episodes?.[0]?.server_data?.[0]
                   if (firstEp) handleSelectEpisode(firstEp.link_embed, firstEp.link_m3u8, firstEp.name)
                   window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -261,7 +255,7 @@ export default function WatchPage() {
       <div className='max-w-6xl mx-auto px-4'>
         <button
           className='mb-6 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition duration-300 flex items-center gap-2 shadow-lg'
-          onClick={() => setIsWatching(false)}
+          onClick={() => goBack()}
         >
           <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
             <path
