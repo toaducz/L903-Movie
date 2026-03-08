@@ -30,9 +30,10 @@ interface VideoPlayerProps {
   options: VideoJsPlayerOptions
   onReady?: (player: Player) => void
   progressKey?: string
+  onEnded?: () => void
 }
 
-export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, progressKey }) => {
+export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, progressKey, onEnded }) => {
   const videoRef = useRef<HTMLDivElement>(null)
   const playerRef = useRef<Player | null>(null)
 
@@ -216,9 +217,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, prog
             }
           })
 
-          // Xóa khi xem xong
+          // Xóa khi xem xong + callback cho parent
           player.on('ended', () => {
             if (progressKey) clearWatchProgress(progressKey)
+            onEnded?.()
           })
 
         if (onReady) onReady(player)
