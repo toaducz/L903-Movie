@@ -37,6 +37,8 @@ interface VideoPlayerProps {
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, progressKey, onEnded, onProgress }) => {
   const videoRef = useRef<HTMLDivElement>(null)
   const playerRef = useRef<Player | null>(null)
+  const currentSrcRef = useRef<string | undefined>(undefined)
+  const progressKeyRef = useRef<string | undefined>(progressKey)
   const [seekHint, setSeekHint] = useState<{ side: 'left' | 'right'; key: number } | null>(null)
   const lastTapRef = useRef<{ time: number; side: 'left' | 'right' } | null>(null)
 
@@ -77,6 +79,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, prog
         },
       }
 
+      currentSrcRef.current = (options?.sources as Array<{ src: string }> | undefined)?.[0]?.src
+      progressKeyRef.current = progressKey
       const player = (playerRef.current = videojs(videoElement, mergedOptions, () => {
         // bắt bàn phím
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -246,12 +250,13 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, prog
           }
         })
 
-          // Restore vị trí xem
+          // Restore vị trí xem (từ "Đang xem dở") và tự phát
           if (progressKey) {
             const saved = getWatchProgress(progressKey)
             if (saved > 0) {
               player.one('loadedmetadata', () => {
                 player.currentTime(saved)
+                player.play()?.catch(() => {})
               })
             }
           }
@@ -284,7 +289,21 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, prog
       const player = playerRef.current
       if (options?.autoplay !== undefined) player.autoplay(options.autoplay)
       if (options?.poster) player.poster(options.poster)
-      if (options?.sources) player.src(options.sources)
+      const newSrc = (options?.sources as Array<{ src: string }> | undefined)?.[0]?.src
+      if (options?.sources && newSrc !== currentSrcRef.current) {
+        currentSrcRef.current = newSrc
+        progressKeyRef.current = progressKey
+        player.src(options.sources)
+        if (progressKey) {
+          const saved = getWatchProgress(progressKey)
+          if (saved > 0) {
+            player.one('loadedmetadata', () => {
+              player.currentTime(saved)
+              player.play()?.catch(() => {})
+            })
+          }
+        }
+      }
     }
   }, [options, onReady])
 
