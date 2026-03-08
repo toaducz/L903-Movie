@@ -119,6 +119,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
         player.on('fullscreenchange', handleFullscreenChange)
 
         let adRegions: Array<{ start: number; end: number }> = []
+        let mutedByAd = false
 
         const calculateAdRegions = () => {
           const tech = player.tech() as unknown as VHSTech
@@ -161,13 +162,17 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
             if (currentTime >= region.start && currentTime < region.end) {
               isAdPlaying = true
               player.currentTime(region.end + 1)
-              if (!player.muted()) player.muted(true)
+              if (!player.muted()) {
+                player.muted(true)
+                mutedByAd = true
+              }
               break
             }
           }
 
-          if (!isAdPlaying && player.muted()) {
+          if (!isAdPlaying && mutedByAd) {
             player.muted(false)
+            mutedByAd = false
           }
         })
 
