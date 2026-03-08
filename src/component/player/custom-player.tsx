@@ -137,6 +137,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
           media.segments.forEach(segment => {
             const url = segment.resolvedUri || segment.uri || ''
             const fileName = url.split('/').pop()?.split('?')[0] || ''
+            console.log('[segment]', fileName, adRegex.test(fileName) ? '← AD' : '')
 
             if (adRegex.test(fileName)) {
               newAdRegions.push({
