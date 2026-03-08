@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { getDetailMovie } from '@/api/kkphim/get-detail-movie'
 import EpisodeList from '@/component/episode-list'
@@ -16,19 +16,57 @@ import VideoPlayer from '@/component/player/custom-player'
 
 export default function WatchPage() {
   const { slug } = useParams()
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const { data, isLoading, isError } = useQuery(getDetailMovie({ slug: String(slug) }))
   const [selectedEpisode, setSelectedEpisode] = useState<string | null>(null)
   const [useBackup, setUseBackup] = useState<string | null>(null)
   const [useBackupPlayer, setUseBackupPlayer] = useState(false)
-  const [isWatching, setIsWatching] = useState(false)
   const [iframeLoading, setIframeLoading] = useState(true)
+
+  const isWatching = searchParams.get('watch') === '1'
+  const epParam = searchParams.get('ep')
   const isAvailable = data?.movie?.episode_current === 'Trailer'
+
+  const setIsWatching = (value: boolean) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (value) {
+      params.set('watch', '1')
+    } else {
+      params.delete('watch')
+      params.delete('ep')
+    }
+    router.replace(`?${params.toString()}`)
+  }
+
+  const updateEpParam = (epName: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('ep', epName)
+    router.replace(`?${params.toString()}`)
+  }
 
   // Đặt lại selectedEpisode khi slug thay đổi
   useEffect(() => {
     setSelectedEpisode(null)
-    setIsWatching(false) // Quay về giao diện thông tin khi đổi phim
   }, [slug])
+
+  // Khôi phục tập đang xem từ URL khi data đã tải
+  useEffect(() => {
+    if (!data) return
+    const allEps = data.episodes.flatMap(s => s.server_data)
+    if (isWatching && epParam) {
+      const ep = allEps.find(e => e.name === epParam)
+      if (ep) {
+        setSelectedEpisode(ep.link_embed)
+        setUseBackup(ep.link_m3u8)
+        return
+      }
+    }
+    if (isWatching && !selectedEpisode && allEps[0]) {
+      setSelectedEpisode(allEps[0].link_embed)
+      setUseBackup(allEps[0].link_m3u8)
+    }
+  }, [data, isWatching, epParam])
 
   // Tự động chọn tập 1 khi data được tải và đang ở chế độ xem phim
   useEffect(() => {
@@ -37,11 +75,7 @@ export default function WatchPage() {
       image: data?.movie?.poster_url ?? '',
       slug: data?.movie?.slug ?? ''
     })
-    if (isWatching && data?.episodes?.[0]?.server_data?.[0] && !selectedEpisode) {
-      setSelectedEpisode(data.episodes[0].server_data[0].link_embed)
-      setUseBackup(data.episodes[0].server_data[0].link_embed)
-    }
-  }, [data, selectedEpisode, isWatching])
+  }, [data])
 
   if (isLoading) return <Loading />
   if (isError || !data || data.status === false) return <Error message={data?.msg} />
@@ -52,10 +86,11 @@ export default function WatchPage() {
   const episodeToPlay = flatEpisodes[currentIndex]
   const movie = data.movie
 
-  const handleSelectEpisode = (ep: string, backup: string) => {
+  const handleSelectEpisode = (ep: string, backup: string, epName?: string) => {
     setSelectedEpisode(ep)
     setUseBackup(backup)
     setIframeLoading(true)
+    if (epName) updateEpParam(epName)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -99,7 +134,7 @@ export default function WatchPage() {
                 onClick={() => {
                   setIsWatching(true)
                   const firstEp = data?.episodes?.[0]?.server_data?.[0]
-                  if (firstEp) handleSelectEpisode(firstEp.link_embed, firstEp.link_m3u8)
+                  if (firstEp) handleSelectEpisode(firstEp.link_embed, firstEp.link_m3u8, firstEp.name)
                   window.scrollTo({ top: 0, behavior: 'smooth' })
                 }}
               >
@@ -336,7 +371,10 @@ export default function WatchPage() {
             <button
               className='px-5 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition duration-300 flex items-center gap-2 shadow-lg disabled:cursor-not-allowed cursor-pointer'
               disabled={currentIndex <= 0}
-              onClick={() => setSelectedEpisode(flatEpisodes[currentIndex - 1].link_embed)}
+              onClick={() => {
+                const ep = flatEpisodes[currentIndex - 1]
+                handleSelectEpisode(ep.link_embed, ep.link_m3u8, ep.name)
+              }}
             >
               <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
                 <path
@@ -350,7 +388,10 @@ export default function WatchPage() {
             <button
               className='px-5 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition duration-300 flex items-center gap-2 shadow-lg disabled:cursor-not-allowed cursor-pointer'
               disabled={currentIndex >= flatEpisodes.length - 1}
-              onClick={() => setSelectedEpisode(flatEpisodes[currentIndex + 1].link_embed)}
+              onClick={() => {
+                const ep = flatEpisodes[currentIndex + 1]
+                handleSelectEpisode(ep.link_embed, ep.link_m3u8, ep.name)
+              }}
             >
               Tập sau
               <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
@@ -420,7 +461,7 @@ export default function WatchPage() {
                 data?.episodes && (
                   <EpisodeList
                     episodes={data.episodes}
-                    onSelectEpisode={ep => handleSelectEpisode(ep.link_embed, ep.link_m3u8)}
+                    onSelectEpisode={ep => handleSelectEpisode(ep.link_embed, ep.link_m3u8, ep.name)}
                     selectedEpisode={selectedEpisode}
                   />
                 )
