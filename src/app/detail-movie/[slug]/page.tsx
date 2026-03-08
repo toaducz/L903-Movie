@@ -268,8 +268,20 @@ export default function WatchPage() {
               <div className='relative pt-[56.25%] rounded-xl overflow-hidden shadow-2xl bg-black'>
                 {!useBackupPlayer ? (
                   <VideoPlayer
-                    src={episodeToPlay.link_m3u8}
-                    poster={thumbnail.src}
+                    options={{
+                      autoplay: false,
+                      controls: true,
+                      responsive: false,
+                      fluid: false,
+                      poster: thumbnail.src,
+                      
+                      sources: [
+                        {
+                          src: episodeToPlay.link_m3u8,
+                          type: 'application/x-mpegURL'
+                        }
+                      ]
+                    }}
                   />
                 ) : (
                   <div className='absolute top-0 left-0 w-full h-full'>
