@@ -12,7 +12,7 @@ import Image from 'next/image'
 import thumbnail from '@/assets/gumaKe.png'
 import FavoriteButton from '@/component/favorite-button'
 import { saveViewHistory } from '@/utils/local-storage'
-// import CustomPlayer from '@/component/player/custom-player'
+import VideoPlayer from '@/component/player/custom-player'
 
 export default function WatchPage() {
   const { slug } = useParams()
@@ -254,51 +254,58 @@ export default function WatchPage() {
                 <button
                   onClick={() => setUseBackupPlayer(prev => !prev)}
                   className={`px-4 py-2 text-sm font-medium rounded transition cursor-pointer
-      ${useBackupPlayer ? 'bg-green-500 hover:bg-green-600 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+            ${
+              useBackupPlayer
+                ? 'bg-green-500 hover:bg-green-600 text-white'
+                : 'bg-blue-500 hover:bg-blue-600 text-white'
+            }`}
                 >
-                  {useBackupPlayer ? 'Nếu vẫn lỗi thì đỗi server (nếu có) nha' : 'Link dự phòng'}
+                  {useBackupPlayer ? 'Đang dùng dự phòng - Đổi về Server chính' : 'Link dự phòng (Có quảng cáo)'}
                 </button>
               </div>
-              <div className='relative pt-[56.25%] rounded-xl overflow-hidden shadow-2xl'>
-                {useBackupPlayer ? (
-                  <ReactPlayer
-                    url={useBackup ?? ''}
-                    controls
-                    width='100%'
-                    height='100%'
-                    config={{ file: { forceHLS: true } }}
-                    playing
-                    light={thumbnail?.src}
-                    className='absolute top-0 left-0'
+
+              {/* Wrapper giữ tỉ lệ 16:9 */}
+              <div className='relative pt-[56.25%] rounded-xl overflow-hidden shadow-2xl bg-black'>
+                {!useBackupPlayer ? (
+                  <VideoPlayer
+                    options={{
+                      autoplay: false,
+                      controls: true,
+                      responsive: false,
+                      fluid: false,
+                      poster: thumbnail.src,
+                      sources: [
+                        {
+                          src: episodeToPlay.link_m3u8,
+                          type: 'application/x-mpegURL'
+                        }
+                      ]
+                    }}
                   />
                 ) : (
                   <div className='absolute top-0 left-0 w-full h-full'>
                     {iframeLoading && (
                       <div className='absolute inset-0 flex items-center justify-center bg-black/80 z-10'>
-                        <span className='text-white text-xs italic opacity-70'>(Đang tải video...)</span>
+                        <span className='text-white text-xs italic opacity-70'>(Đang tải video dự phòng...)</span>
                       </div>
                     )}
                     <iframe
-                      src={selectedEpisode}
+                      src={episodeToPlay.link_embed || useBackup || ''}
                       title={episodeToPlay.name}
                       allowFullScreen
                       onLoad={() => setIframeLoading(false)}
-                      className='w-full h-full'
+                      className='w-full h-full border-none'
                     ></iframe>
                   </div>
                 )}
               </div>
             </div>
           ) : (
+            /* Loading state */
             <div className='flex items-center justify-center h-96 text-xl'>
               {!isAvailable ? (
                 <div className='flex items-center'>
-                  <svg
-                    className='animate-spin -ml-1 mr-3 h-8 w-8 text-blue-500'
-                    xmlns='http://www.w3.org/2000/svg'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                  >
+                  <svg className='animate-spin -ml-1 mr-3 h-8 w-8 text-blue-500' viewBox='0 0 24 24'>
                     <circle
                       className='opacity-25'
                       cx='12'
