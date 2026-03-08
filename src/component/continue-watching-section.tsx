@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getWatchingInProgress, WatchingItem } from '@/utils/local-storage'
-import { useAuth } from '@/app/auth-provider'
 
 type DbItem = {
   slug: string
@@ -16,7 +15,6 @@ type DbItem = {
 }
 
 export default function ContinueWatchingSection() {
-  const { user } = useAuth()
   const [items, setItems] = useState<WatchingItem[]>([])
 
   useEffect(() => {
