@@ -71,6 +71,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
             } else {
               player.pause()
             }
+          } else if (e.key.toLowerCase() === 'm') {
+            player.muted(!player.muted())
           } else if (e.key === 'ArrowUp') {
             e.preventDefault()
             player.volume(Math.min(1, (player.volume() ?? 1) + 0.1))
