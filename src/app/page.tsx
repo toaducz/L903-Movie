@@ -8,6 +8,7 @@ import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
 import { useRouter } from 'next/navigation'
 import { getListMovie } from '@/api/kkphim/get-list-movie'
+import ContinueWatchingSection from '@/component/continue-watching-section'
 
 export default function Home() {
   const router = useRouter()
@@ -37,7 +38,10 @@ export default function Home() {
 
   return (
     <main className='min-h-screen p-2 sm:py-2 sm:px-4 bg-gray-900 text-gray-900'>
-      <h1 className='text-2xl sm:text-4xl font-bold mb-8 text-center text-white pt-20 md:w-4/5'> Phim Mới Cập Nhật</h1>
+      <div className='pt-20'>
+        <ContinueWatchingSection />
+      </div>
+      <h1 className='text-2xl sm:text-4xl font-bold mb-8 text-center text-white pt-4 md:w-4/5'> Phim Mới Cập Nhật</h1>
       <div className='flex'>
         <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 md:w-4/5 '>
           {updateMovie?.items.map(movie => (

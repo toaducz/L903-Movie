@@ -85,6 +85,12 @@ export default function WatchPage() {
       params.set('watch', '1')
       params.set('ep', epName)
       router.replace(`?${params.toString()}`)
+      saveViewHistory({
+        name: data?.movie?.name ?? '',
+        image: data?.movie?.poster_url ?? '',
+        slug: data?.movie?.slug ?? '',
+        episodeName: epName
+      })
     }
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }

@@ -2,6 +2,13 @@ type Movie = {
   name: string
   image: string
   slug: string
+  episodeName?: string
+}
+
+export type WatchingItem = Movie & {
+  progress: number
+  duration: number
+  percent: number
 }
 
 const STORAGE_KEY = 'viewHistory'
@@ -68,7 +75,44 @@ export function clearWatchProgress(key: string) {
   if (typeof window === 'undefined') return
   try {
     localStorage.removeItem(`watchProgress_${key}`)
+    localStorage.removeItem(`watchDuration_${key}`)
   } catch {}
+}
+
+export function saveWatchDuration(key: string, duration: number) {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.setItem(`watchDuration_${key}`, String(duration))
+  } catch {}
+}
+
+export function getWatchDuration(key: string): number {
+  if (typeof window === 'undefined') return 0
+  try {
+    return Number(localStorage.getItem(`watchDuration_${key}`)) || 0
+  } catch {
+    return 0
+  }
+}
+
+export function getWatchingInProgress(): WatchingItem[] {
+  const history = getViewHistory()
+  const result: WatchingItem[] = []
+
+  for (const movie of history) {
+    if (!movie.episodeName) continue
+    const key = `${movie.slug}_${movie.episodeName}`
+    const progress = getWatchProgress(key)
+    const duration = getWatchDuration(key)
+    if (progress > 30 && duration > 0) {
+      const percent = Math.min(Math.round((progress / duration) * 100), 99)
+      if (percent < 95) {
+        result.push({ ...movie, progress, duration, percent })
+      }
+    }
+  }
+
+  return result
 }
 
 export function getViewHistory(): Movie[] {

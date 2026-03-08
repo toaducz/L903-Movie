@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from 'react'
 import videojs from 'video.js'
 import Player from 'video.js/dist/types/player'
 import 'video.js/dist/video-js.css'
-import { saveWatchProgress, getWatchProgress, clearWatchProgress } from '@/utils/local-storage'
+import { saveWatchProgress, getWatchProgress, clearWatchProgress, saveWatchDuration } from '@/utils/local-storage'
 
 interface HLSSegment {
   resolvedUri?: string
@@ -207,6 +207,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, prog
             const current = player.currentTime() ?? 0
             if (current - lastSaved >= 5) {
               saveWatchProgress(progressKey, current)
+              const dur = player.duration() ?? 0
+              if (dur > 0) saveWatchDuration(progressKey, dur)
               lastSaved = current
             }
           })
