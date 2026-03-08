@@ -268,6 +268,7 @@ export default function WatchPage() {
               <div className='relative pt-[56.25%] rounded-xl overflow-hidden shadow-2xl bg-black'>
                 {!useBackupPlayer ? (
                   <VideoPlayer
+                    progressKey={`${slug}_${episodeToPlay.name}`}
                     options={{
                       autoplay: false,
                       controls: true,

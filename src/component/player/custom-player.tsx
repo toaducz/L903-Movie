@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from 'react'
 import videojs from 'video.js'
 import Player from 'video.js/dist/types/player'
 import 'video.js/dist/video-js.css'
+import { saveWatchProgress, getWatchProgress, clearWatchProgress } from '@/utils/local-storage'
 
 interface HLSSegment {
   resolvedUri?: string
@@ -28,9 +29,10 @@ type VideoJsPlayerOptions = Parameters<typeof videojs>[1]
 interface VideoPlayerProps {
   options: VideoJsPlayerOptions
   onReady?: (player: Player) => void
+  progressKey?: string
 }
 
-export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) => {
+export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, progressKey }) => {
   const videoRef = useRef<HTMLDivElement>(null)
   const playerRef = useRef<Player | null>(null)
 
@@ -187,6 +189,32 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
             playerEl.removeEventListener('mousemove', handleMouseMove)
           }
         })
+
+          // Restore vị trí xem
+          if (progressKey) {
+            const saved = getWatchProgress(progressKey)
+            if (saved > 0) {
+              player.one('loadedmetadata', () => {
+                player.currentTime(saved)
+              })
+            }
+          }
+
+          // Lưu vị trí xem mỗi 5s
+          let lastSaved = 0
+          player.on('timeupdate', () => {
+            if (!progressKey) return
+            const current = player.currentTime() ?? 0
+            if (current - lastSaved >= 5) {
+              saveWatchProgress(progressKey, current)
+              lastSaved = current
+            }
+          })
+
+          // Xóa khi xem xong
+          player.on('ended', () => {
+            if (progressKey) clearWatchProgress(progressKey)
+          })
 
         if (onReady) onReady(player)
       }))

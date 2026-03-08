@@ -48,6 +48,29 @@ export function saveViewHistory(movie: Movie) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(history))
 }
 
+export function saveWatchProgress(key: string, time: number) {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.setItem(`watchProgress_${key}`, String(time))
+  } catch {}
+}
+
+export function getWatchProgress(key: string): number {
+  if (typeof window === 'undefined') return 0
+  try {
+    return Number(localStorage.getItem(`watchProgress_${key}`)) || 0
+  } catch {
+    return 0
+  }
+}
+
+export function clearWatchProgress(key: string) {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.removeItem(`watchProgress_${key}`)
+  } catch {}
+}
+
 export function getViewHistory(): Movie[] {
   if (typeof window === 'undefined') return []
 
