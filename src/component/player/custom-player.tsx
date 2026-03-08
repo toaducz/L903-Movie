@@ -175,8 +175,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
               player.muted(true)
               mutedByAd = true
             }
-            // Xóa region đã skip để không check lại
-            adRegions = adRegions.filter(r => r !== region)
           } else if (mutedByAd) {
             player.muted(false)
             mutedByAd = false
