@@ -17,9 +17,7 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-player": "^2.16.0",
-    "video.js": "^8.23.7",
-    "videojs-contrib-quality-levels": "^4.1.0",
-    "videojs-hls-quality-selector": "^2.0.0"
+    "video.js": "^8.23.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
