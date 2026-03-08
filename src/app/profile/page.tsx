@@ -10,6 +10,7 @@ type FavoriteMovie = {
   name: string
   image: string
   slug: string
+  episode_name?: string
 }
 
 export default function ProfilePage() {
@@ -19,8 +20,14 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    setHistory(getViewHistory().slice(0, 5))
-  }, [])
+    if (user) {
+      fetch('/api/history')
+        .then(res => res.json())
+        .then(json => setHistory((json.data ?? []).slice(0, 5)))
+    } else {
+      setHistory(getViewHistory().slice(0, 5))
+    }
+  }, [user])
 
   useEffect(() => {
     setLoading(true)
@@ -55,7 +62,7 @@ export default function ProfilePage() {
         {history.length > 0 ? (
           <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4'>
             {history.map(movie => (
-              <HistoryItem key={movie.slug} slug={movie.slug} name={movie.name} image={movie.image} />
+              <HistoryItem key={movie.slug} slug={movie.slug} name={movie.name} image={movie.image} episodeName={movie.episode_name} />
             ))}
           </div>
         ) : (

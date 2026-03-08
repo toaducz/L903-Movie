@@ -69,7 +69,7 @@ export default function HistoryPage() {
       {visibleMovies.length > 0 ? (
         <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 min-h-screen'>
           {visibleMovies.map(movie => (
-            <HistoryItem key={movie.slug} slug={movie.slug} name={movie.name} image={movie.image} />
+            <HistoryItem key={movie.slug} slug={movie.slug} name={movie.name} image={movie.image} episodeName={movie.episode_name} />
           ))}
         </div>
       ) : (
