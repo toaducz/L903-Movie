@@ -170,11 +170,16 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, prog
           if (adRegions.length === 0) return
           const currentTime = player.currentTime()!
 
-          const region = adRegions.find(r => currentTime >= r.start && currentTime < r.end)
-          if (region) {
-            player.muted(true)
-            mutedByAd = true
-            player.currentTime(region.end + 1)
+          const PRE_MUTE = 0.5
+          const upcoming = adRegions.find(r => currentTime >= r.start - PRE_MUTE && currentTime < r.end)
+          if (upcoming) {
+            if (!mutedByAd) {
+              player.muted(true)
+              mutedByAd = true
+            }
+            if (currentTime >= upcoming.start) {
+              player.currentTime(upcoming.end + 1)
+            }
           } else if (mutedByAd) {
             player.muted(false)
             mutedByAd = false
