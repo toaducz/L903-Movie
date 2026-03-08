@@ -4,15 +4,6 @@ import React, { useEffect, useRef } from 'react'
 import videojs from 'video.js'
 import Player from 'video.js/dist/types/player'
 import 'video.js/dist/video-js.css'
-import 'videojs-contrib-quality-levels'
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const hlsQualitySelector = require('videojs-hls-quality-selector')
-
-// Đăng ký plugin một lần
-if (typeof window !== 'undefined' && !(videojs as unknown as Record<string, unknown>).__hlsQualityRegistered) {
-  hlsQualitySelector(videojs)
-  ;(videojs as unknown as Record<string, unknown>).__hlsQualityRegistered = true
-}
 
 interface HLSSegment {
   resolvedUri?: string
@@ -58,9 +49,23 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
         },
       }
 
+      // Load plugin chất lượng HLS (dynamic import để tránh lỗi SSR)
+      Promise.all([
+        import('videojs-contrib-quality-levels'),
+        import('videojs-hls-quality-selector'),
+      ]).then(([, { default: hlsQualitySelector }]) => {
+        const vjs = videojs as unknown as Record<string, unknown>
+        if (!vjs.__hlsQualityRegistered) {
+          hlsQualitySelector(videojs)
+          vjs.__hlsQualityRegistered = true
+        }
+      }).catch(() => {})
+
       const player = (playerRef.current = videojs(videoElement, mergedOptions, () => {
         // chọn chất lượng HLS (chỉ hoạt động nếu m3u8 là master playlist)
-        ;(player as unknown as Record<string, CallableFunction>).hlsQualitySelector?.({ displayCurrentQuality: true })
+        setTimeout(() => {
+          ;(player as unknown as Record<string, CallableFunction>).hlsQualitySelector?.({ displayCurrentQuality: true })
+        }, 0)
 
         // bắt bàn phím, có gì hay sẽ thêm sau
         const handleKeyDown = (e: KeyboardEvent) => {
