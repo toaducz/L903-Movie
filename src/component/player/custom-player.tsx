@@ -40,7 +40,16 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
       videoElement.classList.add('vjs-big-play-centered')
       videoRef.current.appendChild(videoElement)
 
-      const player = (playerRef.current = videojs(videoElement, options, () => {
+      const mergedOptions = {
+        ...options,
+        playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2],
+        controlBar: {
+          skipButtons: { backward: 10, forward: 10 },
+          ...((options as Record<string, unknown>)?.controlBar as object ?? {}),
+        },
+      }
+
+      const player = (playerRef.current = videojs(videoElement, mergedOptions, () => {
         // bắt bàn phím, có gì hay sẽ thêm sau
         const handleKeyDown = (e: KeyboardEvent) => {
           if (e.key === 'ArrowRight') {
