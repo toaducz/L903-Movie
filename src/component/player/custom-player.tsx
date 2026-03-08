@@ -167,21 +167,17 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
         player.on('timeupdate', () => {
           if (adRegions.length === 0) return
           const currentTime = player.currentTime()!
-          let isAdPlaying = false
 
-          for (const region of adRegions) {
-            if (currentTime >= region.start && currentTime < region.end) {
-              isAdPlaying = true
-              player.currentTime(region.end + 1)
-              if (!player.muted()) {
-                player.muted(true)
-                mutedByAd = true
-              }
-              break
+          const region = adRegions.find(r => currentTime >= r.start && currentTime < r.end)
+          if (region) {
+            player.currentTime(region.end + 1)
+            if (!player.muted()) {
+              player.muted(true)
+              mutedByAd = true
             }
-          }
-
-          if (!isAdPlaying && mutedByAd) {
+            // Xóa region đã skip để không check lại
+            adRegions = adRegions.filter(r => r !== region)
+          } else if (mutedByAd) {
             player.muted(false)
             mutedByAd = false
           }
