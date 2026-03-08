@@ -29,12 +29,12 @@ export default function Navbar() {
   const { data: countryData, isLoading: countryLoading } = useQuery(getCountrySlug())
 
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(search.trim()), 400)
+    const timer = setTimeout(() => setDebouncedSearch(search.trim()), 250)
     return () => clearTimeout(timer)
   }, [search])
 
   const { data: suggestionData } = useQuery({
-    ...getSearchByName({ keyword: debouncedSearch, page: 1 }),
+    ...getSearchByName({ keyword: debouncedSearch, page: 1, limit: 6 }),
     enabled: debouncedSearch.length >= 2,
   })
   const suggestions = suggestionData?.data?.items?.slice(0, 6) ?? []

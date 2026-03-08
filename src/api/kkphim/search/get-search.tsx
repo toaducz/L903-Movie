@@ -54,14 +54,15 @@ type SearchResponse = {
   status: string
 }
 
-export const getSearchByName = ({ keyword, page = 1 }: SearchByNameRequest) => {
+export const getSearchByName = ({ keyword, page = 1, limit = 12 }: SearchByNameRequest & { limit?: number }) => {
   return queryOptions({
-    queryKey: ['get-search-by-name', keyword, page],
+    queryKey: ['get-search-by-name', keyword, page, limit],
     queryFn: () =>
       request<SearchResponse>(kkphim, `v1/api/tim-kiem`, 'GET', {
         keyword: keyword,
         page: page,
-        limit: 12
-      })
+        limit,
+      }),
+    staleTime: 1000 * 60 * 5,
   })
 }
