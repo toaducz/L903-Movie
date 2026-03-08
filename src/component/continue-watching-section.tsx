@@ -20,23 +20,23 @@ export default function ContinueWatchingSection() {
   const [items, setItems] = useState<WatchingItem[]>([])
 
   useEffect(() => {
-    if (user) {
-      fetch('/api/history')
-        .then(res => res.json())
-        .then(json => {
-          const dbItems: WatchingItem[] = (json.data ?? [])
-            .filter((d: DbItem) => d.episode_name && d.progress > 30 && d.duration > 0)
-            .map((d: DbItem) => {
-              const percent = Math.min(Math.round((d.progress / d.duration) * 100), 99)
-              return { ...d, episodeName: d.episode_name, percent }
-            })
-            .filter((d: WatchingItem) => d.percent < 95)
-          setItems(dbItems)
-        })
-    } else {
-      setItems(getWatchingInProgress())
-    }
-  }, [user])
+    fetch('/api/history')
+      .then(res => res.status === 401 ? null : res.json())
+      .then(json => {
+        if (!json) {
+          setItems(getWatchingInProgress())
+          return
+        }
+        const dbItems: WatchingItem[] = (json.data ?? [])
+          .filter((d: DbItem) => d.episode_name && d.progress > 30 && d.duration > 0)
+          .map((d: DbItem) => {
+            const percent = Math.min(Math.round((d.progress / d.duration) * 100), 99)
+            return { ...d, episodeName: d.episode_name, percent }
+          })
+          .filter((d: WatchingItem) => d.percent < 95)
+        setItems(dbItems.length > 0 ? dbItems : getWatchingInProgress())
+      })
+  }, [])
 
   if (items.length === 0) return null
 

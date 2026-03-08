@@ -15,25 +15,18 @@ export default function HistoryPage() {
   const PAGE_SIZE = 10
 
   useEffect(() => {
-    if (user) {
-      fetch('/api/history')
-        .then(res => res.json())
-        .then(json => {
-          const items: HistoryMovie[] = (json.data ?? []).map((d: { name: string; slug: string; image: string; episode_name?: string }) => ({
-            name: d.name,
-            slug: d.slug,
-            image: d.image,
-            episode_name: d.episode_name
-          }))
-          setAllMovies(items)
-          setVisibleMovies(items.slice(0, PAGE_SIZE))
-        })
-    } else {
-      const history = getViewHistory()
-      setAllMovies(history)
-      setVisibleMovies(history.slice(0, PAGE_SIZE))
-    }
-  }, [user])
+    fetch('/api/history')
+      .then(res => res.status === 401 ? null : res.json())
+      .then(json => {
+        const items = json
+          ? (json.data ?? []).map((d: { name: string; slug: string; image: string; episode_name?: string }) => ({
+              name: d.name, slug: d.slug, image: d.image, episode_name: d.episode_name
+            }))
+          : getViewHistory()
+        setAllMovies(items)
+        setVisibleMovies(items.slice(0, PAGE_SIZE))
+      })
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
