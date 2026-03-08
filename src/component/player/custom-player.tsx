@@ -71,6 +71,12 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
             } else {
               player.pause()
             }
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault()
+            player.volume(Math.min(1, (player.volume() ?? 1) + 0.1))
+          } else if (e.key === 'ArrowDown') {
+            e.preventDefault()
+            player.volume(Math.max(0, (player.volume() ?? 0) - 0.1))
           }
         }
         window.addEventListener('keydown', handleKeyDown)
