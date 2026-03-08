@@ -13,11 +13,13 @@ import thumbnail from '@/assets/gumaKe.png'
 import FavoriteButton from '@/component/favorite-button'
 import { saveViewHistory } from '@/utils/local-storage'
 import VideoPlayer from '@/component/player/custom-player'
+import { useAuth } from '@/app/auth-provider'
 
 export default function WatchPage() {
   const { slug } = useParams()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { user } = useAuth()
   const { data, isLoading, isError } = useQuery(getDetailMovie({ slug: String(slug) }))
   const [selectedEpisode, setSelectedEpisode] = useState<string | null>(null)
   const [useBackup, setUseBackup] = useState<string | null>(null)
@@ -85,12 +87,20 @@ export default function WatchPage() {
       params.set('watch', '1')
       params.set('ep', epName)
       router.replace(`?${params.toString()}`)
-      saveViewHistory({
+      const historyPayload = {
         name: data?.movie?.name ?? '',
         image: data?.movie?.poster_url ?? '',
         slug: data?.movie?.slug ?? '',
         episodeName: epName
-      })
+      }
+      saveViewHistory(historyPayload)
+      if (user) {
+        fetch('/api/history', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug: historyPayload.slug, name: historyPayload.name, image: historyPayload.image, episode_name: epName })
+        })
+      }
     }
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
