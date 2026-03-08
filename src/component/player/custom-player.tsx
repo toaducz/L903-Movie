@@ -77,6 +77,33 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, prog
             }
           } else if (e.key.toLowerCase() === 'm') {
             player.muted(!player.muted())
+          } else if (e.key.toLowerCase() === 't') {
+            const doc = document as Document & {
+              pictureInPictureElement?: Element
+              exitPictureInPicture?: () => Promise<void>
+            }
+            const videoEl = player.el()?.querySelector('video') as HTMLVideoElement & {
+              requestPictureInPicture?: () => Promise<void>
+            } | null
+            if (doc.pictureInPictureElement) {
+              doc.exitPictureInPicture?.()
+            } else if (videoEl?.requestPictureInPicture) {
+              videoEl.requestPictureInPicture().catch(() => {})
+            }
+          } else if (e.key === '[') {
+            const rates = [0.5, 0.75, 1, 1.25, 1.5, 2]
+            const current = player.playbackRate() ?? 1
+            const idx = rates.indexOf(current)
+            if (idx > 0) player.playbackRate(rates[idx - 1])
+          } else if (e.key === ']') {
+            const rates = [0.5, 0.75, 1, 1.25, 1.5, 2]
+            const current = player.playbackRate() ?? 1
+            const idx = rates.indexOf(current)
+            if (idx < rates.length - 1) player.playbackRate(rates[idx + 1])
+          } else if (e.key >= '0' && e.key <= '9') {
+            const percent = parseInt(e.key) / 10
+            const duration = player.duration()
+            if (duration) player.currentTime(duration * percent)
           } else if (e.key === 'ArrowUp') {
             e.preventDefault()
             player.volume(Math.min(1, (player.volume() ?? 1) + 0.1))
