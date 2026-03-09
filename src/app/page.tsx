@@ -9,6 +9,7 @@ import Error from '@/component/status/error'
 import { useRouter } from 'next/navigation'
 import { getListMovie } from '@/api/kkphim/get-list-movie'
 import ContinueWatchingSection from '@/component/continue-watching-section'
+import RecommendationsSection from '@/component/recommendations-section'
 
 export default function Home() {
   const router = useRouter()
@@ -40,6 +41,7 @@ export default function Home() {
     <main className='min-h-screen p-2 sm:py-2 sm:px-4 bg-gray-900 text-gray-900'>
       <div className='pt-20'>
         <ContinueWatchingSection />
+        <RecommendationsSection />
       </div>
       <h1 className='text-2xl sm:text-4xl font-bold mb-8 text-center text-white pt-4 md:w-4/5'> Phim Mới Cập Nhật</h1>
       <div className='flex'>
