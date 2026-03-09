@@ -4,9 +4,7 @@ const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
 async function searchKKPhim(name: string) {
   // thử tìm full tên trước
-  const res = await fetch(
-    `https://phimapi.com/v1/api/tim-kiem?keyword=${encodeURIComponent(name)}&page=1&limit=1`
-  )
+  const res = await fetch(`https://phimapi.com/v1/api/tim-kiem?keyword=${encodeURIComponent(name)}&page=1&limit=1`)
   const data = await res.json()
   if (data?.data?.items?.[0]) return data.data.items[0]
 
@@ -41,12 +39,12 @@ export async function POST(req: NextRequest) {
       messages: [
         {
           role: 'user',
-          content: `Người dùng đã xem: ${movieList}\n\nHãy gợi ý ĐÚNG 5 bộ phim nổi tiếng khác phù hợp, đa dạng thể loại, không chỉ anime. Mỗi gợi ý phải dựa trên một phim khác nhau trong danh sách trên. Trả lời theo định dạng:\nTên phim 1\nTên phim 2\nTên phim 3\nTên phim 4\nTên phim 5\n\nChỉ trả về 5 dòng tên phim bằng tiếng Việt, không có gì khác.`,
-        },
+          content: `Người dùng đã xem: ${movieList}\n\nHãy gợi ý ĐÚNG 5 bộ phim nổi tiếng khác phù hợp, đa dạng thể loại, không chỉ anime. Mỗi gợi ý phải dựa trên một phim khác nhau trong danh sách trên. Trả lời theo định dạng:\nTên phim 1\nTên phim 2\nTên phim 3\nTên phim 4\nTên phim 5\n\nChỉ trả về 5 dòng tên phim bằng tiếng Việt, không có gì khác.`
+        }
       ],
-      temperature: 0.7,
-      max_tokens: 200,
-    }),
+      temperature: 0.7
+      // max_tokens: 200,
+    })
   })
 
   if (!groqRes.ok) {
@@ -57,7 +55,7 @@ export async function POST(req: NextRequest) {
 
   const groqData = await groqRes.json()
   const text: string = groqData?.choices?.[0]?.message?.content ?? ''
-  console.log('[recommendations] Groq suggestions:', text)
+  console.log('[recommendations] Groq suggestions:', text) // in này ra chi vậy :D?
 
   const suggestions = text
     .split('\n')

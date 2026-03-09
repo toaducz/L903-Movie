@@ -35,7 +35,14 @@ interface VideoPlayerProps {
   onProgress?: (time: number, duration: number) => void
 }
 
-export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, progressKey, initialTime, onEnded, onProgress }) => {
+export const VideoPlayer: React.FC<VideoPlayerProps> = ({
+  options,
+  onReady,
+  progressKey,
+  initialTime,
+  onEnded,
+  onProgress
+}) => {
   const videoRef = useRef<HTMLDivElement>(null)
   const playerRef = useRef<Player | null>(null)
   const currentSrcRef = useRef<string | undefined>(undefined)
@@ -76,8 +83,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, prog
         playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2],
         controlBar: {
           skipButtons: { backward: 10, forward: 10 },
-          ...((options as Record<string, unknown>)?.controlBar as object ?? {}),
-        },
+          ...(((options as Record<string, unknown>)?.controlBar as object) ?? {})
+        }
       }
 
       currentSrcRef.current = (options?.sources as Array<{ src: string }> | undefined)?.[0]?.src
@@ -111,9 +118,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, prog
               pictureInPictureElement?: Element
               exitPictureInPicture?: () => Promise<void>
             }
-            const videoEl = player.el()?.querySelector('video') as HTMLVideoElement & {
-              requestPictureInPicture?: () => Promise<void>
-            } | null
+            const videoEl = player.el()?.querySelector('video') as
+              | (HTMLVideoElement & {
+                  requestPictureInPicture?: () => Promise<void>
+                })
+              | null
             if (doc.pictureInPictureElement) {
               doc.exitPictureInPicture?.()
             } else if (videoEl?.requestPictureInPicture) {
@@ -159,7 +168,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, prog
           if (player.isFullscreen()) {
             try {
               if (window.screen && window.screen.orientation && 'lock' in window.screen.orientation) {
-                const orientation = window.screen.orientation as ScreenOrientation & { lock: (type: string) => Promise<void> }
+                const orientation = window.screen.orientation as ScreenOrientation & {
+                  lock: (type: string) => Promise<void>
+                }
                 orientation.lock('landscape').catch(() => {})
               }
             } catch (error) {
@@ -251,36 +262,36 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, prog
           }
         })
 
-          // Restore vị trí xem — ưu tiên giá trị lớn hơn giữa URL (cross-device) và localStorage (same device)
-          const saved = Math.max(initialTime ?? 0, progressKey ? getWatchProgress(progressKey) : 0)
-          if (saved > 0) {
-            player.one('loadedmetadata', () => {
-              player.currentTime(saved)
-              player.play()?.catch(() => {})
-            })
-          }
+        // Restore vị trí xem — ưu tiên giá trị lớn hơn giữa URL (cross-device) và localStorage (same device)
+        const saved = Math.max(initialTime ?? 0, progressKey ? getWatchProgress(progressKey) : 0)
+        if (saved > 0) {
+          player.one('loadedmetadata', () => {
+            player.currentTime(saved)
+            player.play()?.catch(() => {})
+          })
+        }
 
-          // Lưu vị trí xem mỗi 5s
-          let lastSaved = 0
-          player.on('timeupdate', () => {
-            if (!progressKey) return
-            const current = player.currentTime() ?? 0
-            if (current - lastSaved >= 5) {
-              saveWatchProgress(progressKey, current)
-              const dur = player.duration() ?? 0
-              if (dur > 0) {
-                saveWatchDuration(progressKey, dur)
-                onProgress?.(current, dur)
-              }
-              lastSaved = current
+        // Lưu vị trí xem mỗi 5s
+        let lastSaved = 0
+        player.on('timeupdate', () => {
+          if (!progressKey) return
+          const current = player.currentTime() ?? 0
+          if (current - lastSaved >= 5) {
+            saveWatchProgress(progressKey, current)
+            const dur = player.duration() ?? 0
+            if (dur > 0) {
+              saveWatchDuration(progressKey, dur)
+              onProgress?.(current, dur)
             }
-          })
+            lastSaved = current
+          }
+        })
 
-          // Xóa khi xem xong + callback cho parent
-          player.on('ended', () => {
-            if (progressKey) clearWatchProgress(progressKey)
-            onEnded?.()
-          })
+        // Xóa khi xem xong + callback cho parent
+        player.on('ended', () => {
+          if (progressKey) clearWatchProgress(progressKey)
+          onEnded?.()
+        })
 
         if (onReady) onReady(player)
       }))
@@ -320,14 +331,12 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady, prog
       {seekHint && (
         <div
           key={seekHint.key}
-          className={`pointer-events-none absolute top-1/2 -translate-y-1/2 flex flex-col items-center gap-1 text-white animate-seek-hint ${seekHint.side === 'left' ? 'left-6' : 'right-6'}`}
+          className={`pointer-events-none absolute top-1/2 -translate-y-1/2 flex flex-col items-center gap-1 text-white animate-seek-hint ${
+            seekHint.side === 'left' ? 'left-6' : 'right-6'
+          }`}
         >
-          <div className='rounded-full bg-white/20 p-4 text-2xl'>
-            {seekHint.side === 'left' ? '«' : '»'}
-          </div>
-          <span className='text-sm font-semibold drop-shadow'>
-            {seekHint.side === 'right' ? '+10s' : '-10s'}
-          </span>
+          <div className='rounded-full bg-white/20 p-4 text-2xl'>{seekHint.side === 'left' ? '«' : '»'}</div>
+          <span className='text-sm font-semibold drop-shadow'>{seekHint.side === 'right' ? '+10s' : '-10s'}</span>
         </div>
       )}
       <style jsx global>{`
