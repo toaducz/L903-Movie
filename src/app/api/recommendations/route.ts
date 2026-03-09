@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const GEMINI_API_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.GEMINI_API_KEY
+  const apiKey = process.env.GROQ_API_KEY
   if (!apiKey) {
-    return NextResponse.json({ error: 'Missing Gemini API key' }, { status: 500 })
+    return NextResponse.json({ error: 'Missing Groq API key' }, { status: 500 })
   }
 
   const { history } = await req.json()
@@ -16,29 +15,31 @@ export async function POST(req: NextRequest) {
 
   const movieList = (history as string[]).slice(0, 15).join('\n')
 
-  const geminiRes = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+  const groqRes = await fetch(GROQ_API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify({
-      contents: [
+      model: 'llama-3.1-8b-instant',
+      messages: [
         {
-          parts: [
-            {
-              text: `Người dùng đã xem các phim sau:\n${movieList}\n\nGợi ý đúng 3 phim khác mà người dùng có thể thích (không trùng với danh sách trên). Chỉ trả về đúng 3 tên phim, mỗi tên trên một dòng riêng, không đánh số, không giải thích, không có ký tự đặc biệt.`,
-            },
-          ],
+          role: 'user',
+          content: `Người dùng đã xem: ${movieList}\n\nHãy gợi ý ĐÚNG 3 bộ phim/anime nổi tiếng khác phù hợp với sở thích trên. Trả lời theo định dạng:\nTên phim 1\nTên phim 2\nTên phim 3\n\nChỉ trả về 3 dòng tên phim bằng tiếng Việt, không có gì khác.`,
         },
       ],
-      generationConfig: { temperature: 0.7, maxOutputTokens: 100 },
+      temperature: 0.7,
+      max_tokens: 150,
     }),
   })
 
-  if (!geminiRes.ok) {
+  if (!groqRes.ok) {
+    const errText = await groqRes.text()
+    console.error('[recommendations] Groq error:', groqRes.status, errText)
     return NextResponse.json({ movies: [] })
   }
 
-  const geminiData = await geminiRes.json()
-  const text: string = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+  const groqData = await groqRes.json()
+  const text: string = groqData?.choices?.[0]?.message?.content ?? ''
+  console.log('[recommendations] Groq suggestions:', text)
   const suggestions = text
     .split('\n')
     .map((s: string) => s.trim())
