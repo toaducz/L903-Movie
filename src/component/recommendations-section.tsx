@@ -10,19 +10,29 @@ export default function RecommendationsSection() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    const history = getViewHistory()
-    if (history.length === 0) return
+    fetch('/api/history')
+      .then(res => res.status === 401 ? null : res.json())
+      .then(async json => {
+        let names: string[] = []
+        if (json?.data?.length > 0) {
+          names = json.data.slice(0, 15).map((d: { name: string }) => d.name)
+        } else {
+          const local = getViewHistory()
+          names = local.slice(0, 15).map(h => h.name)
+        }
+        if (names.length === 0) return
 
-    setLoading(true)
-    fetch('/api/recommendations', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ history: history.map(h => h.name) }),
-    })
-      .then(res => res.json())
-      .then(data => setMovies(data.movies ?? []))
-      .catch(() => {})
-      .finally(() => setLoading(false))
+        setLoading(true)
+        const res = await fetch('/api/recommendations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ history: names }),
+        })
+        const data = await res.json()
+        setMovies(data.movies ?? [])
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
   }, [])
 
   if (!loading && movies.length === 0) return null
