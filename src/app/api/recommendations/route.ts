@@ -2,6 +2,24 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
+async function searchKKPhim(name: string) {
+  // thử tìm full tên trước
+  const res = await fetch(
+    `https://phimapi.com/v1/api/tim-kiem?keyword=${encodeURIComponent(name)}&page=1&limit=1`
+  )
+  const data = await res.json()
+  if (data?.data?.items?.[0]) return data.data.items[0]
+
+  // fallback: tìm với 2-3 từ đầu
+  const shortName = name.split(/[\s:,]/)[0]
+  if (shortName === name) return null
+  const res2 = await fetch(
+    `https://phimapi.com/v1/api/tim-kiem?keyword=${encodeURIComponent(shortName)}&page=1&limit=1`
+  )
+  const data2 = await res2.json()
+  return data2?.data?.items?.[0] ?? null
+}
+
 export async function POST(req: NextRequest) {
   const apiKey = process.env.GROQ_API_KEY
   if (!apiKey) {
@@ -23,11 +41,11 @@ export async function POST(req: NextRequest) {
       messages: [
         {
           role: 'user',
-          content: `Người dùng đã xem: ${movieList}\n\nHãy gợi ý ĐÚNG 3 bộ phim/anime nổi tiếng khác phù hợp với sở thích trên. Trả lời theo định dạng:\nTên phim 1\nTên phim 2\nTên phim 3\n\nChỉ trả về 3 dòng tên phim bằng tiếng Việt, không có gì khác.`,
+          content: `Người dùng đã xem: ${movieList}\n\nHãy gợi ý ĐÚNG 5 bộ phim nổi tiếng khác phù hợp, đa dạng thể loại, không chỉ anime. Mỗi gợi ý phải dựa trên một phim khác nhau trong danh sách trên. Trả lời theo định dạng:\nTên phim 1\nTên phim 2\nTên phim 3\nTên phim 4\nTên phim 5\n\nChỉ trả về 5 dòng tên phim bằng tiếng Việt, không có gì khác.`,
         },
       ],
       temperature: 0.7,
-      max_tokens: 150,
+      max_tokens: 200,
     }),
   })
 
@@ -40,21 +58,16 @@ export async function POST(req: NextRequest) {
   const groqData = await groqRes.json()
   const text: string = groqData?.choices?.[0]?.message?.content ?? ''
   console.log('[recommendations] Groq suggestions:', text)
+
   const suggestions = text
     .split('\n')
     .map((s: string) => s.trim())
     .filter((s: string) => s.length > 0)
-    .slice(0, 3)
+    .slice(0, 5)
 
-  const movies = await Promise.all(
-    suggestions.map(async (name: string) => {
-      const res = await fetch(
-        `https://phimapi.com/v1/api/tim-kiem?keyword=${encodeURIComponent(name)}&page=1&limit=1`
-      )
-      const data = await res.json()
-      return data?.data?.items?.[0] ?? null
-    })
-  )
+  // search song song, lấy 3 cái đầu tìm thấy
+  const results = await Promise.all(suggestions.map(searchKKPhim))
+  const movies = results.filter(Boolean).slice(0, 3)
 
-  return NextResponse.json({ movies: movies.filter(Boolean) })
+  return NextResponse.json({ movies })
 }
