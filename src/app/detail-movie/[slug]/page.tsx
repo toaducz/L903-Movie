@@ -102,7 +102,7 @@ export default function WatchPage() {
     }
     const timer = setTimeout(() => setAutoplayCountdown(prev => (prev !== null ? prev - 1 : null)), 1000)
     return () => clearTimeout(timer)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoplayCountdown])
 
   if (isLoading) return <Loading />
@@ -135,7 +135,12 @@ export default function WatchPage() {
         fetch('/api/history', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ slug: historyPayload.slug, name: historyPayload.name, image: historyPayload.image, episode_name: epName })
+          body: JSON.stringify({
+            slug: historyPayload.slug,
+            name: historyPayload.name,
+            image: historyPayload.image,
+            episode_name: epName
+          })
         })
       }
     }
@@ -174,7 +179,8 @@ export default function WatchPage() {
               <div className='rounded-xl overflow-hidden shadow-2xl transform transition hover:scale-[1.02] duration-300'>
                 <Image
                   unoptimized
-                  priority
+                  // priority
+                  loading='lazy'
                   width={400}
                   height={600}
                   src={movie.poster_url}
@@ -213,9 +219,7 @@ export default function WatchPage() {
                     </div>
                     <div>
                       <p className='text-xs text-yellow-400 font-semibold uppercase tracking-wide'>TMDB</p>
-                      <p className='text-sm text-gray-300'>
-                        {movie.tmdb.vote_count.toLocaleString()} lượt đánh giá
-                      </p>
+                      <p className='text-sm text-gray-300'>{movie.tmdb.vote_count.toLocaleString()} lượt đánh giá</p>
                     </div>
                   </div>
                 )}
@@ -363,20 +367,24 @@ export default function WatchPage() {
                     progressKey={`${slug}_${episodeToPlay.name}`}
                     initialTime={tParam}
                     onEnded={handleEpisodeEnded}
-                    onProgress={user ? (time, duration) => {
-                      fetch('/api/history', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          slug: movie.slug,
-                          name: movie.name,
-                          image: movie.poster_url,
-                          episode_name: episodeToPlay.name,
-                          progress: time,
-                          duration
-                        })
-                      })
-                    } : undefined}
+                    onProgress={
+                      user
+                        ? (time, duration) => {
+                            fetch('/api/history', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                slug: movie.slug,
+                                name: movie.name,
+                                image: movie.poster_url,
+                                episode_name: episodeToPlay.name,
+                                progress: time,
+                                duration
+                              })
+                            })
+                          }
+                        : undefined
+                    }
                     options={{
                       autoplay: false,
                       controls: true,
@@ -421,8 +429,12 @@ export default function WatchPage() {
                         <svg className='w-20 h-20 -rotate-90' viewBox='0 0 80 80'>
                           <circle cx='40' cy='40' r='34' fill='none' stroke='#374151' strokeWidth='6' />
                           <circle
-                            cx='40' cy='40' r='34' fill='none'
-                            stroke='#3b82f6' strokeWidth='6'
+                            cx='40'
+                            cy='40'
+                            r='34'
+                            fill='none'
+                            stroke='#3b82f6'
+                            strokeWidth='6'
                             strokeDasharray={`${2 * Math.PI * 34}`}
                             strokeDashoffset={`${2 * Math.PI * 34 * (1 - autoplayCountdown / AUTOPLAY_COUNTDOWN)}`}
                             strokeLinecap='round'

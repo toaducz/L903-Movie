@@ -31,19 +31,21 @@ export default function MovieItem({ movie, color, source }: Readonly<Props>) {
 
   const poster = normalizePosterUrl(movie.poster_url)
 
-  const customLoader = ({ src }: { src: string }) => {
-    return `https://wsrv.nl/?url=${encodeURIComponent(src)}&w=400&h=600&fit=cover`
-  }
+  // const customLoader = ({ src }: { src: string }) => {
+  //   return `https://wsrv.nl/?url=${encodeURIComponent(src)}&w=400&h=600&fit=cover`
+  // }
 
   return (
     <Link
       href={source ? `/${source}/detail-movie/${movie.slug}` : `/detail-movie/${movie.slug}`}
-      className={`block ${color ?? 'bg-slate-800'} rounded-xl shadow-md hover:shadow-lg transition duration-300 overflow-hidden hover:opacity-80 cursor-pointer`}
+      className={`block ${
+        color ?? 'bg-slate-800'
+      } rounded-xl shadow-md hover:shadow-lg transition duration-300 overflow-hidden hover:opacity-80 cursor-pointer`}
     >
       <div className='relative w-[auto] h-[300px]'>
         {!isLoaded && <div className='absolute inset-0 bg-gray-700 animate-pulse rounded-lg' />}
         <Image
-          loader={customLoader}
+          // loader={customLoader}
           src={poster ?? ouguricap}
           alt={movie.name}
           width={270}
