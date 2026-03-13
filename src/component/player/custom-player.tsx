@@ -273,19 +273,32 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
         // Lưu vị trí xem mỗi 5s
         let lastSaved = 0
-        player.on('timeupdate', () => {
+
+        const handleSaveProgress = () => {
           if (!progressKey) return
           const current = player.currentTime() ?? 0
-          if (current - lastSaved >= 5) {
-            saveWatchProgress(progressKey, current)
-            const dur = player.duration() ?? 0
-            if (dur > 0) {
-              saveWatchDuration(progressKey, dur)
-              onProgress?.(current, dur)
-            }
-            lastSaved = current
+          saveWatchProgress(progressKey, current)
+          const dur = player.duration() ?? 0
+          if (dur > 0) {
+            saveWatchDuration(progressKey, dur)
+            onProgress?.(current, dur)
+          }
+          lastSaved = current
+        }
+
+        // Khi video đang chạy
+        player.on('timeupdate', () => {
+          const current = player.currentTime() ?? 0
+          // fix trường hợp tua lùi thì cũng lưu, xài cái này cho nó không âm
+          if (Math.abs(current - lastSaved) >= 5) {
+            handleSaveProgress()
           }
         })
+
+        // tua cái là lưu luôn ??
+        // player.on('seeked', () => {
+        //   handleSaveProgress()
+        // })
 
         // Xóa khi xem xong + callback cho parent
         player.on('ended', () => {
