@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
-import Navbar from '@/component/navbar'
+import Navbar from '@/component/layout/navbar'
 import QueryProvider from '@/app/provider'
 import { Suspense } from 'react'
-import NProgressInit from '@/component/NProgressInit'
+import NProgressInit from '@/component/layout/NProgressInit'
 import { AuthProvider } from './auth-provider'
-import Footer from '@/component/footer'
+import Footer from '@/component/layout/footer'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',

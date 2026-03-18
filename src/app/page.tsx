@@ -9,8 +9,8 @@ import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
 import { useRouter } from 'next/navigation'
 import { getListMovie } from '@/api/kkphim/get-list-movie'
-import ContinueWatchingSection from '@/component/continue-watching-section'
-import RecommendationsSection from '@/component/recommendations-section'
+import ContinueWatchingSection from '@/component/sections/continue-watching-section'
+import RecommendationsSection from '@/component/sections/recommendations-section'
 
 export default function Home() {
   const router = useRouter()

@@ -1,7 +1,7 @@
 'use client'
 
 import MovieItem from '@/component/item/movie-item'
-import Pagination from '@/component/pagination'
+import Pagination from '@/component/interactive/pagination'
 import Image from 'next/image'
 import errorImage from '@/assets/error.jpg'
 import Error from '@/component/status/error'
