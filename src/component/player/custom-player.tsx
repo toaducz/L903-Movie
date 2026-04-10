@@ -194,6 +194,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
         let adRegions: Array<{ start: number; end: number }> = []
         let mutedByAd = false
+        let adRafId: number | null = null
 
         const calculateAdRegions = () => {
           const tech = player.tech() as unknown as VHSTech
@@ -238,27 +239,32 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         player.on('loadedmetadata', calculateAdRegions)
         player.on('mediachange', calculateAdRegions)
 
-        player.on('timeupdate', () => {
-          if (adRegions.length === 0) return
-          const currentTime = player.currentTime()!
+        const pollAds = () => {
+          if (player.isDisposed()) return
+          adRafId = requestAnimationFrame(pollAds)
 
-          const PRE_MUTE = 0.5
+          if (adRegions.length === 0) return
+          const currentTime = player.currentTime() ?? 0
+
+          const PRE_MUTE = 0.1
           const upcoming = adRegions.find(r => currentTime >= r.start - PRE_MUTE && currentTime < r.end)
           if (upcoming) {
             if (!mutedByAd) {
               player.muted(true)
               mutedByAd = true
             }
-            if (currentTime >= upcoming.start) {
+            if (currentTime >= upcoming.start && currentTime < upcoming.end - 0.1) {
               player.currentTime(upcoming.end)
             }
           } else if (mutedByAd) {
             player.muted(false)
             mutedByAd = false
           }
-        })
+        }
+        adRafId = requestAnimationFrame(pollAds)
 
         player.on('dispose', () => {
+          if (adRafId !== null) cancelAnimationFrame(adRafId)
           window.removeEventListener('keydown', handleKeyDown)
           if (playerEl) {
             playerEl.removeEventListener('mousemove', handleMouseMove)
