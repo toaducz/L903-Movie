@@ -1,3 +1,5 @@
+'use client'
+
 import { Suspense, useState, useEffect } from 'react'
 import { notFound, useSearchParams, useRouter } from 'next/navigation'
 import SearchResultPage from '@/page/search-result-page'
