@@ -92,6 +92,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       const player = (playerRef.current = videojs(videoElement, mergedOptions, () => {
         // bắt bàn phím
         const handleKeyDown = (e: KeyboardEvent) => {
+          const target = e.target as HTMLElement
+          if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+            return
+          }
+
           if (e.key === 'ArrowRight') {
             e.preventDefault()
             player.currentTime(player.currentTime()! + 10)

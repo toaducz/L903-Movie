@@ -14,6 +14,7 @@ import FavoriteButton from '@/component/interactive/favorite-button'
 import { saveViewHistory } from '@/utils/local-storage'
 import VideoPlayer from '@/component/player/custom-player'
 import { useAuth } from '@/app/auth-provider'
+import MovieReview from '@/component/interactive/movie-review'
 
 const AUTOPLAY_COUNTDOWN = 5
 
@@ -311,6 +312,8 @@ export default function WatchPage() {
               </div>
             </div>
           )}
+
+          <MovieReview slug={movie.slug} name={movie.name} image={movie.poster_url} />
         </div>
       </div>
     )
@@ -600,6 +603,8 @@ export default function WatchPage() {
             </div>
           </div>
         </div>
+
+        <MovieReview slug={movie.slug} name={movie.name} image={movie.poster_url} />
       </div>
     </div>
   )

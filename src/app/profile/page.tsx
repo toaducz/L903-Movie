@@ -17,6 +17,7 @@ export default function ProfilePage() {
   const { logout, user } = useAuth()
   const [history, setHistory] = useState<FavoriteMovie[]>([])
   const [favorites, setFavorites] = useState<FavoriteMovie[]>([])
+  const [reviews, setReviews] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -54,8 +55,25 @@ export default function ProfilePage() {
     }
   }, [user])
 
+  useEffect(() => {
+    async function fetchReviews() {
+      try {
+        const res = await fetch('/api/review?my_reviews=1&limit=5')
+        const json = await res.json()
+        if (json.data) {
+          setReviews(json.data)
+        }
+      } catch (err) {
+        console.error('Lỗi fetch reviews:', err)
+      }
+    }
+    if (user) {
+      fetchReviews()
+    }
+  }, [user])
+
   return (
-    <div className='pt-25 pb-20 px-4 max-w-4xl mx-auto bg-black'>
+    <div className='pt-25 pb-20 px-4 max-w-4xl mx-auto bg-black text-white'>
       {user && <p className='mb-6'>Đăng nhập bằng: {user.email}</p>}
       <section className='mb-8'>
         <h2 className='text-xl font-semibold mb-3'>Phim đã xem gần đây</h2>
@@ -95,6 +113,29 @@ export default function ProfilePage() {
           </Link>
         </div>
       </section>
+
+      {/* Phim đã đánh giá */}
+      {user && (
+        <section className='mb-8'>
+          <h2 className='text-xl font-semibold mb-3 border-l-4 border-yellow-500 pl-3'>Phim đã đánh giá</h2>
+          {reviews.length > 0 ? (
+            <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4'>
+              {reviews.map(review => (
+                <div key={review.id} className='relative transition-transform hover:scale-105'>
+                   <HistoryItem slug={review.slug} name={review.name} image={review.image} />
+                   <div className='absolute top-2 right-2 bg-black/80 text-yellow-500 text-sm font-bold px-3 py-1 rounded-full border border-yellow-500/50 shadow-lg flex items-center gap-1 backdrop-blur-md'>
+                     <span>★</span> {review.score}
+                   </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className='text-gray-500 bg-gray-900/50 p-6 rounded-xl border border-gray-800 text-center'>
+              Bạn chưa tham gia đánh giá bộ phim nào.
+            </div>
+          )}
+        </section>
+      )}
 
       <div className='flex justify-center mt-6'>
         <button onClick={logout} className='px-4 py-2 bg-red-600 text-white rounded cursor-pointer hover:opacity-90'>
