@@ -13,11 +13,19 @@ type FavoriteMovie = {
   episode_name?: string
 }
 
+type ReviewMovie = {
+  id: string
+  slug: string
+  name: string
+  image: string
+  score: number
+}
+
 export default function ProfilePage() {
   const { logout, user } = useAuth()
   const [history, setHistory] = useState<FavoriteMovie[]>([])
   const [favorites, setFavorites] = useState<FavoriteMovie[]>([])
-  const [reviews, setReviews] = useState<any[]>([])
+  const [reviews, setReviews] = useState<ReviewMovie[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
