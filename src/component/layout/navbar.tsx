@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 import menu from '@/assets/menu.png'
 import { useQuery } from '@tanstack/react-query'
@@ -16,6 +16,7 @@ type DropdownItem = { _id: string; slug: string; name: string }
 
 export default function Navbar() {
   const router = useRouter()
+  const pathname = usePathname()
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
@@ -121,6 +122,8 @@ export default function Navbar() {
       tooltip: 'Ở đây cũng nhiều phim chất lắm, mỗi tội có quảng cáo :v'
     }
   ]
+
+  if (pathname === '/login') return null
 
   return (
     <nav
