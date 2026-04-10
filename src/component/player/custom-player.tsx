@@ -162,6 +162,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
         // xoay ngang
         const handleFullscreenChange = () => {
+          if (player.isFullscreen()) {
+            player.focus()
+          }
           const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
           if (!isMobile) return
 
@@ -247,7 +250,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
               mutedByAd = true
             }
             if (currentTime >= upcoming.start) {
-              player.currentTime(upcoming.end + 1)
+              player.currentTime(upcoming.end)
             }
           } else if (mutedByAd) {
             player.muted(false)
