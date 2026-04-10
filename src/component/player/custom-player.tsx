@@ -239,18 +239,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         player.on('loadedmetadata', calculateAdRegions)
         player.on('mediachange', calculateAdRegions)
 
-        let adRegions: Array<{ start: number; end: number }> = []
-        let mutedByAd = false
-        let adRafId: number | null = null
-        let isSkippingAd = false // Thêm cờ để theo dõi trạng thái che màn hình
-
-        const calculateAdRegions = () => {
-          // ... (Giữ nguyên phần logic gộp adRegions của bạn) ...
-        }
-
-        player.on('loadedmetadata', calculateAdRegions)
-        player.on('mediachange', calculateAdRegions)
-
         const pollAds = () => {
           if (player.isDisposed()) return
           adRafId = requestAnimationFrame(pollAds)
@@ -258,34 +246,19 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           if (adRegions.length === 0) return
           const currentTime = player.currentTime() ?? 0
 
-          // Phân giải vùng an toàn trước 0.3s để kịp bôi đen màn hình trước khi frame ad xuất hiện
-          const PRE_HIDE = 0.3
-          const upcoming = adRegions.find(r => currentTime >= r.start - PRE_HIDE && currentTime < r.end)
-
+          const PRE_MUTE = 0.1
+          const upcoming = adRegions.find(r => currentTime >= r.start - PRE_MUTE && currentTime < r.end)
           if (upcoming) {
-            if (!isSkippingAd) {
-              isSkippingAd = true
-              player.addClass('vjs-ad-skipping') // Gọi CSS che màn hình
-              if (!mutedByAd) {
-                player.muted(true)
-                mutedByAd = true
-              }
+            if (!mutedByAd) {
+              player.muted(true)
+              mutedByAd = true
             }
-
-            // Thực hiện tua sớm hơn 1 chút (0.1s) để tránh lọt bất kỳ frame ad nào
-            if (currentTime >= upcoming.start - 0.1 && currentTime < upcoming.end - 0.1) {
+            if (currentTime >= upcoming.start && currentTime < upcoming.end - 0.1) {
               player.currentTime(upcoming.end)
             }
-          } else {
-            // Chỉ bỏ che màn hình khi đã qua ad VÀ player đã buffer/seek xong đoạn tiếp theo
-            if (isSkippingAd && !player.seeking()) {
-              isSkippingAd = false
-              player.removeClass('vjs-ad-skipping')
-              if (mutedByAd) {
-                player.muted(false)
-                mutedByAd = false
-              }
-            }
+          } else if (mutedByAd) {
+            player.muted(false)
+            mutedByAd = false
           }
         }
         adRafId = requestAnimationFrame(pollAds)
