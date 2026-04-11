@@ -4,7 +4,7 @@ const securityHeaders = [
   //  Ngăn clickjacking (nhúng iframe)
   {
     key: 'X-Frame-Options',
-    value: 'SAMEORIGIN',
+    value: 'SAMEORIGIN'
   },
   // Giới hạn ai được phép nhúng trang này (CSP)
   // {
@@ -14,7 +14,7 @@ const securityHeaders = [
   // Bật XSS filter cho trình duyệt cũ
   {
     key: 'X-XSS-Protection',
-    value: '1; mode=block',
+    value: '1; mode=block'
   },
   // Chỉ cho phép tải tài nguyên an toàn (HTTPS)
   // {
@@ -24,24 +24,38 @@ const securityHeaders = [
   // Giúp ngăn lộ thông tin server
   {
     key: 'X-Content-Type-Options',
-    value: 'nosniff',
+    value: 'nosniff'
   },
   //  HSTS - bắt buộc dùng HTTPS nếu deploy thật
   {
     key: 'Strict-Transport-Security',
-    value: 'max-age=63072000; includeSubDomains; preload',
-  },
+    value: 'max-age=63072000; includeSubDomains; preload'
+  }
 ]
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'phimimg.com',
+        pathname: '/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'phim.nguonc.com',
+        pathname: '/**'
+      }
+    ]
+  },
   async headers() {
     return [
       {
         source: '/(.*)', // áp dụng cho tất cả route
-        headers: securityHeaders,
-      },
+        headers: securityHeaders
+      }
     ]
-  },
+  }
 }
 
 export default nextConfig

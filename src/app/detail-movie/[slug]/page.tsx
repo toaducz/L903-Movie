@@ -1,34 +1,69 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { getDetailMovie } from '@/api/kkphim/get-detail-movie'
-import EpisodeList from '@/component/episode-list'
+import EpisodeList from '@/component/interactive/episode-list'
 import ReactPlayer from 'react-player'
 import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
 import Image from 'next/image'
 import thumbnail from '@/assets/gumaKe.png'
-import FavoriteButton from '@/component/favorite-button'
+import FavoriteButton from '@/component/interactive/favorite-button'
 import { saveViewHistory } from '@/utils/local-storage'
 import VideoPlayer from '@/component/player/custom-player'
+import { useAuth } from '@/app/auth-provider'
+import MovieReview from '@/component/interactive/movie-review'
+
+const AUTOPLAY_COUNTDOWN = 5
 
 export default function WatchPage() {
   const { slug } = useParams()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const { user } = useAuth()
   const { data, isLoading, isError } = useQuery(getDetailMovie({ slug: String(slug) }))
   const [selectedEpisode, setSelectedEpisode] = useState<string | null>(null)
   const [useBackup, setUseBackup] = useState<string | null>(null)
   const [useBackupPlayer, setUseBackupPlayer] = useState(false)
-  const [isWatching, setIsWatching] = useState(false)
   const [iframeLoading, setIframeLoading] = useState(true)
+  const [autoplayCountdown, setAutoplayCountdown] = useState<number | null>(null)
+
+  const isWatching = searchParams.get('watch') === '1'
+  const epParam = searchParams.get('ep')
+  const tParam = Number(searchParams.get('t') ?? 0) || 0
   const isAvailable = data?.movie?.episode_current === 'Trailer'
+
+  const goBack = () => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete('watch')
+    params.delete('ep')
+    router.replace(`?${params.toString()}`)
+  }
 
   // Đặt lại selectedEpisode khi slug thay đổi
   useEffect(() => {
     setSelectedEpisode(null)
-    setIsWatching(false) // Quay về giao diện thông tin khi đổi phim
   }, [slug])
+
+  // Khôi phục tập đang xem từ URL khi data đã tải
+  useEffect(() => {
+    if (!data) return
+    const allEps = data.episodes.flatMap(s => s.server_data)
+    if (isWatching && epParam) {
+      const ep = allEps.find(e => e.name === epParam)
+      if (ep) {
+        setSelectedEpisode(ep.link_embed)
+        setUseBackup(ep.link_m3u8)
+        return
+      }
+    }
+    if (isWatching && !selectedEpisode && allEps[0]) {
+      setSelectedEpisode(allEps[0].link_embed)
+      setUseBackup(allEps[0].link_m3u8)
+    }
+  }, [data, isWatching, epParam])
 
   // Tự động chọn tập 1 khi data được tải và đang ở chế độ xem phim
   useEffect(() => {
@@ -37,11 +72,39 @@ export default function WatchPage() {
       image: data?.movie?.poster_url ?? '',
       slug: data?.movie?.slug ?? ''
     })
-    if (isWatching && data?.episodes?.[0]?.server_data?.[0] && !selectedEpisode) {
-      setSelectedEpisode(data.episodes[0].server_data[0].link_embed)
-      setUseBackup(data.episodes[0].server_data[0].link_embed)
+  }, [data])
+
+  // Countdown auto-play tập tiếp theo
+  useEffect(() => {
+    if (autoplayCountdown === null) return
+    if (autoplayCountdown === 0) {
+      // Chuyển tập khi đếm về 0
+      const eps = data?.episodes?.flatMap(s => s.server_data) ?? []
+      const idx = eps.findIndex(ep => ep.link_embed === selectedEpisode)
+      if (idx >= 0 && idx < eps.length - 1) {
+        const nextEp = eps[idx + 1]
+        setSelectedEpisode(nextEp.link_embed)
+        setUseBackup(nextEp.link_m3u8)
+        setIframeLoading(true)
+        const params = new URLSearchParams(searchParams.toString())
+        params.set('watch', '1')
+        params.set('ep', nextEp.name)
+        router.replace(`?${params.toString()}`)
+        saveViewHistory({
+          name: data?.movie?.name ?? '',
+          image: data?.movie?.poster_url ?? '',
+          slug: data?.movie?.slug ?? '',
+          episodeName: nextEp.name
+        })
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+      setAutoplayCountdown(null)
+      return
     }
-  }, [data, selectedEpisode, isWatching])
+    const timer = setTimeout(() => setAutoplayCountdown(prev => (prev !== null ? prev - 1 : null)), 1000)
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoplayCountdown])
 
   if (isLoading) return <Loading />
   if (isError || !data || data.status === false) return <Error message={data?.msg} />
@@ -52,11 +115,43 @@ export default function WatchPage() {
   const episodeToPlay = flatEpisodes[currentIndex]
   const movie = data.movie
 
-  const handleSelectEpisode = (ep: string, backup: string) => {
+  const handleSelectEpisode = (ep: string, backup: string, epName?: string) => {
     setSelectedEpisode(ep)
     setUseBackup(backup)
     setIframeLoading(true)
+    setAutoplayCountdown(null)
+    if (epName) {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set('watch', '1')
+      params.set('ep', epName)
+      router.replace(`?${params.toString()}`)
+      const historyPayload = {
+        name: data?.movie?.name ?? '',
+        image: data?.movie?.poster_url ?? '',
+        slug: data?.movie?.slug ?? '',
+        episodeName: epName
+      }
+      saveViewHistory(historyPayload)
+      if (user) {
+        fetch('/api/history', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            slug: historyPayload.slug,
+            name: historyPayload.name,
+            image: historyPayload.image,
+            episode_name: epName
+          })
+        })
+      }
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleEpisodeEnded = () => {
+    if (currentIndex < flatEpisodes.length - 1) {
+      setAutoplayCountdown(AUTOPLAY_COUNTDOWN)
+    }
   }
 
   // Giao diện thông tin phim
@@ -85,7 +180,8 @@ export default function WatchPage() {
               <div className='rounded-xl overflow-hidden shadow-2xl transform transition hover:scale-[1.02] duration-300'>
                 <Image
                   unoptimized
-                  priority
+                  // priority
+                  loading='lazy'
                   width={400}
                   height={600}
                   src={movie.poster_url}
@@ -97,9 +193,8 @@ export default function WatchPage() {
               <button
                 className='mt-6 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-blue-500/50 w-full flex justify-center items-center gap-2 cursor-pointer'
                 onClick={() => {
-                  setIsWatching(true)
                   const firstEp = data?.episodes?.[0]?.server_data?.[0]
-                  if (firstEp) handleSelectEpisode(firstEp.link_embed, firstEp.link_m3u8)
+                  if (firstEp) handleSelectEpisode(firstEp.link_embed, firstEp.link_m3u8, firstEp.name)
                   window.scrollTo({ top: 0, behavior: 'smooth' })
                 }}
               >
@@ -118,17 +213,19 @@ export default function WatchPage() {
               </div>
 
               <div className='mt-6 bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 shadow-lg'>
-                <div className='flex items-center justify-center mb-2'>
-                  {/* <div className="bg-yellow-500 text-black font-bold rounded-full w-14 h-14 flex items-center justify-center text-xl shadow-lg">
-                    {movie.tmdb?.vote_average?.toFixed(1)}
-                  </div> */}
-                  {/* <div className="ml-4">
-                    <p className="text-sm text-gray-300">Đánh giá từ</p>
-                    <p className="text-sm font-semibold">{movie.tmdb?.vote_count} người</p>
-                  </div> */}
-                </div>
+                {movie.tmdb?.vote_average > 0 && (
+                  <div className='flex items-center gap-3 mb-4 p-3 bg-gray-700/50 rounded-lg'>
+                    <div className='bg-yellow-500 text-black font-bold rounded-full w-14 h-14 flex items-center justify-center text-xl shadow-lg shrink-0'>
+                      {movie.tmdb.vote_average.toFixed(1)}
+                    </div>
+                    <div>
+                      <p className='text-xs text-yellow-400 font-semibold uppercase tracking-wide'>TMDB</p>
+                      <p className='text-sm text-gray-300'>{movie.tmdb.vote_count.toLocaleString()} lượt đánh giá</p>
+                    </div>
+                  </div>
+                )}
 
-                <div className='grid grid-cols-2 gap-y-2 mt-4 text-sm text-gray-300'>
+                <div className='grid grid-cols-2 gap-y-2 text-sm text-gray-300'>
                   <div>
                     <span className='font-semibold text-gray-200'>Năm:</span> {movie.year}
                   </div>
@@ -215,6 +312,8 @@ export default function WatchPage() {
               </div>
             </div>
           )}
+
+          <MovieReview slug={movie.slug} name={movie.name} image={movie.poster_url} />
         </div>
       </div>
     )
@@ -226,7 +325,7 @@ export default function WatchPage() {
       <div className='max-w-6xl mx-auto px-4'>
         <button
           className='mb-6 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition duration-300 flex items-center gap-2 shadow-lg'
-          onClick={() => setIsWatching(false)}
+          onClick={() => goBack()}
         >
           <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
             <path
@@ -268,6 +367,27 @@ export default function WatchPage() {
               <div className='relative pt-[56.25%] rounded-xl overflow-hidden shadow-2xl bg-black'>
                 {!useBackupPlayer ? (
                   <VideoPlayer
+                    progressKey={`${slug}_${episodeToPlay.name}`}
+                    initialTime={tParam}
+                    onEnded={handleEpisodeEnded}
+                    onProgress={
+                      user
+                        ? (time, duration) => {
+                            fetch('/api/history', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                slug: movie.slug,
+                                name: movie.name,
+                                image: movie.poster_url,
+                                episode_name: episodeToPlay.name,
+                                progress: time,
+                                duration
+                              })
+                            })
+                          }
+                        : undefined
+                    }
                     options={{
                       autoplay: false,
                       controls: true,
@@ -297,6 +417,56 @@ export default function WatchPage() {
                       onLoad={() => setIframeLoading(false)}
                       className='w-full h-full border-none'
                     ></iframe>
+                  </div>
+                )}
+
+                {/* Overlay auto-play tập tiếp theo */}
+                {autoplayCountdown !== null && currentIndex < flatEpisodes.length - 1 && (
+                  <div className='absolute inset-0 flex items-center justify-center bg-black/75 z-20'>
+                    <div className='text-center bg-gray-900/90 rounded-2xl p-8 shadow-2xl max-w-sm w-full mx-4'>
+                      <p className='text-gray-400 text-sm mb-1'>Tập tiếp theo</p>
+                      <p className='text-white font-bold text-lg mb-6 line-clamp-1'>
+                        {flatEpisodes[currentIndex + 1]?.name}
+                      </p>
+                      {/* Vòng đếm ngược */}
+                      <div className='relative w-20 h-20 mx-auto mb-6'>
+                        <svg className='w-20 h-20 -rotate-90' viewBox='0 0 80 80'>
+                          <circle cx='40' cy='40' r='34' fill='none' stroke='#374151' strokeWidth='6' />
+                          <circle
+                            cx='40'
+                            cy='40'
+                            r='34'
+                            fill='none'
+                            stroke='#3b82f6'
+                            strokeWidth='6'
+                            strokeDasharray={`${2 * Math.PI * 34}`}
+                            strokeDashoffset={`${2 * Math.PI * 34 * (1 - autoplayCountdown / AUTOPLAY_COUNTDOWN)}`}
+                            strokeLinecap='round'
+                            className='transition-all duration-1000 ease-linear'
+                          />
+                        </svg>
+                        <span className='absolute inset-0 flex items-center justify-center text-white text-2xl font-bold'>
+                          {autoplayCountdown}
+                        </span>
+                      </div>
+                      <div className='flex gap-3 justify-center'>
+                        <button
+                          onClick={() => {
+                            const nextEp = flatEpisodes[currentIndex + 1]
+                            handleSelectEpisode(nextEp.link_embed, nextEp.link_m3u8, nextEp.name)
+                          }}
+                          className='px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition cursor-pointer'
+                        >
+                          Xem ngay
+                        </button>
+                        <button
+                          onClick={() => setAutoplayCountdown(null)}
+                          className='px-5 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition cursor-pointer'
+                        >
+                          Huỷ
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -336,7 +506,10 @@ export default function WatchPage() {
             <button
               className='px-5 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition duration-300 flex items-center gap-2 shadow-lg disabled:cursor-not-allowed cursor-pointer'
               disabled={currentIndex <= 0}
-              onClick={() => setSelectedEpisode(flatEpisodes[currentIndex - 1].link_embed)}
+              onClick={() => {
+                const ep = flatEpisodes[currentIndex - 1]
+                handleSelectEpisode(ep.link_embed, ep.link_m3u8, ep.name)
+              }}
             >
               <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
                 <path
@@ -350,7 +523,10 @@ export default function WatchPage() {
             <button
               className='px-5 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition duration-300 flex items-center gap-2 shadow-lg disabled:cursor-not-allowed cursor-pointer'
               disabled={currentIndex >= flatEpisodes.length - 1}
-              onClick={() => setSelectedEpisode(flatEpisodes[currentIndex + 1].link_embed)}
+              onClick={() => {
+                const ep = flatEpisodes[currentIndex + 1]
+                handleSelectEpisode(ep.link_embed, ep.link_m3u8, ep.name)
+              }}
             >
               Tập sau
               <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
@@ -420,7 +596,7 @@ export default function WatchPage() {
                 data?.episodes && (
                   <EpisodeList
                     episodes={data.episodes}
-                    onSelectEpisode={ep => handleSelectEpisode(ep.link_embed, ep.link_m3u8)}
+                    onSelectEpisode={ep => handleSelectEpisode(ep.link_embed, ep.link_m3u8, ep.name)}
                     selectedEpisode={selectedEpisode}
                   />
                 )
@@ -428,6 +604,8 @@ export default function WatchPage() {
             </div>
           </div>
         </div>
+
+        <MovieReview slug={movie.slug} name={movie.name} image={movie.poster_url} />
       </div>
     </div>
   )

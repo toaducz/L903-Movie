@@ -7,12 +7,17 @@ type HistoryItemProps = {
   slug: string
   name: string
   image: string
+  episodeName?: string
 }
 
-export default function HistoryItem({ slug, name, image }: HistoryItemProps) {
+export default function HistoryItem({ slug, name, image, episodeName }: HistoryItemProps) {
+  const href = episodeName
+    ? `/detail-movie/${slug}?watch=1&ep=${encodeURIComponent(episodeName)}`
+    : `/detail-movie/${slug}`
+
   return (
     <Link
-      href={`/detail-movie/${slug}`}
+      href={href}
       className='block rounded-lg overflow-hidden shadow-md hover:opacity-90  transition-shadow duration-300 '
     >
       <div className='relative w-full h-48 bg-gray-200'>

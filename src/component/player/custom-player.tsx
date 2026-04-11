@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import videojs from 'video.js'
 import Player from 'video.js/dist/types/player'
 import 'video.js/dist/video-js.css'
+import { saveWatchProgress, getWatchProgress, clearWatchProgress, saveWatchDuration } from '@/utils/local-storage'
 
 interface HLSSegment {
   resolvedUri?: string
@@ -28,11 +29,48 @@ type VideoJsPlayerOptions = Parameters<typeof videojs>[1]
 interface VideoPlayerProps {
   options: VideoJsPlayerOptions
   onReady?: (player: Player) => void
+  progressKey?: string
+  initialTime?: number
+  onEnded?: () => void
+  onProgress?: (time: number, duration: number) => void
 }
 
-export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) => {
+export const VideoPlayer: React.FC<VideoPlayerProps> = ({
+  options,
+  onReady,
+  progressKey,
+  initialTime,
+  onEnded,
+  onProgress
+}) => {
   const videoRef = useRef<HTMLDivElement>(null)
   const playerRef = useRef<Player | null>(null)
+  const currentSrcRef = useRef<string | undefined>(undefined)
+  const progressKeyRef = useRef<string | undefined>(progressKey)
+  const [seekHint, setSeekHint] = useState<{ side: 'left' | 'right'; key: number } | null>(null)
+  const lastTapRef = useRef<{ time: number; side: 'left' | 'right' } | null>(null)
+
+  const handleTap = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    const player = playerRef.current
+    if (!player) return
+
+    const touch = e.changedTouches[0]
+    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
+    const side = touch.clientX - rect.left < rect.width / 2 ? 'left' : 'right'
+    const now = Date.now()
+    const last = lastTapRef.current
+
+    if (last && now - last.time < 300 && last.side === side) {
+      // double-tap detected
+      lastTapRef.current = null
+      const delta = side === 'right' ? 10 : -10
+      player.currentTime(Math.max(0, (player.currentTime() ?? 0) + delta))
+      setSeekHint({ side, key: now })
+      setTimeout(() => setSeekHint(null), 700)
+    } else {
+      lastTapRef.current = { time: now, side }
+    }
+  }, [])
 
   useEffect(() => {
     if (!playerRef.current && videoRef.current) {
@@ -40,30 +78,81 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
       videoElement.classList.add('vjs-big-play-centered')
       videoRef.current.appendChild(videoElement)
 
-      const player = (playerRef.current = videojs(videoElement, options, () => {
-        // bắt bàn phím, có gì hay sẽ thêm sau
+      const mergedOptions = {
+        ...options,
+        playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2],
+        controlBar: {
+          skipButtons: { backward: 10, forward: 10 },
+          ...(((options as Record<string, unknown>)?.controlBar as object) ?? {})
+        }
+      }
+
+      currentSrcRef.current = (options?.sources as Array<{ src: string }> | undefined)?.[0]?.src
+      progressKeyRef.current = progressKey
+      const player = (playerRef.current = videojs(videoElement, mergedOptions, () => {
+        // bắt bàn phím
         const handleKeyDown = (e: KeyboardEvent) => {
+          const target = e.target as HTMLElement
+          if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+            return
+          }
+
           if (e.key === 'ArrowRight') {
+            e.preventDefault()
             player.currentTime(player.currentTime()! + 10)
           } else if (e.key === 'ArrowLeft') {
+            e.preventDefault()
             player.currentTime(player.currentTime()! - 10)
-          }
-          // bắt sự kiện phím F để bật/tắt chế độ toàn màn hình
-          else if (e.key.toLowerCase() === 'f') {
+          } else if (e.key.toLowerCase() === 'f') {
             if (!player.isFullscreen()) {
               player.requestFullscreen()
             } else {
               player.exitFullscreen()
             }
-          }
-          //space
-          else if (e.key === ' ' || e.code === 'Space') {
+          } else if (e.key === ' ' || e.code === 'Space') {
             e.preventDefault()
             if (player.paused()) {
               player.play()
             } else {
               player.pause()
             }
+          } else if (e.key.toLowerCase() === 'm') {
+            player.muted(!player.muted())
+          } else if (e.key.toLowerCase() === 't') {
+            const doc = document as Document & {
+              pictureInPictureElement?: Element
+              exitPictureInPicture?: () => Promise<void>
+            }
+            const videoEl = player.el()?.querySelector('video') as
+              | (HTMLVideoElement & {
+                  requestPictureInPicture?: () => Promise<void>
+                })
+              | null
+            if (doc.pictureInPictureElement) {
+              doc.exitPictureInPicture?.()
+            } else if (videoEl?.requestPictureInPicture) {
+              videoEl.requestPictureInPicture().catch(() => {})
+            }
+          } else if (e.key === '[') {
+            const rates = [0.5, 0.75, 1, 1.25, 1.5, 2]
+            const current = player.playbackRate() ?? 1
+            const idx = rates.indexOf(current)
+            if (idx > 0) player.playbackRate(rates[idx - 1])
+          } else if (e.key === ']') {
+            const rates = [0.5, 0.75, 1, 1.25, 1.5, 2]
+            const current = player.playbackRate() ?? 1
+            const idx = rates.indexOf(current)
+            if (idx < rates.length - 1) player.playbackRate(rates[idx + 1])
+          } else if (e.key >= '0' && e.key <= '9') {
+            const percent = parseInt(e.key) / 10
+            const duration = player.duration()
+            if (duration) player.currentTime(duration * percent)
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault()
+            player.volume(Math.min(1, (player.volume() ?? 1) + 0.1))
+          } else if (e.key === 'ArrowDown') {
+            e.preventDefault()
+            player.volume(Math.max(0, (player.volume() ?? 0) - 0.1))
           }
         }
         window.addEventListener('keydown', handleKeyDown)
@@ -76,33 +165,20 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
           playerEl.addEventListener('mousemove', handleMouseMove)
         }
 
-        // đúp 2 bên để tua 10s
-        // const handleDoubleClick = (e: MouseEvent) => {
-        //   if (!playerEl) return
-          
-        //   const playerWidth = playerEl.offsetWidth
-        //   const clickX = e.offsetX
-
-        //   if (clickX < playerWidth / 2) {
-        //     player.currentTime(player.currentTime()! - 10)
-        //   } else {
-        //     player.currentTime(player.currentTime()! + 10)
-        //   }
-        // }
-        // if (playerEl) {
-        //   playerEl.addEventListener('dblclick', handleDoubleClick)
-        // }
-
         // xoay ngang
         const handleFullscreenChange = () => {
+          if (player.isFullscreen()) {
+            player.focus()
+          }
           const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-          
           if (!isMobile) return
 
           if (player.isFullscreen()) {
             try {
               if (window.screen && window.screen.orientation && 'lock' in window.screen.orientation) {
-                const orientation = window.screen.orientation as ScreenOrientation & { lock: (type: string) => Promise<void> }
+                const orientation = window.screen.orientation as ScreenOrientation & {
+                  lock: (type: string) => Promise<void>
+                }
                 orientation.lock('landscape').catch(() => {})
               }
             } catch (error) {
@@ -122,6 +198,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
         player.on('fullscreenchange', handleFullscreenChange)
 
         let adRegions: Array<{ start: number; end: number }> = []
+        let mutedByAd = false
+        let adRafId: number | null = null
 
         const calculateAdRegions = () => {
           const tech = player.tech() as unknown as VHSTech
@@ -134,62 +212,112 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
           let currentTimeAcc = 0
           const newAdRegions: Array<{ start: number; end: number }> = []
 
-          // bắt các khuôn mẫu quảng cáo phổ biến nhất
-          // ^ : Bắt đầu chuỗi tên file
-          // (segment_.* | ads?_.* | promo_.* | \d{4,}) : Chứa 1 trong các khuôn mẫu
-          // \.ts$ : Kết thúc phải là .ts
-          // i : Không phân biệt hoa/thường
-          const adRegex = /^(segment_.*|ads?_.*|promo_.*|\d{4,})\.ts$/i
+          // segment_\d+ = ad (tên có số thứ tự), content dùng tên random
+          const adRegex = /^(segment_\d+|ads?_.*|promo_.*)\.ts$/i
 
           media.segments.forEach(segment => {
             const url = segment.resolvedUri || segment.uri || ''
-
-            // bóc tách lấy đúng phần TÊN FILE cuối cùng (bỏ qua domain và các thư mục)
-            // VD: https://s3.abc.com/phim/segment_001.ts -> segment_001.ts
             const fileName = url.split('/').pop()?.split('?')[0] || ''
 
             if (adRegex.test(fileName)) {
               newAdRegions.push({
                 start: currentTimeAcc,
-                end: currentTimeAcc + segment.duration + 1.5 // Méo hiểu sao phải 1.5s
+                end: currentTimeAcc + segment.duration
               })
             }
             currentTimeAcc += segment.duration
           })
 
-          adRegions = newAdRegions
+          // Merge các region liền nhau thành 1 để tránh seek nhiều lần
+          const merged: Array<{ start: number; end: number }> = []
+          for (const region of newAdRegions) {
+            const last = merged[merged.length - 1]
+            if (last && region.start <= last.end + 1) {
+              last.end = Math.max(last.end, region.end)
+            } else {
+              merged.push({ ...region })
+            }
+          }
+          adRegions = merged
         }
 
         player.on('loadedmetadata', calculateAdRegions)
         player.on('mediachange', calculateAdRegions)
 
-        player.on('timeupdate', () => {
+        const pollAds = () => {
+          if (player.isDisposed()) return
+          adRafId = requestAnimationFrame(pollAds)
+
           if (adRegions.length === 0) return
-          const currentTime = player.currentTime()!
-          let isAdPlaying = false
+          const currentTime = player.currentTime() ?? 0
 
-          for (const region of adRegions) {
-            if (currentTime >= region.start && currentTime < region.end) {
-              isAdPlaying = true
-
-              // skip 1 đoạn và mute âm thanh
-              player.currentTime(region.end + 1)
-              if (!player.muted()) player.muted(true)
-
-              break
+          const PRE_MUTE = 0.1
+          const upcoming = adRegions.find(r => currentTime >= r.start - PRE_MUTE && currentTime < r.end)
+          if (upcoming) {
+            if (!mutedByAd) {
+              player.muted(true)
+              mutedByAd = true
             }
-          }
-
-          if (!isAdPlaying && player.muted()) {
+            if (currentTime >= upcoming.start && currentTime < upcoming.end - 0.1) {
+              player.currentTime(upcoming.end)
+            }
+          } else if (mutedByAd) {
             player.muted(false)
+            mutedByAd = false
           }
-        })
+        }
+        adRafId = requestAnimationFrame(pollAds)
 
         player.on('dispose', () => {
+          if (adRafId !== null) cancelAnimationFrame(adRafId)
           window.removeEventListener('keydown', handleKeyDown)
           if (playerEl) {
             playerEl.removeEventListener('mousemove', handleMouseMove)
           }
+        })
+
+        // Restore vị trí xem — ưu tiên giá trị lớn hơn giữa URL (cross-device) và localStorage (same device)
+        const saved = Math.max(initialTime ?? 0, progressKey ? getWatchProgress(progressKey) : 0)
+        if (saved > 0) {
+          player.one('loadedmetadata', () => {
+            player.currentTime(saved)
+            player.play()?.catch(() => {})
+          })
+        }
+
+        // Lưu vị trí xem mỗi 5s
+        let lastSaved = 0
+
+        const handleSaveProgress = () => {
+          if (!progressKey) return
+          const current = player.currentTime() ?? 0
+          saveWatchProgress(progressKey, current)
+          const dur = player.duration() ?? 0
+          if (dur > 0) {
+            saveWatchDuration(progressKey, dur)
+            onProgress?.(current, dur)
+          }
+          lastSaved = current
+        }
+
+        // Khi video đang chạy
+        player.on('timeupdate', () => {
+          const current = player.currentTime() ?? 0
+          // fix trường hợp tua lùi thì cũng lưu, xài cái này cho nó không âm
+          if (Math.abs(current - lastSaved) >= 5) {
+            handleSaveProgress()
+          }
+        })
+
+        // tua cái là lưu luôn ??
+        // player.on('seeked', () => {
+        //   handleSaveProgress()
+        // })
+
+        // Xóa khi xem xong + callback cho parent
+        player.on('ended', () => {
+          if (progressKey) clearWatchProgress(progressKey)
+          onEnded?.()
         })
 
         if (onReady) onReady(player)
@@ -198,7 +326,19 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
       const player = playerRef.current
       if (options?.autoplay !== undefined) player.autoplay(options.autoplay)
       if (options?.poster) player.poster(options.poster)
-      if (options?.sources) player.src(options.sources)
+      const newSrc = (options?.sources as Array<{ src: string }> | undefined)?.[0]?.src
+      if (options?.sources && newSrc !== currentSrcRef.current) {
+        currentSrcRef.current = newSrc
+        progressKeyRef.current = progressKey
+        player.src(options.sources)
+        const savedOnChange = Math.max(initialTime ?? 0, progressKey ? getWatchProgress(progressKey) : 0)
+        if (savedOnChange > 0) {
+          player.one('loadedmetadata', () => {
+            player.currentTime(savedOnChange)
+            player.play()?.catch(() => {})
+          })
+        }
+      }
     }
   }, [options, onReady])
 
@@ -213,8 +353,19 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) =>
   }, [])
 
   return (
-    <div data-vjs-player className='absolute top-0 left-0 w-full h-full overflow-hidden'>
+    <div data-vjs-player className='absolute top-0 left-0 w-full h-full overflow-hidden' onTouchEnd={handleTap}>
       <div ref={videoRef} className='w-full h-full' />
+      {seekHint && (
+        <div
+          key={seekHint.key}
+          className={`pointer-events-none absolute top-1/2 -translate-y-1/2 flex flex-col items-center gap-1 text-white animate-seek-hint ${
+            seekHint.side === 'left' ? 'left-6' : 'right-6'
+          }`}
+        >
+          <div className='rounded-full bg-white/20 p-4 text-2xl'>{seekHint.side === 'left' ? '«' : '»'}</div>
+          <span className='text-sm font-semibold drop-shadow'>{seekHint.side === 'right' ? '+10s' : '-10s'}</span>
+        </div>
+      )}
       <style jsx global>{`
         .video-js {
           width: 100% !important;

@@ -2,27 +2,53 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
+import { useState, useEffect, useRef } from 'react'
 import menu from '@/assets/menu.png'
 import { useQuery } from '@tanstack/react-query'
 import { getCategorySlug } from '@/api/kkphim/filter/get-category-slug'
 import { getCountrySlug } from '@/api/kkphim/filter/get-country-slug'
 import userIcon from '@/assets/user-icons.png'
 import { useAuth } from '@/app/auth-provider'
+import { getSearchByName } from '@/api/kkphim/search/get-search'
 
 type DropdownItem = { _id: string; slug: string; name: string }
 
 export default function Navbar() {
   const router = useRouter()
+  const pathname = usePathname()
   const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [showSuggestions, setShowSuggestions] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [openMenu, setOpenMenu] = useState<'category' | 'country' | 'year' | null>(null)
   const MAX_SEARCH_LENGTH = 100
+  const suggestionRef = useRef<HTMLDivElement>(null)
   const { data: categoryData, isLoading: categoryLoading } = useQuery(getCategorySlug())
   const { data: countryData, isLoading: countryLoading } = useQuery(getCountrySlug())
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search.trim()), 250)
+    return () => clearTimeout(timer)
+  }, [search])
+
+  const { data: suggestionData } = useQuery({
+    ...getSearchByName({ keyword: debouncedSearch, page: 1, limit: 6 }),
+    enabled: debouncedSearch.length >= 2,
+  })
+  const suggestions = suggestionData?.data?.items?.slice(0, 6) ?? []
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (suggestionRef.current && !suggestionRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
   const years = Array.from({ length: new Date().getFullYear() - 1970 + 1 }, (_, i) => ({
     _id: String(1970 + i),
     slug: String(1970 + i),
@@ -70,6 +96,7 @@ export default function Navbar() {
       const encoded = encodeURIComponent(search.trim())
       router.push(`/search?q=${encoded}&page=1`)
       setSearch('')
+      setShowSuggestions(false)
       setIsMenuOpen(false)
     }
   }
@@ -95,6 +122,8 @@ export default function Navbar() {
       tooltip: 'Ở đây cũng nhiều phim chất lắm, mỗi tội có quảng cáo :v'
     }
   ]
+
+  if (pathname === '/login') return null
 
   return (
     <nav
@@ -165,22 +194,48 @@ export default function Navbar() {
         </div>
 
         {/* Search - Desktop */}
-        <form onSubmit={handleSearch} className='hidden sm:flex items-center space-x-2'>
-          <input
-            type='text'
-            placeholder='Tìm theo tên phim'
-            className='px-4 py-2 rounded-lg bg-slate-800 text-white border border-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-600 placeholder-slate-400 text-sm transition-all duration-200'
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-          <button
-            type='submit'
-            className='px-4 py-2 bg-slate-800 text-white rounded-lg shadow-md hover:bg-slate-900 hover:scale-105 disabled:bg-slate-600 disabled:text-slate-400 disabled:shadow-none transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-600'
-            disabled={!search.trim()}
-          >
-            Tìm
-          </button>
-        </form>
+        <div ref={suggestionRef} className='hidden sm:flex items-center space-x-2 relative'>
+          <form onSubmit={handleSearch} className='flex items-center space-x-2'>
+            <input
+              type='text'
+              placeholder='Tìm theo tên phim'
+              className='px-4 py-2 rounded-lg bg-slate-800 text-white border border-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-600 placeholder-slate-400 text-sm transition-all duration-200'
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              onFocus={() => setShowSuggestions(true)}
+              autoComplete='off'
+            />
+            <button
+              type='submit'
+              className='px-4 py-2 bg-slate-800 text-white rounded-lg shadow-md hover:bg-slate-900 hover:scale-105 disabled:bg-slate-600 disabled:text-slate-400 disabled:shadow-none transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-600'
+              disabled={!search.trim()}
+            >
+              Tìm
+            </button>
+          </form>
+          {showSuggestions && suggestions.length > 0 && (
+            <div className='absolute top-full left-0 mt-2 w-80 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50 overflow-hidden'>
+              {suggestions.map(movie => (
+                <button
+                  key={movie.slug}
+                  className='flex items-center gap-3 w-full px-3 py-2 hover:bg-slate-700 transition-colors text-left'
+                  onMouseDown={() => {
+                    router.push(`/detail-movie/${movie.slug}`)
+                    setSearch('')
+                    setShowSuggestions(false)
+                  }}
+                >
+                  <img src={`https://wsrv.nl/?url=${encodeURIComponent(movie.thumb_url?.startsWith('http') ? movie.thumb_url : `https://phimimg.com/${movie.thumb_url?.replace(/^\/+/, '')}`)}&w=80&h=112&fit=cover`} alt={movie.name} className='w-10 h-14 object-cover rounded flex-shrink-0' />
+                  <div className='min-w-0'>
+                    <p className='text-white text-sm font-medium truncate'>{movie.name}</p>
+                    <p className='text-slate-400 text-xs truncate'>{movie.origin_name}</p>
+                    <p className='text-slate-500 text-xs'>{movie.year} · {movie.episode_current}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Hamburger Menu - Mobile */}
         <button className='lg:hidden focus:outline-none' onClick={toggleMenu} aria-label='Toggle menu'>
@@ -208,22 +263,49 @@ export default function Navbar() {
       {isMenuOpen && (
         <div className='lg:hidden bg-slate-900 px-4 py-4 flex flex-col gap-4 text-base font-medium border-t border-slate-800'>
           {/* Search - Mobile */}
-          <form onSubmit={handleSearch} className='flex items-center space-x-2'>
-            <input
-              type='text'
-              placeholder='Tìm theo tên phim'
-              className='flex-1 px-4 py-2 rounded-lg bg-slate-800 text-white border border-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-600 placeholder-slate-400 text-sm transition-all duration-200'
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-            <button
-              type='submit'
-              className='px-4 py-2 bg-slate-800 text-white rounded-lg shadow-md hover:bg-slate-900 hover:scale-105 disabled:bg-slate-600 disabled:text-slate-400 disabled:shadow-none transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-600'
-              disabled={!search.trim()}
-            >
-              Tìm
-            </button>
-          </form>
+          <div className='relative'>
+            <form onSubmit={handleSearch} className='flex items-center space-x-2'>
+              <input
+                type='text'
+                placeholder='Tìm theo tên phim'
+                className='flex-1 px-4 py-2 rounded-lg bg-slate-800 text-white border border-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-600 placeholder-slate-400 text-sm transition-all duration-200'
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                onFocus={() => setShowSuggestions(true)}
+                autoComplete='off'
+              />
+              <button
+                type='submit'
+                className='px-4 py-2 bg-slate-800 text-white rounded-lg shadow-md hover:bg-slate-900 hover:scale-105 disabled:bg-slate-600 disabled:text-slate-400 disabled:shadow-none transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-600'
+                disabled={!search.trim()}
+              >
+                Tìm
+              </button>
+            </form>
+            {showSuggestions && suggestions.length > 0 && (
+              <div className='absolute top-full left-0 mt-2 w-full bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50 overflow-hidden'>
+                {suggestions.map(movie => (
+                  <button
+                    key={movie.slug}
+                    className='flex items-center gap-3 w-full px-3 py-2 hover:bg-slate-700 transition-colors text-left'
+                    onMouseDown={() => {
+                      router.push(`/detail-movie/${movie.slug}`)
+                      setSearch('')
+                      setShowSuggestions(false)
+                      setIsMenuOpen(false)
+                    }}
+                  >
+                    <img src={`https://wsrv.nl/?url=${encodeURIComponent(movie.thumb_url?.startsWith('http') ? movie.thumb_url : `https://phimimg.com/${movie.thumb_url?.replace(/^\/+/, '')}`)}&w=80&h=112&fit=cover`} alt={movie.name} className='w-10 h-14 object-cover rounded flex-shrink-0' />
+                    <div className='min-w-0'>
+                      <p className='text-white text-sm font-medium truncate'>{movie.name}</p>
+                      <p className='text-slate-400 text-xs truncate'>{movie.origin_name}</p>
+                      <p className='text-slate-500 text-xs'>{movie.year} · {movie.episode_current}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Navigation Items - Mobile */}
           {navLinks.map((link, i) => (

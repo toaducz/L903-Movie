@@ -46,6 +46,11 @@ export type SearchResult = {
 type SearchByNameRequest = {
   keyword: string
   page: number
+  category?: string
+  country?: string
+  year?: string
+  sort_field?: string
+  sort_type?: string
 }
 
 type SearchResponse = {
@@ -54,14 +59,30 @@ type SearchResponse = {
   status: string
 }
 
-export const getSearchByName = ({ keyword, page = 1 }: SearchByNameRequest) => {
+export const getSearchByName = ({
+  keyword,
+  page = 1,
+  limit = 12,
+  category,
+  country,
+  year,
+  sort_field,
+  sort_type
+}: SearchByNameRequest & { limit?: number }) => {
+  const params: Record<string, unknown> = {
+    keyword,
+    page,
+    ...(limit !== undefined && { limit }),
+    ...(category && { category }),
+    ...(country && { country }),
+    ...(year && { year }),
+    ...(sort_field && { sort_field }),
+    ...(sort_type && { sort_type })
+  }
+
   return queryOptions({
-    queryKey: ['get-search-by-name', keyword, page],
-    queryFn: () =>
-      request<SearchResponse>(kkphim, `v1/api/tim-kiem`, 'GET', {
-        keyword: keyword,
-        page: page,
-        limit: 12
-      })
+    queryKey: ['get-search-by-name', keyword, page, limit, category, country, year, sort_field, sort_type],
+    queryFn: () => request<SearchResponse>(kkphim, `v1/api/tim-kiem`, 'GET', params),
+    staleTime: 1000 * 60 * 5
   })
 }

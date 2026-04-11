@@ -23,9 +23,7 @@ export default function LoginPage() {
   }, [user, router])
 
   if (checkingUser) {
-    return (
-      < Loading />
-    )
+    return <Loading />
   }
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -87,7 +85,7 @@ export default function LoginPage() {
           >
             {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
           </button>
-          <div className='italic items-center pt-6 text-center underline cursor-pointer hover:opacity-80'>Đăng kí</div>
+          {/* <div className='italic items-center pt-6 text-center underline cursor-pointer hover:opacity-80'>Đăng kí</div> */}
         </form>
       ) : null}
     </div>

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react' // Thêm import useState
 import MovieItem from '@/component/item/movie-item'
 import MovieRankItem from '@/component/item/movie-rank-item'
 import { useQuery } from '@tanstack/react-query'
@@ -8,9 +9,13 @@ import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
 import { useRouter } from 'next/navigation'
 import { getListMovie } from '@/api/kkphim/get-list-movie'
+import ContinueWatchingSection from '@/component/sections/continue-watching-section'
+import RecommendationsSection from '@/component/sections/recommendations-section'
 
 export default function Home() {
   const router = useRouter()
+  const [showRecommendations, setShowRecommendations] = useState(false)
+
   const { data: updateMovie, isLoading, isError } = useQuery(getLatestUpdateMovieList({ page: 1 }))
   const {
     data: phimbo,
@@ -27,6 +32,7 @@ export default function Home() {
     isLoading: isLoadingHoatHinh,
     isError: isErrorHoatHinh
   } = useQuery(getListMovie({ typelist: 'hoat-hinh', page: 1, limit: 5 }))
+
   if (isLoading) {
     return <Loading />
   }
@@ -37,7 +43,33 @@ export default function Home() {
 
   return (
     <main className='min-h-screen p-2 sm:py-2 sm:px-4 bg-gray-900 text-gray-900'>
-      <h1 className='text-2xl sm:text-4xl font-bold mb-8 text-center text-white pt-20 md:w-4/5'> Phim Mới Cập Nhật</h1>
+      <div className='pt-20'>
+        <ContinueWatchingSection />
+        {!showRecommendations ? (
+          <div className='flex justify-center py-6'>
+            <button
+              onClick={() => setShowRecommendations(true)}
+              className='px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg shadow-md transition-colors duration-200 ease-in-out cursor-pointer text-center'
+            >
+              Xem gì hôm nay?
+            </button>
+          </div>
+        ) : (
+          <div className='py-6'>
+            <RecommendationsSection />
+            <div className='flex justify-center mt-6'>
+              <button
+                onClick={() => setShowRecommendations(false)}
+                className='px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg shadow-md transition-colors duration-200 ease-in-out cursor-pointer text-center'
+              >
+                Đóng gợi ý
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <h1 className='text-2xl sm:text-4xl font-bold mb-8 text-center text-white pt-4 md:w-4/5'> Phim Mới Cập Nhật</h1>
       <div className='flex'>
         <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 md:w-4/5 '>
           {updateMovie?.items.map(movie => (

@@ -1,42 +1,56 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import HistoryItem from '@/component/item/profile-movie-items'
 import { getViewHistory } from '@/utils/local-storage'
+import { useAuth } from '@/app/auth-provider'
 
-export default function FavoritePage() {
-  const [allMovies, setAllMovies] = useState<{ name: string; slug: string; image: string }[]>([])
-  const [visibleMovies, setVisibleMovies] = useState<typeof allMovies>([])
+type HistoryMovie = { name: string; slug: string; image: string; episode_name?: string }
+
+export default function HistoryPage() {
+  const { user } = useAuth()
+  const [allMovies, setAllMovies] = useState<HistoryMovie[]>([])
+  const [visibleMovies, setVisibleMovies] = useState<HistoryMovie[]>([])
   const [page, setPage] = useState(1)
   const PAGE_SIZE = 10
 
   useEffect(() => {
-    const history = getViewHistory()
-    setAllMovies(history)
-    setVisibleMovies(history.slice(0, PAGE_SIZE))
+    fetch('/api/history')
+      .then(res => res.status === 401 ? null : res.json())
+      .then(json => {
+        const items = json
+          ? (json.data ?? []).map((d: { name: string; slug: string; image: string; episode_name?: string }) => ({
+              name: d.name, slug: d.slug, image: d.image, episode_name: d.episode_name
+            }))
+          : getViewHistory()
+        setAllMovies(items)
+        setVisibleMovies(items.slice(0, PAGE_SIZE))
+      })
   }, [])
 
-  // fake infinite scrolling cho ngầu
-  const handleScroll = useCallback(() => {
-    if (
-      window.innerHeight + window.scrollY >= document.body.offsetHeight - 200 &&
-      visibleMovies.length < allMovies.length
-    ) {
-      setPage(prev => prev + 1)
-    }
-  }, [visibleMovies, allMovies])
-
   useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >= document.body.offsetHeight - 200 &&
+        visibleMovies.length < allMovies.length
+      ) {
+        setPage(prev => prev + 1)
+      }
+    }
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [handleScroll])
+  }, [visibleMovies, allMovies])
 
   useEffect(() => {
     setVisibleMovies(allMovies.slice(0, page * PAGE_SIZE))
   }, [page, allMovies])
 
-  const clearHistory = () => {
-    localStorage.removeItem('viewHistory') // xóa localstorage
+  const clearHistory = async () => {
+    if (user) {
+      await fetch('/api/history', { method: 'DELETE' })
+    } else {
+      localStorage.removeItem('viewHistory')
+    }
     setAllMovies([])
     setVisibleMovies([])
   }
@@ -48,7 +62,7 @@ export default function FavoritePage() {
       {visibleMovies.length > 0 ? (
         <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 min-h-screen'>
           {visibleMovies.map(movie => (
-            <HistoryItem key={movie.slug} slug={movie.slug} name={movie.name} image={movie.image} />
+            <HistoryItem key={movie.slug} slug={movie.slug} name={movie.name} image={movie.image} episodeName={movie.episode_name} />
           ))}
         </div>
       ) : (
@@ -57,11 +71,13 @@ export default function FavoritePage() {
 
       {visibleMovies.length < allMovies.length && <p className='text-center mt-4 text-gray-400'>Đang tải thêm...</p>}
 
-      {visibleMovies.length > 0 && (<div className='mt-6 text-center'>
-        <button onClick={clearHistory} className='px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition mb-10 cursor-pointer'>
-          Xóa hết lịch sử xem
-        </button>
-      </div>)}
+      {visibleMovies.length > 0 && (
+        <div className='mt-6 text-center'>
+          <button onClick={clearHistory} className='px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition mb-10 cursor-pointer'>
+            Xóa hết lịch sử xem
+          </button>
+        </div>
+      )}
     </div>
   )
 }
