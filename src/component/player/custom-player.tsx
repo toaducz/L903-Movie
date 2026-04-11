@@ -135,13 +135,13 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             }
             const videoEl = player.el()?.querySelector('video') as
               | (HTMLVideoElement & {
-                  requestPictureInPicture?: () => Promise<void>
-                })
+                requestPictureInPicture?: () => Promise<void>
+              })
               | null
             if (doc.pictureInPictureElement) {
               doc.exitPictureInPicture?.()
             } else if (videoEl?.requestPictureInPicture) {
-              videoEl.requestPictureInPicture().catch(() => {})
+              videoEl.requestPictureInPicture().catch(() => { })
             }
           } else if (e.key === '[') {
             const rates = [0.5, 0.75, 1, 1.25, 1.5, 2]
@@ -189,7 +189,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 const orientation = window.screen.orientation as ScreenOrientation & {
                   lock: (type: string) => Promise<void>
                 }
-                orientation.lock('landscape').catch(() => {})
+                orientation.lock('landscape').catch(() => { })
               }
             } catch (error) {
               console.warn('Không thể khóa màn hình ngang:', error)
@@ -291,7 +291,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         if (saved > 0) {
           player.one('loadedmetadata', () => {
             player.currentTime(saved)
-            player.play()?.catch(() => {})
+            player.play()?.catch(() => { })
           })
         }
 
@@ -337,7 +337,15 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           skip90Btn.className = 'vjs-skip-90s-button vjs-control vjs-button'
           skip90Btn.title = 'Tua 90 giây'
           skip90Btn.setAttribute('type', 'button')
-          skip90Btn.innerHTML = '<span class="vjs-icon-placeholder" aria-hidden="true"></span><span class="vjs-control-text" aria-live="polite">Tua 90 giây</span>'
+          skip90Btn.innerHTML = `
+            <span class="vjs-icon-placeholder" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px; margin: auto;">
+                <path d="M18 13c0 3.31-2.69 6-6 6s-6-2.69-6-6 2.69-6 6-6v4l5-5-5-5v4c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8h-2z" />
+                <text x="12" y="15" font-size="8" font-weight="900" text-anchor="middle" font-family="sans-serif">90</text>
+              </svg>
+            </span>
+            <span class="vjs-control-text" aria-live="polite">Tua 90 giây</span>
+          `
           skip90Btn.addEventListener('click', () => {
             const current = player.currentTime() ?? 0
             const duration = player.duration() ?? 0
@@ -366,7 +374,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         if (savedOnChange > 0) {
           player.one('loadedmetadata', () => {
             player.currentTime(savedOnChange)
-            player.play()?.catch(() => {})
+            player.play()?.catch(() => { })
           })
         }
       }
@@ -389,9 +397,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       {seekHint && (
         <div
           key={seekHint.key}
-          className={`pointer-events-none absolute top-1/2 -translate-y-1/2 flex flex-col items-center gap-1 text-white animate-seek-hint ${
-            seekHint.side === 'left' ? 'left-6' : 'right-6'
-          }`}
+          className={`pointer-events-none absolute top-1/2 -translate-y-1/2 flex flex-col items-center gap-1 text-white animate-seek-hint ${seekHint.side === 'left' ? 'left-6' : 'right-6'
+            }`}
         >
           <div className='rounded-full bg-white/20 p-4 text-2xl'>{seekHint.side === 'left' ? '«' : '»'}</div>
           <span className='text-sm font-semibold drop-shadow'>{seekHint.side === 'right' ? '+10s' : '-10s'}</span>
@@ -418,15 +425,12 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           align-items: center;
           justify-content: center;
         }
-        .vjs-skip-90s-button .vjs-icon-placeholder::before {
-          content: '90s';
-          font-family: inherit;
-          font-size: 11px;
-          font-weight: 700;
-          line-height: 1;
-          border: 1.5px solid currentColor;
-          border-radius: 4px;
-          padding: 2px 5px;
+        .vjs-skip-90s-button .vjs-icon-placeholder {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          height: 100%;
         }
         .vjs-skip-90s-button:hover {
           opacity: 0.8;
