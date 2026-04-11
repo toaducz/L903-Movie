@@ -18,10 +18,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
 
   useEffect(() => {
-    fetch('/api/auth/me')
-      .then(res => res.json())
-      .then(data => setUser(data.user || null))
-      .finally(() => setLoading(false))
+    const checkAuth = () => {
+      fetch('/api/auth/me')
+        .then(res => res.json())
+        .then(data => setUser(data.user || null))
+        .finally(() => setLoading(false))
+    }
+
+    checkAuth()
+
+    // Refresh khi quay lại tab (focus)
+    window.addEventListener('focus', checkAuth)
+    return () => window.removeEventListener('focus', checkAuth)
   }, [])
 
   const logout = async () => {

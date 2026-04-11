@@ -11,15 +11,16 @@ export const config = {
 
 export function middleware(req: NextRequest) {
   const token = req.cookies.get('sb-access-token')
+  const refreshToken = req.cookies.get('sb-refresh-token')
   const isLoginPage = req.nextUrl.pathname === '/login'
 
-  // Trường hợp 1: Chưa đăng nhập mà cố vào các trang nội dung
-  if (!token && !isLoginPage) {
+  // Trường hợp 1: Chưa đăng nhập (thiếu cả 2 token) mà cố vào các trang nội dung
+  if (!token && !refreshToken && !isLoginPage) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
 
   // Trường hợp 2: Đã đăng nhập mà cố vào lại trang login
-  if (token && isLoginPage) {
+  if ((token || refreshToken) && isLoginPage) {
     return NextResponse.redirect(new URL('/', req.url))
   }
 
