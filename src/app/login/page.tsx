@@ -8,27 +8,28 @@ import Loading from '@/component/status/loading'
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [checkingUser, setCheckingUser] = useState<boolean | null>(null)
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
 
   useEffect(() => {
     if (user) {
       router.replace('/')
-    } else {
-      setCheckingUser(false)
     }
   }, [user, router])
 
-  if (checkingUser) {
-    return <Loading />
+  if (loading) {
+    return (
+      <div className='flex min-h-screen items-center justify-center bg-slate-900'>
+        <Loading />
+      </div>
+    )
   }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+    setIsSubmitting(true)
     setError(null)
 
     try {
@@ -49,7 +50,7 @@ export default function LoginPage() {
       setError('Đăng nhập thất bại' + err)
     }
 
-    setLoading(false)
+    setIsSubmitting(false)
   }
 
   return (
@@ -80,10 +81,10 @@ export default function LoginPage() {
 
           <button
             type='submit'
-            disabled={loading}
+            disabled={isSubmitting}
             className='w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:opacity-50 cursor-pointer'
           >
-            {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+            {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
           </button>
           {/* <div className='italic items-center pt-6 text-center underline cursor-pointer hover:opacity-80'>Đăng kí</div> */}
         </form>
