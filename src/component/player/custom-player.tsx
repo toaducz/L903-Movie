@@ -54,6 +54,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     const player = playerRef.current
     if (!player) return
 
+    // Không trigger double-tap khi chạm vào control bar
+    const target = e.target as HTMLElement
+    if (target.closest('.vjs-control-bar')) return
+
     const touch = e.changedTouches[0]
     const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
     const side = touch.clientX - rect.left < rect.width / 2 ? 'left' : 'right'
@@ -94,6 +98,12 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         const handleKeyDown = (e: KeyboardEvent) => {
           const target = e.target as HTMLElement
           if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+            return
+          }
+
+          // Chỉ xử lý phím tắt khi player đang hiển thị trong viewport
+          const playerRect = playerEl?.getBoundingClientRect()
+          if (playerRect && (playerRect.bottom < 0 || playerRect.top > window.innerHeight)) {
             return
           }
 
@@ -320,6 +330,27 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           onEnded?.()
         })
 
+        // Thêm nút tua 90s vào control bar — bên phải, trước nút fullscreen
+        const controlBarEl = player.el()?.querySelector('.vjs-control-bar') as HTMLElement | null
+        if (controlBarEl) {
+          const skip90Btn = document.createElement('button')
+          skip90Btn.className = 'vjs-skip-90s-button vjs-control vjs-button'
+          skip90Btn.title = 'Tua 90 giây'
+          skip90Btn.setAttribute('type', 'button')
+          skip90Btn.innerHTML = '<span class="vjs-icon-placeholder" aria-hidden="true"></span><span class="vjs-control-text" aria-live="polite">Tua 90 giây</span>'
+          skip90Btn.addEventListener('click', () => {
+            const current = player.currentTime() ?? 0
+            const duration = player.duration() ?? 0
+            player.currentTime(Math.min(duration, current + 90))
+          })
+          const fsBtn = controlBarEl.querySelector('.vjs-fullscreen-control')
+          if (fsBtn) {
+            controlBarEl.insertBefore(skip90Btn, fsBtn)
+          } else {
+            controlBarEl.appendChild(skip90Btn)
+          }
+        }
+
         if (onReady) onReady(player)
       }))
     } else if (playerRef.current) {
@@ -376,6 +407,29 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         }
         .vjs-poster {
           background-size: cover !important;
+        }
+        .vjs-skip-90s-button {
+          cursor: pointer;
+          flex: none;
+          position: relative;
+          width: 3em;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .vjs-skip-90s-button .vjs-icon-placeholder::before {
+          content: '90s';
+          font-family: inherit;
+          font-size: 11px;
+          font-weight: 700;
+          line-height: 1;
+          border: 1.5px solid currentColor;
+          border-radius: 4px;
+          padding: 2px 5px;
+        }
+        .vjs-skip-90s-button:hover {
+          opacity: 0.8;
         }
       `}</style>
     </div>
