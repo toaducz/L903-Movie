@@ -26,27 +26,37 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Vui lòng đăng nhập' }, { status: 401 })
   }
 
-  const { slug, name, image, score, review_text, user_email } = await req.json()
+  // Nhận thêm parent_id từ request
+  const { slug, name, image, score, review_text, user_email, parent_id } = await req.json()
+
   if (!slug || score === undefined || !review_text) {
     return NextResponse.json({ error: 'Thiếu thông tin' }, { status: 400 })
   }
 
-  // Sử dụng upsert để cập nhật review nếu đã tồn tại
-  const { data, error } = await supabase
-    .from('movie_reviews')
-    .upsert(
-      {
-        user_id,
-        user_email: user_email || 'Người dùng ẩn danh',
-        slug,
-        name,
-        image,
-        score,
-        review_text,
-        updated_at: new Date().toISOString()
-      },
-      { onConflict: 'user_id, slug' }
-    )
+  const payload = {
+    user_id,
+    user_email: user_email || 'Người dùng ẩn danh',
+    slug,
+    name,
+    image,
+    score,
+    review_text,
+    parent_id: parent_id || null, // Cực kỳ quan trọng
+    updated_at: new Date().toISOString()
+  }
+
+  let queryResult
+
+  if (parent_id) {
+    // NẾU LÀ REPLY: Thực hiện Insert luôn (cho phép 1 người reply nhiều lần)
+    queryResult = await supabase.from('movie_reviews').insert(payload)
+  } else {
+    // NẾU LÀ REVIEW GỐC: Thực hiện Upsert như cũ
+    // Nó sẽ dựa vào cái Index mới tạo ở DB để bắt onConflict
+    queryResult = await supabase.from('movie_reviews').upsert(payload, { onConflict: 'user_id, slug' })
+  }
+
+  const { data, error } = queryResult
 
   if (error) {
     console.error('Lỗi Supabase:', error)
@@ -56,61 +66,129 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ data, success: true })
 }
 
+export async function PUT(req: NextRequest) {
+  await getSession(req)
+  const user_id = await getUserId(req)
+  if (!user_id) return NextResponse.json({ error: 'Vui lòng đăng nhập' }, { status: 401 })
+
+  const { id, review_text, score } = await req.json()
+  if (!id || review_text === undefined) {
+    return NextResponse.json({ error: 'Thiếu thông tin' }, { status: 400 })
+  }
+
+  const payload: any = { 
+    review_text, 
+    updated_at: new Date().toISOString() 
+  }
+  if (score !== undefined) payload.score = score
+
+  const { error } = await supabase
+    .from('movie_reviews')
+    .update(payload)
+    .eq('id', id)
+    .eq('user_id', user_id)
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ success: true })
+}
+
+export async function DELETE(req: NextRequest) {
+  await getSession(req)
+  const user_id = await getUserId(req)
+  if (!user_id) return NextResponse.json({ error: 'Vui lòng đăng nhập' }, { status: 401 })
+
+  const { searchParams } = new URL(req.url)
+  const id = searchParams.get('id')
+  if (!id) return NextResponse.json({ error: 'Thiếu id' }, { status: 400 })
+
+  const { error } = await supabase
+    .from('movie_reviews')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', user_id)
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ success: true })
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const slug = searchParams.get('slug')
   const my_reviews = searchParams.get('my_reviews')
 
-  const page = parseInt(searchParams.get('page') || '1', 10)
-  const limit = parseInt(searchParams.get('limit') || '10', 10)
-  const from = (page - 1) * limit
-  const to = from + limit - 1
-
+  // Logic lấy review của cá nhân (giữ nguyên)
   if (my_reviews === '1') {
     await getSession(req)
     const user_id = await getUserId(req)
     if (!user_id) return NextResponse.json({ error: 'Không xác thực được' }, { status: 401 })
 
-    const { data, error, count } = await supabase
+    const { data, error } = await supabase
       .from('movie_reviews')
-      .select('*', { count: 'exact' })
+      .select('*')
       .eq('user_id', user_id)
       .order('updated_at', { ascending: false })
-      .range(from, to)
 
-    if (error) {
-      console.error('Lỗi Supabase:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
-    return NextResponse.json({
-      data,
-      count,
-      page,
-      totalPages: count ? Math.ceil(count / limit) : 1
-    })
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ data })
   }
 
+  // Logic lấy toàn bộ comment của một phim và cấu trúc lại
   if (slug) {
-    const { data, error, count } = await supabase
+    const { data: flatData, error } = await supabase
       .from('movie_reviews')
-      .select('*', { count: 'exact' })
+      .select('*')
       .eq('slug', slug)
-      .order('updated_at', { ascending: false })
-      .range(from, to)
+      .order('updated_at', { ascending: true }) // Sắp xếp cũ trước mới sau để dễ dựng cây
 
     if (error) {
-      console.error('Lỗi Supabase:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    // Biến đổi dữ liệu phẳng thành cấu trúc lồng nhau (Nested)
+    const structuredData = buildCommentTree(flatData)
+
     return NextResponse.json({
-      data,
-      count,
-      page,
-      totalPages: count ? Math.ceil(count / limit) : 1
+      data: structuredData,
+      count: flatData.length
     })
   }
 
   return NextResponse.json({ error: 'Bắt buộc phải có slug hoặc my_reviews=1' }, { status: 400 })
+}
+
+/**
+ * Hàm hỗ trợ chuyển đổi mảng phẳng thành cấu trúc cây 1 tầng (tránh Infinite Nesting)
+ */
+function buildCommentTree(flatComments: any[]) {
+  const map: any = {}
+  const roots: any[] = []
+
+  // Bước 1: Tạo map để truy xuất nhanh theo ID
+  flatComments.forEach(comment => {
+    map[comment.id] = { ...comment, replies: [] }
+  })
+
+  // Bước 2: Duyệt qua từng comment
+  // Bất kể reply ở tầng level mấy, đều được gộp chung vào mảng .replies của bình luận gốc
+  flatComments.forEach(comment => {
+    if (comment.parent_id && map[comment.parent_id]) {
+      const parent = map[comment.parent_id]
+      // Đính kèm tên người dùng của comment cha để UI dễ hiển thị Mentions (@username)
+      map[comment.id].reply_to_username = parent.user_email.split('@')[0]
+
+      // Tìm gốc thực sự (Root Comment)
+      let root = parent
+      while (root.parent_id && map[root.parent_id]) {
+        root = map[root.parent_id]
+      }
+
+      // Nhét thẳng reply vào list replies của gốc
+      map[root.id].replies.push(map[comment.id])
+    } else {
+      roots.push(map[comment.id])
+    }
+  })
+
+  // Bước 3: Đảo ngược lại gốc nếu muốn thấy root review mới nhất ở trên cùng
+  return roots.reverse()
 }
