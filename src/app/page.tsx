@@ -77,8 +77,8 @@ export default function Home() {
 
           {/* Grid đã fix: Tự động nhảy cột dựa trên không gian thực tế */}
           <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6'>
-            {updateMovie?.items.map(movie => (
-              <MovieItem key={movie._id} movie={movie} />
+            {updateMovie?.items.map((movie, index) => (
+              <MovieItem key={movie._id} movie={movie} index={index} />
             ))}
           </div>
 
