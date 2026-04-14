@@ -43,14 +43,15 @@ export default function FavoritePage() {
     }
   }
 
+  if (loading) return <Loading />
+
   return (
     <div className='pt-25 px-4 max-w-5xl mx-auto min-h-screen'>
       <h1 className='text-2xl font-bold mb-6'>Phim yêu thích</h1>
 
-      {loading && <Loading />}
       {error && <p className='text-red-500'>{error.message}</p>}
 
-      {!loading && !error && favorites.length > 0 ? (
+      {!error && favorites.length > 0 ? (
         <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 content-start'>
           {favorites.map(movie => (
             <div key={movie.slug} className='relative'>
