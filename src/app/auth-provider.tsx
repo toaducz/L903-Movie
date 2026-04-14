@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' })
     setUser(null) // reset state toàn site
-    router.replace(`/`)
+    router.replace(`/login`)
   }
 
   return <AuthContext.Provider value={{ user, setUser, logout, loading }}>{children}</AuthContext.Provider>
