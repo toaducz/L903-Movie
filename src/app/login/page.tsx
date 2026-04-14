@@ -7,6 +7,11 @@ import { useMutation } from '@tanstack/react-query'
 import Loading from '@/component/status/loading'
 import LoginAnimation from '@/component/login/login-animation'
 
+type Credentials = {
+  email: string
+  password: string
+}
+
 export default function LoginPage() {
   const [isHigh, setIsHigh] = useState(false)
   const [email, setEmail] = useState('')
@@ -20,7 +25,7 @@ export default function LoginPage() {
   }, [user, router])
 
   const loginMutation = useMutation({
-    mutationFn: async (credentials: any) => {
+    mutationFn: async (credentials: Credentials) => {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
