@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useAuth } from '../auth-provider'
 import { useRouter } from 'next/navigation'
 import { useMutation } from '@tanstack/react-query'
@@ -19,6 +19,10 @@ export default function LoginPage() {
 
   const router = useRouter()
   const { user, loading } = useAuth()
+
+  const handleToggle = useCallback(() => {
+    setIsHigh(prev => !prev)
+  }, [])
 
   useEffect(() => {
     if (user) router.replace('/')
@@ -75,7 +79,7 @@ export default function LoginPage() {
       {/* Main Card */}
       <div className='relative z-10 w-full max-w-4xl flex flex-col md:flex-row bg-white/[0.02] backdrop-blur-3xl border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden'>
         <div className='w-full md:w-[42%] relative border-b md:border-b-0 md:border-r border-white/5'>
-          <LoginAnimation isHigh={isHigh} onToggle={() => setIsHigh(!isHigh)} />
+          <LoginAnimation isHigh={isHigh} onToggle={handleToggle} />
         </div>
 
         <div className='flex-1 p-10 sm:p-14 lg:p-16 flex flex-col justify-center'>

@@ -1,19 +1,21 @@
-// component/login/login-animation.js
 'use client'
 import { useRive, Layout, Fit, Alignment } from '@rive-app/react-canvas'
-import { useEffect } from 'react'
+import { useEffect, memo } from 'react'
 
 interface LoginAnimationProps {
   isHigh: boolean
   onToggle: () => void
 }
 
-export default function LoginAnimation({ isHigh, onToggle }: LoginAnimationProps) {
+const LoginAnimation = memo(function LoginAnimation({ isHigh, onToggle }: LoginAnimationProps) {
   const { rive, RiveComponent } = useRive({
     src: '/riv/frieren.riv',
     animations: ['cloud', 'Timeline 1', 'low'],
     autoplay: true,
-    layout: new Layout({ fit: Fit.FitWidth, alignment: Alignment.Center })
+    layout: new Layout({
+      fit: Fit.FitWidth,
+      alignment: Alignment.Center
+    })
   })
 
   useEffect(() => {
@@ -29,10 +31,14 @@ export default function LoginAnimation({ isHigh, onToggle }: LoginAnimationProps
 
   return (
     <div
-      className={`relative w-full h-full overflow-hidden  ${isHigh ? 'bg-[#80B772]' : 'bg-[#A7E0FF]'}`}
+      className={`relative w-full h-full overflow-hidden transition-colors duration-1000 cursor-pointer ${
+        isHigh ? 'bg-[#80B772]' : 'bg-[#A7E0FF]'
+      }`}
       onClick={onToggle}
     >
-      <RiveComponent className='w-full h-full scale-[1.6] translate-y-[17%]' />
+      <RiveComponent className='w-full h-full scale-[1.6] translate-y-[15%]' />
     </div>
   )
-}
+})
+
+export default LoginAnimation
