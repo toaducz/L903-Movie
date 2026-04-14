@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '../auth-provider'
 import HistoryItem from '@/component/item/profile-movie-items'
@@ -54,11 +53,13 @@ export default function ProfilePage() {
   })
 
   const history: FavoriteMovie[] = (historyData?.data ?? []).slice(0, 5)
-  const favorites: FavoriteMovie[] = favoritesData?.data ? favoritesData.data.map((item: FavoriteMovie) => ({
-    name: item.name,
-    image: item.image,
-    slug: item.slug
-  })) : []
+  const favorites: FavoriteMovie[] = favoritesData?.data
+    ? favoritesData.data.map((item: FavoriteMovie) => ({
+        name: item.name,
+        image: item.image,
+        slug: item.slug
+      }))
+    : []
   const reviews: ReviewMovie[] = reviewsData?.data ?? []
 
   const isLoading = isHistoryLoading || isFavoritesLoading || isReviewsLoading
@@ -73,7 +74,13 @@ export default function ProfilePage() {
         {history.length > 0 ? (
           <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4'>
             {history.map(movie => (
-              <HistoryItem key={movie.slug} slug={movie.slug} name={movie.name} image={movie.image} episodeName={movie.episode_name} />
+              <HistoryItem
+                key={movie.slug}
+                slug={movie.slug}
+                name={movie.name}
+                image={movie.image}
+                episodeName={movie.episode_name}
+              />
             ))}
           </div>
         ) : (
@@ -113,10 +120,10 @@ export default function ProfilePage() {
             <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4'>
               {reviews.map(review => (
                 <div key={review.id} className='relative transition-transform hover:scale-105'>
-                   <HistoryItem slug={review.slug} name={review.name} image={review.image} />
-                   <div className='absolute top-2 right-2 bg-black/80 text-yellow-500 text-sm font-bold px-3 py-1 rounded-full border border-yellow-500/50 shadow-lg flex items-center gap-1 backdrop-blur-md'>
-                     <span>★</span> {review.score}
-                   </div>
+                  <HistoryItem slug={review.slug} name={review.name} image={review.image} />
+                  <div className='absolute top-2 right-2 bg-black/80 text-yellow-500 text-sm font-bold px-3 py-1 rounded-full border border-yellow-500/50 shadow-lg flex items-center gap-1 backdrop-blur-md'>
+                    <span>★</span> {review.score}
+                  </div>
                 </div>
               ))}
             </div>

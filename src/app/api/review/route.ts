@@ -2,6 +2,24 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '../../../lib/supabaseClient'
 import { getUserId } from '../../../lib/auth-helper'
 
+type ReviewRecord = {
+  id: string
+  user_id: string
+  user_email: string
+  slug: string
+  name: string
+  image: string
+  score: number
+  review_text: string
+  parent_id: string | null
+  updated_at: string
+}
+
+type ReviewNode = ReviewRecord & {
+  replies: ReviewNode[]
+  reply_to_username?: string
+}
+
 async function getSession(req: NextRequest) {
   const access_token = req.cookies.get('sb-access-token')?.value
   const refresh_token = req.cookies.get('sb-refresh-token')?.value
@@ -76,9 +94,9 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: 'Thiếu thông tin' }, { status: 400 })
   }
 
-  const payload: any = { 
-    review_text, 
-    updated_at: new Date().toISOString() 
+  const payload: { review_text: string; updated_at: string; score?: number } = {
+    review_text,
+    updated_at: new Date().toISOString()
   }
   if (score !== undefined) payload.score = score
 
@@ -161,9 +179,9 @@ export async function GET(req: NextRequest) {
 /**
  * Hàm hỗ trợ chuyển đổi mảng phẳng thành cấu trúc cây 1 tầng (tránh Infinite Nesting)
  */
-function buildCommentTree(flatComments: any[]) {
-  const map: any = {}
-  const roots: any[] = []
+function buildCommentTree(flatComments: ReviewRecord[]): ReviewNode[] {
+  const map: Record<string, ReviewNode> = {}
+  const roots: ReviewNode[] = []
 
   // Bước 1: Tạo map để truy xuất nhanh theo ID
   flatComments.forEach(comment => {
