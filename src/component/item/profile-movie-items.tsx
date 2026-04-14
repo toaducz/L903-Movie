@@ -25,7 +25,7 @@ export default function HistoryItem({ slug, name, image, episodeName, hideEpisod
         <Image src={image} alt={name} unoptimized className='object-cover' fill />
       </div>
       <div className='p-2'>
-        <h3 className='text-sm font-medium line-clamp-2'>{name}</h3>
+        <h3 className='text-sm font-medium line-clamp-1 overflow-hidden'>{name}</h3>
         {!hideEpisode && (
           <p className='text-xs text-blue-400 mt-1 font-medium'>
             {!episodeName || episodeName.toLowerCase() === 'full' ? 'Tập Full' : episodeName}
