@@ -1,4 +1,12 @@
+'use client'
+
+import { usePathname } from 'next/navigation'
+
 export default function Footer() {
+  const pathname = usePathname()
+
+  if (pathname === '/login') return null
+
   return (
     <footer className='bg-gray-800 text-gray-300 pb-8 pt-12 px-4 text-sm'>
       <div className='max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6'>

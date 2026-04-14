@@ -3,92 +3,115 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../auth-provider'
 import { useRouter } from 'next/navigation'
+import { useMutation } from '@tanstack/react-query'
 import Loading from '@/component/status/loading'
+import LoginAnimation from '@/component/login/login-animation'
 
 export default function LoginPage() {
+  const [isHigh, setIsHigh] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+
   const router = useRouter()
   const { user, loading } = useAuth()
 
   useEffect(() => {
-    if (user) {
-      router.replace('/')
-    }
+    if (user) router.replace('/')
   }, [user, router])
 
-  if (loading) {
-    return (
-      <div className='flex min-h-screen items-center justify-center bg-slate-900'>
-        <Loading />
-      </div>
-    )
-  }
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setError(null)
-
-    try {
+  const loginMutation = useMutation({
+    mutationFn: async (credentials: any) => {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify(credentials)
       })
-
-      // const result = await res.json()
-
-      if (!res.ok) {
-        setError('Đăng nhập thất bại')
-      } else {
-        window.location.href = '/'
-      }
-    } catch (err) {
-      setError('Đăng nhập thất bại' + err)
+      if (!res.ok) throw new Error('Email hoặc mật khẩu không chính xác')
+      return res.json()
+    },
+    onSuccess: () => {
+      window.location.href = '/'
     }
+  })
 
-    setIsSubmitting(false)
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault()
+    loginMutation.mutate({ email, password })
   }
 
+  const theme = {
+    pageBg: isHigh ? 'bg-[#0d1a12]' : 'bg-[#0a121e]',
+    glow: isHigh ? 'bg-[#80B772]/10' : 'bg-[#A7E0FF]/10',
+    button: isHigh
+      ? 'bg-[#80B772] hover:bg-[#6e9e62] shadow-[#80B772]/20'
+      : 'bg-[#3b82f6] hover:bg-[#2563eb] shadow-blue-500/20',
+    focus: isHigh ? 'focus:ring-[#80B772]/40 border-[#80B772]/20' : 'focus:ring-[#A7E0FF]/40 border-[#A7E0FF]/20',
+    accentText: isHigh ? 'text-[#80B772]' : 'text-[#A7E0FF]'
+  }
+
+  if (loading)
+    return (
+      <div className='flex min-h-screen items-center justify-center bg-[#0a121e]'>
+        <Loading />
+      </div>
+    )
+
   return (
-    <div className='flex min-h-screen items-center justify-center bg-slate-900'>
-      {!user?.id ? (
-        <form onSubmit={handleLogin} className='bg-slate-800 p-6 rounded-lg shadow-md w-80'>
-          <h2 className='text-xl font-bold mb-4 text-center'>Đăng nhập</h2>
+    <div
+      className={`relative flex min-h-screen items-center justify-center overflow-hidden p-4 transition-colors duration-1000 ${theme.pageBg}`}
+    >
+      <div
+        className={`absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full blur-[130px] transition-all duration-1000 ${theme.glow}`}
+      />
+      <div
+        className={`absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full blur-[130px] transition-all duration-1000 ${theme.glow}`}
+      />
 
-          <input
-            type='email'
-            placeholder='Email'
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            className='w-full mb-3 px-3 py-2 border rounded'
-            required
-          />
+      {/* Main Card */}
+      <div className='relative z-10 w-full max-w-4xl flex flex-col md:flex-row bg-white/[0.02] backdrop-blur-3xl border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden'>
+        <div className='w-full md:w-[42%] relative border-b md:border-b-0 md:border-r border-white/5'>
+          <LoginAnimation isHigh={isHigh} onToggle={() => setIsHigh(!isHigh)} />
+        </div>
 
-          <input
-            type='password'
-            placeholder='Mật khẩu'
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            className='w-full mb-3 px-3 py-2 border rounded'
-            required
-          />
+        <div className='flex-1 p-10 sm:p-14 lg:p-16 flex flex-col justify-center'>
+          <div className='mb-10'>
+            <h2 className='text-3xl font-bold text-white tracking-tight'>Đăng nhập</h2>
+            <p className='text-slate-400 mt-2'>Chào mừng bạn trở lại</p>
+          </div>
 
-          {error && <p className='text-red-500 text-sm mb-2'>{error}</p>}
+          <form onSubmit={handleLogin} className='space-y-5'>
+            <input
+              type='email'
+              placeholder='Email'
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              className={`w-full bg-white/[0.03] border text-white px-5 py-4 rounded-2xl outline-none transition-all placeholder:text-slate-600 focus:ring-2 ${theme.focus}`}
+            />
 
-          <button
-            type='submit'
-            disabled={isSubmitting}
-            className='w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:opacity-50 cursor-pointer'
-          >
-            {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
-          </button>
-          {/* <div className='italic items-center pt-6 text-center underline cursor-pointer hover:opacity-80'>Đăng kí</div> */}
-        </form>
-      ) : null}
+            <input
+              type='password'
+              placeholder='Mật khẩu'
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+              className={`w-full bg-white/[0.03] border text-white px-5 py-4 rounded-2xl outline-none transition-all placeholder:text-slate-600 focus:ring-2 ${theme.focus}`}
+            />
+
+            <button
+              type='submit'
+              disabled={loginMutation.isPending}
+              className={`w-full text-white py-4 rounded-2xl font-bold text-lg shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 mt-4 cursor-pointer duration-500 ${theme.button}`}
+            >
+              {loginMutation.isPending ? 'Đang xác thực...' : 'Xác nhận'}
+            </button>
+
+            {loginMutation.isError && (
+              <p className='text-red-400 text-sm font-medium'>{(loginMutation.error as Error).message}</p>
+            )}
+          </form>
+        </div>
+      </div>
     </div>
   )
 }
