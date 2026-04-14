@@ -104,7 +104,11 @@ export function getWatchingInProgress(): WatchingItem[] {
     const key = `${movie.slug}_${movie.episodeName}`
     const progress = getWatchProgress(key)
     const duration = getWatchDuration(key)
-    if (progress > 30 && duration > 0) {
+    
+    // Nếu là tập 2 trở đi của phim bộ thì luôn hiện dù xem < 30s
+    const isMovie = movie.episodeName.toLowerCase() === 'full' || /^tập\s*0?1$/i.test(movie.episodeName)
+    
+    if ((progress > 30 || !isMovie) && duration > 0) {
       const percent = Math.min(Math.round((progress / duration) * 100), 99)
       if (percent < 95) {
         result.push({ ...movie, progress, duration, percent })

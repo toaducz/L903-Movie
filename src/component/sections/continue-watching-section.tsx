@@ -5,6 +5,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { getWatchingInProgress, WatchingItem } from '@/utils/local-storage'
 
+import { useQuery } from '@tanstack/react-query'
+
 type DbItem = {
   slug: string
   name: string
@@ -15,30 +17,36 @@ type DbItem = {
 }
 
 export default function ContinueWatchingSection() {
-  const [items, setItems] = useState<WatchingItem[]>([])
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    fetch('/api/history')
-      .then(res => (res.status === 401 ? null : res.json()))
-      .then(json => {
-        if (!json) {
-          setItems(getWatchingInProgress().slice(0, 20))
-          return
-        }
-        const dbItems: WatchingItem[] = (json.data ?? [])
-          .filter((d: DbItem) => d.episode_name && d.progress > 30 && d.duration > 0)
-          .map((d: DbItem) => {
-            const percent = Math.min(Math.round((d.progress / d.duration) * 100), 99)
-            return { ...d, episodeName: d.episode_name, percent }
-          })
-          .filter((d: WatchingItem) => d.percent < 95)
-        const merged = dbItems.length > 0 ? dbItems : getWatchingInProgress()
-        setItems(merged.slice(0, 20))
-      })
-  }, [])
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: ['continue_watching'],
+    queryFn: async () => {
+      const res = await fetch('/api/history')
+      if (res.status === 401) {
+        return getWatchingInProgress().slice(0, 20)
+      }
+      const json = await res.json()
+      if (!json || !json.data) {
+        return getWatchingInProgress().slice(0, 20)
+      }
+      const dbItems: WatchingItem[] = json.data
+        .filter((d: DbItem) => {
+          if (!d.episode_name || d.duration <= 0) return false
+          const isMovie = d.episode_name.toLowerCase() === 'full' || /^tập\s*0?1$/i.test(d.episode_name)
+          return d.progress > 30 || !isMovie
+        })
+        .map((d: DbItem) => {
+          const percent = Math.min(Math.round((d.progress / d.duration) * 100), 99)
+          return { ...d, episodeName: d.episode_name, percent }
+        })
+        .filter((d: WatchingItem) => d.percent < 95)
+      const merged = dbItems.length > 0 ? dbItems : getWatchingInProgress()
+      return merged.slice(0, 20)
+    }
+  })
 
   const checkScroll = () => {
     const el = scrollRef.current
@@ -65,7 +73,7 @@ export default function ContinueWatchingSection() {
     el.scrollBy({ left: dir === 'left' ? -400 : 400, behavior: 'smooth' })
   }
 
-  if (items.length === 0) return null
+  if (isLoading || items.length === 0) return null
 
   return (
     <div className='px-2 sm:px-4 pt-6 pb-2'>

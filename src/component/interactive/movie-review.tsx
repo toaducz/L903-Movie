@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '@/app/auth-provider'
+import Loading from '@/component/status/loading'
 
 interface MovieReviewProps {
   slug: string
@@ -459,7 +460,7 @@ export default function MovieReview({ slug, name, image }: MovieReviewProps) {
       <div>
         <h3 className='font-semibold text-xl mb-4 text-gray-200'>Anh em nói gì về phim này? ({totalCount})</h3>
         {loading ? (
-          <p className='text-gray-500 text-center py-4'>Đang tải đánh giá...</p>
+          <Loading />
         ) : reviews.length === 0 ? (
           <div className='text-center py-8 text-gray-500 bg-gray-800/20 rounded-xl border border-gray-700 border-dashed'>
             Chưa có đánh giá nào cho phim này. Hãy là người đầu tiên!

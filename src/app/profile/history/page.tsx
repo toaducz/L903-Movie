@@ -4,29 +4,31 @@ import { useEffect, useState } from 'react'
 import HistoryItem from '@/component/item/profile-movie-items'
 import { getViewHistory } from '@/utils/local-storage'
 import { useAuth } from '@/app/auth-provider'
+import { useQuery } from '@tanstack/react-query'
+import Loading from '@/component/status/loading'
 
 type HistoryMovie = { name: string; slug: string; image: string; episode_name?: string }
 
 export default function HistoryPage() {
   const { user } = useAuth()
-  const [allMovies, setAllMovies] = useState<HistoryMovie[]>([])
-  const [visibleMovies, setVisibleMovies] = useState<HistoryMovie[]>([])
   const [page, setPage] = useState(1)
   const PAGE_SIZE = 10
 
-  useEffect(() => {
-    fetch('/api/history')
-      .then(res => res.status === 401 ? null : res.json())
-      .then(json => {
-        const items = json
-          ? (json.data ?? []).map((d: { name: string; slug: string; image: string; episode_name?: string }) => ({
-              name: d.name, slug: d.slug, image: d.image, episode_name: d.episode_name
-            }))
-          : getViewHistory()
-        setAllMovies(items)
-        setVisibleMovies(items.slice(0, PAGE_SIZE))
-      })
-  }, [])
+  const { data: allMoviesBase, isLoading, refetch } = useQuery({
+    queryKey: ['history_full', user?.id],
+    queryFn: async () => {
+      if (!user) return getViewHistory()
+      const res = await fetch('/api/history')
+      if (res.status === 401) return getViewHistory()
+      const json = await res.json()
+      return (json.data ?? []).map((d: HistoryMovie) => ({
+        name: d.name, slug: d.slug, image: d.image, episode_name: d.episode_name
+      }))
+    }
+  })
+
+  const allMovies = allMoviesBase || []
+  const visibleMovies = allMovies.slice(0, page * PAGE_SIZE)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,11 +41,7 @@ export default function HistoryPage() {
     }
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [visibleMovies, allMovies])
-
-  useEffect(() => {
-    setVisibleMovies(allMovies.slice(0, page * PAGE_SIZE))
-  }, [page, allMovies])
+  }, [visibleMovies.length, allMovies.length])
 
   const clearHistory = async () => {
     if (user) {
@@ -51,22 +49,24 @@ export default function HistoryPage() {
     } else {
       localStorage.removeItem('viewHistory')
     }
-    setAllMovies([])
-    setVisibleMovies([])
+    setPage(1)
+    refetch()
   }
 
   return (
     <div className='pt-25 px-4 max-w-5xl mx-auto min-h-screen'>
       <h1 className='text-2xl font-bold mb-6'>Lịch sử xem</h1>
 
-      {visibleMovies.length > 0 ? (
-        <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 min-h-screen'>
-          {visibleMovies.map(movie => (
+      {isLoading ? (
+        <Loading />
+      ) : visibleMovies.length > 0 ? (
+        <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 content-start'>
+          {visibleMovies.map((movie: HistoryMovie) => (
             <HistoryItem key={movie.slug} slug={movie.slug} name={movie.name} image={movie.image} episodeName={movie.episode_name} />
           ))}
         </div>
       ) : (
-        <p className='text-gray-500 min-h-screen'>Bạn chưa xem phim nào.</p>
+        <p className='text-gray-500'>Bạn chưa xem phim nào.</p>
       )}
 
       {visibleMovies.length < allMovies.length && <p className='text-center mt-4 text-gray-400'>Đang tải thêm...</p>}

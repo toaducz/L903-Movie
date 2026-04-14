@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '../auth-provider'
 import HistoryItem from '@/component/item/profile-movie-items'
+import { useQuery } from '@tanstack/react-query'
 import { getViewHistory } from '@/utils/local-storage'
+import Loading from '@/component/status/loading'
 
 type FavoriteMovie = {
   name: string
@@ -23,62 +25,45 @@ type ReviewMovie = {
 
 export default function ProfilePage() {
   const { logout, user } = useAuth()
-  const [history, setHistory] = useState<FavoriteMovie[]>([])
-  const [favorites, setFavorites] = useState<FavoriteMovie[]>([])
-  const [reviews, setReviews] = useState<ReviewMovie[]>([])
-  const [loading, setLoading] = useState(true)
+  const { data: historyData, isLoading: isHistoryLoading } = useQuery({
+    queryKey: ['history', user?.id],
+    queryFn: async () => {
+      if (!user) return { data: getViewHistory() }
+      const res = await fetch('/api/history')
+      if (res.status === 401) return { data: getViewHistory() }
+      return res.json()
+    }
+  })
 
-  useEffect(() => {
-    if (user) {
-      fetch('/api/history')
-        .then(res => res.json())
-        .then(json => setHistory((json.data ?? []).slice(0, 5)))
-    } else {
-      setHistory(getViewHistory().slice(0, 5))
-    }
-  }, [user])
+  const { data: favoritesData, isLoading: isFavoritesLoading } = useQuery({
+    queryKey: ['favorites', user?.id],
+    queryFn: async () => {
+      const res = await fetch('/api/favorite?page=1&limit=5')
+      return res.json()
+    },
+    enabled: !!user
+  })
 
-  useEffect(() => {
-    setLoading(true)
-    async function fetchFavorites() {
-      try {
-        const res = await fetch('/api/favorite?page=1&limit=5')
-        const json = await res.json()
-        if (json.data) {
-          const mapped: FavoriteMovie[] = json.data.map((item: FavoriteMovie) => ({
-            name: item.name,
-            image: item.image,
-            slug: item.slug
-          }))
-          setFavorites(mapped)
-        }
-      } catch (err) {
-        console.error('Lỗi fetch favorites:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-    if (user) {
-      fetchFavorites()
-    }
-  }, [user])
+  const { data: reviewsData, isLoading: isReviewsLoading } = useQuery({
+    queryKey: ['reviews', user?.id],
+    queryFn: async () => {
+      const res = await fetch('/api/review?my_reviews=1&limit=5')
+      return res.json()
+    },
+    enabled: !!user
+  })
 
-  useEffect(() => {
-    async function fetchReviews() {
-      try {
-        const res = await fetch('/api/review?my_reviews=1&limit=5')
-        const json = await res.json()
-        if (json.data) {
-          setReviews(json.data)
-        }
-      } catch (err) {
-        console.error('Lỗi fetch reviews:', err)
-      }
-    }
-    if (user) {
-      fetchReviews()
-    }
-  }, [user])
+  const history: FavoriteMovie[] = (historyData?.data ?? []).slice(0, 5)
+  const favorites: FavoriteMovie[] = favoritesData?.data ? favoritesData.data.map((item: FavoriteMovie) => ({
+    name: item.name,
+    image: item.image,
+    slug: item.slug
+  })) : []
+  const reviews: ReviewMovie[] = reviewsData?.data ?? []
+
+  const isLoading = isHistoryLoading || isFavoritesLoading || isReviewsLoading
+
+  if (isLoading) return <Loading />
 
   return (
     <div className='pt-25 pb-20 px-4 max-w-4xl mx-auto bg-black text-white'>
@@ -104,9 +89,7 @@ export default function ProfilePage() {
       {/* Phim yêu thích */}
       <section className='mb-8'>
         <h2 className='text-xl font-semibold mb-3'>Phim yêu thích</h2>
-        {loading ? (
-          <p className='text-gray-500'>Đang tải...</p>
-        ) : favorites.length > 0 ? (
+        {favorites.length > 0 ? (
           <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4'>
             {favorites.map(movie => (
               <HistoryItem key={movie.slug} slug={movie.slug} name={movie.name} image={movie.image} />

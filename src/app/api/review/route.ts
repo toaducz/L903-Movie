@@ -126,6 +126,8 @@ export async function GET(req: NextRequest) {
       .from('movie_reviews')
       .select('*')
       .eq('user_id', user_id)
+      .is('parent_id', null)
+      .gt('score', 0)
       .order('updated_at', { ascending: false })
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })

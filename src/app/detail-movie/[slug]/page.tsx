@@ -39,6 +39,7 @@ export default function WatchPage() {
     const params = new URLSearchParams(searchParams.toString())
     params.delete('watch')
     params.delete('ep')
+    params.delete('t')
     router.replace(`?${params.toString()}`)
   }
 
@@ -89,6 +90,7 @@ export default function WatchPage() {
         const params = new URLSearchParams(searchParams.toString())
         params.set('watch', '1')
         params.set('ep', nextEp.name)
+        params.delete('t')
         router.replace(`?${params.toString()}`)
         saveViewHistory({
           name: data?.movie?.name ?? '',
@@ -124,6 +126,7 @@ export default function WatchPage() {
       const params = new URLSearchParams(searchParams.toString())
       params.set('watch', '1')
       params.set('ep', epName)
+      params.delete('t')
       router.replace(`?${params.toString()}`)
       const historyPayload = {
         name: data?.movie?.name ?? '',

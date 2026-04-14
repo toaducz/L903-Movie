@@ -47,6 +47,15 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const playerRef = useRef<Player | null>(null)
   const currentSrcRef = useRef<string | undefined>(undefined)
   const progressKeyRef = useRef<string | undefined>(progressKey)
+  const onProgressRef = useRef(onProgress)
+  const onEndedRef = useRef(onEnded)
+
+  useEffect(() => {
+    progressKeyRef.current = progressKey
+    onProgressRef.current = onProgress
+    onEndedRef.current = onEnded
+  }, [progressKey, onProgress, onEnded])
+
   const [seekHint, setSeekHint] = useState<{ side: 'left' | 'right'; key: number } | null>(null)
   const lastTapRef = useRef<{ time: number; side: 'left' | 'right' } | null>(null)
 
@@ -299,13 +308,14 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         let lastSaved = 0
 
         const handleSaveProgress = () => {
-          if (!progressKey) return
+          const key = progressKeyRef.current
+          if (!key) return
           const current = player.currentTime() ?? 0
-          saveWatchProgress(progressKey, current)
+          saveWatchProgress(key, current)
           const dur = player.duration() ?? 0
           if (dur > 0) {
-            saveWatchDuration(progressKey, dur)
-            onProgress?.(current, dur)
+            saveWatchDuration(key, dur)
+            onProgressRef.current?.(current, dur)
           }
           lastSaved = current
         }
@@ -326,8 +336,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
         // Xóa khi xem xong + callback cho parent
         player.on('ended', () => {
-          if (progressKey) clearWatchProgress(progressKey)
-          onEnded?.()
+          const key = progressKeyRef.current
+          if (key) clearWatchProgress(key)
+          onEndedRef.current?.()
         })
 
         // Thêm nút tua 90s vào control bar — bên phải, trước nút fullscreen
@@ -434,6 +445,29 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         }
         .vjs-skip-90s-button:hover {
           opacity: 0.8;
+        }
+
+        /* Ẩn bớt các chức năng không quan trọng trên điện thoại màn hình dọc */
+        @media (max-width: 768px) and (orientation: portrait) {
+          .video-js .vjs-volume-panel,
+          .video-js .vjs-picture-in-picture-control,
+          .video-js .vjs-playback-rate,
+          .video-js .vjs-skip-90s-button {
+            display: none !important;
+          }
+          
+          /* Giảm kích thước một số nút để có thêm không gian */
+          .video-js .vjs-control {
+            width: 3em; 
+          }
+        }
+
+        /* Điện thoại nhỏ nữa thì ẩn luôn nút tua +/- 10s (người dùng vẫn có thể double-tap) */
+        @media (max-width: 480px) and (orientation: portrait) {
+          .video-js .vjs-skip-backward-10,
+          .video-js .vjs-skip-forward-10 {
+            display: none !important;
+          }
         }
       `}</style>
     </div>
