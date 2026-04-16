@@ -12,6 +12,8 @@
     "@rive-app/react-canvas": "^4.28.0",
     "@supabase/supabase-js": "^2.58.0",
     "@tanstack/react-query": "^5.90.2",
+    "deep-chat": "^2.4.2",
+    "deep-chat-react": "^2.4.2",
     "hls.js": "^1.6.5",
     "next": "15.5.9",
     "nprogress": "^0.2.0",

@@ -7,6 +7,7 @@ import { Suspense } from 'react'
 import NProgressInit from '@/component/layout/NProgressInit'
 import { AuthProvider } from './auth-provider'
 import Footer from '@/component/layout/footer'
+import ChatWidget from '@/component/chat-widget/chat-widget'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -40,6 +41,7 @@ export default function RootLayout({
             {/* <div className='pb-25'></div> */}
             {children}
             {/* <div className='pb-25'></div> */}
+            <ChatWidget />
             <Footer />
           </AuthProvider>
         </QueryProvider>
