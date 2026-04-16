@@ -100,7 +100,7 @@ export default function Home() {
             {renderMovieList(isLoadingPhimBo, isErrorPhimBo, phimbo?.data.items)}
             <button
               onClick={() => router.push('/list-movie?typelist=phim-bo')}
-              className='mt-2 text-sm text-gray-400 hover:text-blue-400 underline'
+              className='mt-2 text-sm text-gray-400 hover:text-blue-400 underline cursor-pointer'
             >
               Xem tất cả phim bộ
             </button>
@@ -112,7 +112,7 @@ export default function Home() {
             {renderMovieList(isLoadingPhimLe, isErrorPhimLe, phimle?.data.items)}
             <button
               onClick={() => router.push('/list-movie?typelist=phim-le')}
-              className='mt-2 text-sm text-gray-400 hover:text-blue-400 underline'
+              className='mt-2 text-sm text-gray-400 hover:text-blue-400 underline cursor-pointer'
             >
               Xem tất cả phim lẻ
             </button>
@@ -124,7 +124,7 @@ export default function Home() {
             {renderMovieList(isLoadingHoatHinh, isErrorHoatHinh, hoathinh?.data.items)}
             <button
               onClick={() => router.push('/list-movie?typelist=hoat-hinh')}
-              className='mt-2 text-sm text-gray-400 hover:text-blue-400 underline'
+              className='mt-2 text-sm text-gray-400 hover:text-blue-400 underline cursor-pointer'
             >
               Xem tất cả hoạt hình
             </button>
