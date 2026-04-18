@@ -286,7 +286,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
           const currentTime = player.currentTime() ?? 0
 
-          const PRE_MUTE = 0.3
+          const PRE_MUTE = 0.1
           const upcoming = adRegions.find(r => currentTime >= r.start - PRE_MUTE && currentTime < r.end)
           if (upcoming) {
             // Enforce mute mỗi frame — tránh trường hợp bị unmute từ bên ngoài
