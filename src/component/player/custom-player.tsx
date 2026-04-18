@@ -261,41 +261,23 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           adRegions = merged
         }
 
-        // Lắng nghe nhiều event hơn để đảm bảo adRegions được tính đúng lúc
         player.on('loadedmetadata', calculateAdRegions)
-        player.on('loadeddata', calculateAdRegions)
-        player.on('canplay', calculateAdRegions)
         player.on('mediachange', calculateAdRegions)
-
-        // Retry tính ad regions mỗi 2s cho đến khi thành công
-        let lastRegionCalcAttempt = 0
 
         const pollAds = () => {
           if (player.isDisposed()) return
           adRafId = requestAnimationFrame(pollAds)
 
-          // Nếu chưa tính được regions, thử lại mỗi 2 giây
-          if (adRegions.length === 0) {
-            const now = Date.now()
-            if (now - lastRegionCalcAttempt > 2000) {
-              lastRegionCalcAttempt = now
-              calculateAdRegions()
-            }
-            return
-          }
-
+          if (adRegions.length === 0) return
           const currentTime = player.currentTime() ?? 0
 
           const PRE_MUTE = 0.1
           const upcoming = adRegions.find(r => currentTime >= r.start - PRE_MUTE && currentTime < r.end)
           if (upcoming) {
-            // Enforce mute mỗi frame — tránh trường hợp bị unmute từ bên ngoài
-            if (!player.muted()) {
+            if (!mutedByAd) {
               player.muted(true)
+              mutedByAd = true
             }
-            mutedByAd = true
-
-            // Cơ chế seek gốc: guard -0.1s tránh seek vòng lặp
             if (currentTime >= upcoming.start && currentTime < upcoming.end - 0.1) {
               player.currentTime(upcoming.end)
             }
