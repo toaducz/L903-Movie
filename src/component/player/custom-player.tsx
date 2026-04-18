@@ -269,8 +269,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
         // Retry tính ad regions mỗi 2s cho đến khi thành công
         let lastRegionCalcAttempt = 0
-        // Debounce seek để tránh seek liên tục trong RAF loop
-        let lastSeekTime = 0
 
         const pollAds = () => {
           if (player.isDisposed()) return
@@ -297,10 +295,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             }
             mutedByAd = true
 
-            // Dùng debounce 300ms thay vì guard -0.1s → tránh sót đoạn cuối
-            const now = Date.now()
-            if (currentTime >= upcoming.start && now - lastSeekTime > 300) {
-              lastSeekTime = now
+            // Cơ chế seek gốc: guard -0.1s tránh seek vòng lặp
+            if (currentTime >= upcoming.start && currentTime < upcoming.end - 0.1) {
               player.currentTime(upcoming.end)
             }
           } else if (mutedByAd) {
