@@ -216,7 +216,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         }
         player.on('fullscreenchange', handleFullscreenChange)
 
-        let adRegions: Array<{ start: number; end: number }> = []
+        let adRegions: Array<{ start: number; end: number; skipped?: boolean }> = []
         let mutedByAd = false
         let adRafId: number | null = null
 
@@ -237,7 +237,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
           media.segments.forEach(segment => {
             const url = segment.resolvedUri || segment.uri || ''
-            const fileName = url.split('/').pop()?.split('?')[0] || ''
+            const fileName = url.split('/').pop()?.split('?')[0]?.split('#')[0] || ''
 
             if (adRegex.test(fileName)) {
               newAdRegions.push({
@@ -249,7 +249,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           })
 
           // Merge các region liền nhau thành 1 để tránh seek nhiều lần
-          const merged: Array<{ start: number; end: number }> = []
+          const merged: Array<{ start: number; end: number; skipped?: boolean }> = []
           for (const region of newAdRegions) {
             const last = merged[merged.length - 1]
             if (last && region.start <= last.end + 1) {
@@ -279,11 +279,15 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
               mutedByAd = true
             }
             if (currentTime >= upcoming.start && currentTime < upcoming.end - 0.1) {
-              player.currentTime(upcoming.end)
+              if (!upcoming.skipped && !player.seeking()) {
+                upcoming.skipped = true
+                player.currentTime(upcoming.end)
+              }
             }
           } else if (mutedByAd) {
             player.muted(false)
             mutedByAd = false
+            adRegions.forEach(r => r.skipped = false)
           }
         }
         adRafId = requestAnimationFrame(pollAds)
