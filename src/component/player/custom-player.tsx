@@ -232,7 +232,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           const newAdRegions: Array<{ start: number; end: number }> = []
 
           // segment_\d+ = ad (tên có số thứ tự), content dùng tên random
-          const adRegex = /^(segment_\d+|ads?_.*|promo_.*)\.ts$/i
+          // \d{4,}\.ts = pattern mới kiểu 000010.ts (tên toàn số từ 4 chữ số trở lên)
+          const adRegex = /^(segment_\d+|ads?_.*|promo_.*|\d{4,})\.ts$/i
 
           media.segments.forEach(segment => {
             const url = segment.resolvedUri || segment.uri || ''
@@ -260,16 +261,32 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           adRegions = merged
         }
 
+        // Lắng nghe nhiều event hơn để đảm bảo adRegions được tính đúng lúc
         player.on('loadedmetadata', calculateAdRegions)
+        player.on('loadeddata', calculateAdRegions)
+        player.on('canplay', calculateAdRegions)
         player.on('mediachange', calculateAdRegions)
+
+        // Retry tính ad regions mỗi 2s cho đến khi thành công
+        let lastRegionCalcAttempt = 0
 
         const pollAds = () => {
           if (player.isDisposed()) return
           adRafId = requestAnimationFrame(pollAds)
 
-          if (adRegions.length === 0) return
+          // Nếu chưa tính được regions, thử lại mỗi 2 giây
+          if (adRegions.length === 0) {
+            const now = Date.now()
+            if (now - lastRegionCalcAttempt > 2000) {
+              lastRegionCalcAttempt = now
+              calculateAdRegions()
+            }
+            return
+          }
+
           const currentTime = player.currentTime() ?? 0
 
+          // Có thể tăng PRE_MUTE lên 0.3s để kịp mute trước khi ad bắt đầu, không biết nữa :V
           const PRE_MUTE = 0.1
           const upcoming = adRegions.find(r => currentTime >= r.start - PRE_MUTE && currentTime < r.end)
           if (upcoming) {
