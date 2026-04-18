@@ -269,6 +269,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
         // Retry tính ad regions mỗi 2s cho đến khi thành công
         let lastRegionCalcAttempt = 0
+        // Debounce seek để tránh seek liên tục trong RAF loop
+        let lastSeekTime = 0
 
         const pollAds = () => {
           if (player.isDisposed()) return
@@ -286,15 +288,19 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
           const currentTime = player.currentTime() ?? 0
 
-          // Có thể tăng PRE_MUTE lên 0.3s để kịp mute trước khi ad bắt đầu, không biết nữa :V
-          const PRE_MUTE = 0.1
+          const PRE_MUTE = 0.3
           const upcoming = adRegions.find(r => currentTime >= r.start - PRE_MUTE && currentTime < r.end)
           if (upcoming) {
-            if (!mutedByAd) {
+            // Enforce mute mỗi frame — tránh trường hợp bị unmute từ bên ngoài
+            if (!player.muted()) {
               player.muted(true)
-              mutedByAd = true
             }
-            if (currentTime >= upcoming.start && currentTime < upcoming.end - 0.1) {
+            mutedByAd = true
+
+            // Dùng debounce 300ms thay vì guard -0.1s → tránh sót đoạn cuối
+            const now = Date.now()
+            if (currentTime >= upcoming.start && now - lastSeekTime > 300) {
+              lastSeekTime = now
               player.currentTime(upcoming.end)
             }
           } else if (mutedByAd) {
