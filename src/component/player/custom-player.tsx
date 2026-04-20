@@ -218,7 +218,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         }
         player.on('fullscreenchange', handleFullscreenChange)
 
-        let adRegions: Array<{ start: number; end: number }> = []
+        let adRegions: Array<{ start: number; end: number; skipped?: boolean }> = []
         let mutedByAd = false
         let adRafId: number | null = null
 
@@ -234,11 +234,12 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           const newAdRegions: Array<{ start: number; end: number }> = []
 
           // segment_\d+ = ad (tên có số thứ tự), content dùng tên random
-          const adRegex = /^(segment_\d+|ads?_.*|promo_.*)\.ts$/i
+          // \d{4,}\.ts = pattern mới kiểu 000010.ts (tên toàn số từ 4 chữ số trở lên)
+          const adRegex = /^(segment_\d+|ads?_.*|promo_.*|\d{4,})\.ts$/i
 
           media.segments.forEach(segment => {
             const url = segment.resolvedUri || segment.uri || ''
-            const fileName = url.split('/').pop()?.split('?')[0] || ''
+            const fileName = url.split('/').pop()?.split('?')[0]?.split('#')[0] || ''
 
             if (adRegex.test(fileName)) {
               newAdRegions.push({
@@ -250,7 +251,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           })
 
           // Merge các region liền nhau thành 1 để tránh seek nhiều lần
-          const merged: Array<{ start: number; end: number }> = []
+          const merged: Array<{ start: number; end: number; skipped?: boolean }> = []
           for (const region of newAdRegions) {
             const last = merged[merged.length - 1]
             if (last && region.start <= last.end + 1) {
@@ -272,8 +273,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           if (adRegions.length === 0) return
           const currentTime = player.currentTime() ?? 0
 
-          // Tăng lên 0.2 để rèm sập sớm hơn trước khi cái frame qc kịp lọt ra ngoài
-          const PRE_MUTE = 0.1
+          const PRE_MUTE = 0.2 // giớ hạn kĩ thuật nên phải pre muted 0.2 :v
           const upcoming = adRegions.find(r => currentTime >= r.start - PRE_MUTE && currentTime < r.end)
 
           if (upcoming) {
@@ -423,7 +423,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         className='pointer-events-none absolute top-0 left-0 w-full h-full bg-black z-50 flex items-center justify-center'
         style={{ opacity: 0, transition: 'opacity 0.1s ease-in-out' }}
       >
-        Che cho đỡ phản cảm :D
+        <span className='text-sm font-semibold drop-shadow'>Bỏ qua QC...</span>
       </div>
 
       {seekHint && (
