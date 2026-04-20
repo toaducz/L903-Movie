@@ -50,6 +50,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const onProgressRef = useRef(onProgress)
   const onEndedRef = useRef(onEnded)
 
+  const blackScreenRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
     progressKeyRef.current = progressKey
     onProgressRef.current = onProgress
@@ -144,13 +146,13 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             }
             const videoEl = player.el()?.querySelector('video') as
               | (HTMLVideoElement & {
-                requestPictureInPicture?: () => Promise<void>
-              })
+                  requestPictureInPicture?: () => Promise<void>
+                })
               | null
             if (doc.pictureInPictureElement) {
               doc.exitPictureInPicture?.()
             } else if (videoEl?.requestPictureInPicture) {
-              videoEl.requestPictureInPicture().catch(() => { })
+              videoEl.requestPictureInPicture().catch(() => {})
             }
           } else if (e.key === '[') {
             const rates = [0.5, 0.75, 1, 1.25, 1.5, 2]
@@ -198,7 +200,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 const orientation = window.screen.orientation as ScreenOrientation & {
                   lock: (type: string) => Promise<void>
                 }
-                orientation.lock('landscape').catch(() => { })
+                orientation.lock('landscape').catch(() => {})
               }
             } catch (error) {
               console.warn('Không thể khóa màn hình ngang:', error)
@@ -270,19 +272,29 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           if (adRegions.length === 0) return
           const currentTime = player.currentTime() ?? 0
 
+          // Tăng lên 0.2 để rèm sập sớm hơn trước khi cái frame qc kịp lọt ra ngoài
           const PRE_MUTE = 0.1
           const upcoming = adRegions.find(r => currentTime >= r.start - PRE_MUTE && currentTime < r.end)
+
           if (upcoming) {
             if (!mutedByAd) {
+              // 1. NGAY LÚC PHÁT HIỆN: Sập rèm đen & Tắt tiếng
+              if (blackScreenRef.current) blackScreenRef.current.style.opacity = '1'
               player.muted(true)
               mutedByAd = true
             }
             if (currentTime >= upcoming.start && currentTime < upcoming.end - 0.1) {
+              // 2. Ép tua đi (Logic cũ của bạn)
               player.currentTime(upcoming.end)
             }
           } else if (mutedByAd) {
-            player.muted(false)
-            mutedByAd = false
+            // 3. KHI ĐÃ TUA QUA KHỎI VÙNG QUẢNG CÁO
+            // Dùng setTimeout 150ms để đợi video js load xong frame phim thật rồi mới mở rèm lên
+            setTimeout(() => {
+              if (blackScreenRef.current) blackScreenRef.current.style.opacity = '0'
+              player.muted(false)
+              mutedByAd = false
+            }, 150)
           }
         }
         adRafId = requestAnimationFrame(pollAds)
@@ -300,7 +312,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         if (saved > 0) {
           player.one('loadedmetadata', () => {
             player.currentTime(saved)
-            player.play()?.catch(() => { })
+            player.play()?.catch(() => {})
           })
         }
 
@@ -385,7 +397,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         if (savedOnChange > 0) {
           player.one('loadedmetadata', () => {
             player.currentTime(savedOnChange)
-            player.play()?.catch(() => { })
+            player.play()?.catch(() => {})
           })
         }
       }
@@ -405,11 +417,21 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   return (
     <div data-vjs-player className='absolute top-0 left-0 w-full h-full overflow-hidden' onTouchEnd={handleTap}>
       <div ref={videoRef} className='w-full h-full' />
+
+      <div
+        ref={blackScreenRef}
+        className='pointer-events-none absolute top-0 left-0 w-full h-full bg-black z-50 flex items-center justify-center'
+        style={{ opacity: 0, transition: 'opacity 0.1s ease-in-out' }}
+      >
+        Che cho đỡ phản cảm :D
+      </div>
+
       {seekHint && (
         <div
           key={seekHint.key}
-          className={`pointer-events-none absolute top-1/2 -translate-y-1/2 flex flex-col items-center gap-1 text-white animate-seek-hint ${seekHint.side === 'left' ? 'left-6' : 'right-6'
-            }`}
+          className={`pointer-events-none absolute top-1/2 -translate-y-1/2 flex flex-col items-center gap-1 text-white animate-seek-hint ${
+            seekHint.side === 'left' ? 'left-6' : 'right-6'
+          }`}
         >
           <div className='rounded-full bg-white/20 p-4 text-2xl'>{seekHint.side === 'left' ? '«' : '»'}</div>
           <span className='text-sm font-semibold drop-shadow'>{seekHint.side === 'right' ? '+10s' : '-10s'}</span>
@@ -455,10 +477,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           .video-js .vjs-skip-90s-button {
             display: none !important;
           }
-          
+
           /* Giảm kích thước một số nút để có thêm không gian */
           .video-js .vjs-control {
-            width: 3em; 
+            width: 3em;
           }
         }
 
