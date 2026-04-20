@@ -233,7 +233,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           let currentTimeAcc = 0
           const newAdRegions: Array<{ start: number; end: number }> = []
 
-          // segment_\d+ = ad (tên có số thứ tự), content dùng tên random
           // \d{4,}\.ts = pattern mới kiểu 000010.ts (tên toàn số từ 4 chữ số trở lên)
           const adRegex = /^(segment_\d+|ads?_.*|promo_.*|\d{4,})\.ts$/i
 
