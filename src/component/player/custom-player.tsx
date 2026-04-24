@@ -5,6 +5,11 @@ import videojs from 'video.js'
 import Player from 'video.js/dist/types/player'
 import 'video.js/dist/video-js.css'
 import { saveWatchProgress, getWatchProgress, clearWatchProgress, saveWatchDuration } from '@/utils/local-storage'
+import { SubtitleCue } from '@/types/subtitle'
+import { findActiveSub } from '@/utils/parse-srt'
+import SubtitleSettingsPanel from '@/component/player/subtitle-settings-panel'
+import { getSubtitleSettings, saveSubtitleSettings, DEFAULT_SUBTITLE_SETTINGS } from '@/utils/subtitle-settings'
+import type { SubtitleSettings } from '@/types/subtitle'
 
 interface HLSSegment {
   resolvedUri?: string
@@ -33,6 +38,8 @@ interface VideoPlayerProps {
   initialTime?: number
   onEnded?: () => void
   onProgress?: (time: number, duration: number) => void
+  subtitles1?: SubtitleCue[]
+  subtitles2?: SubtitleCue[]
 }
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({
@@ -41,7 +48,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   progressKey,
   initialTime,
   onEnded,
-  onProgress
+  onProgress,
+  subtitles1,
+  subtitles2
 }) => {
   const videoRef = useRef<HTMLDivElement>(null)
   const playerRef = useRef<Player | null>(null)
@@ -49,14 +58,37 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const progressKeyRef = useRef<string | undefined>(progressKey)
   const onProgressRef = useRef(onProgress)
   const onEndedRef = useRef(onEnded)
-
   const blackScreenRef = useRef<HTMLDivElement>(null)
+
+  // ── Subtitle refs (đọc trong RAF loop, tránh stale closure) ────────────────
+  const subtitles1Ref = useRef<SubtitleCue[]>(subtitles1 ?? [])
+  const subtitles2Ref = useRef<SubtitleCue[]>(subtitles2 ?? [])
+  const subOffsetRef = useRef(0)
+  const showSubRef = useRef(true)
+  const activeSub1Ref = useRef<string | null>(null)
+  const activeSub2Ref = useRef<string | null>(null)
+
+  // ── Subtitle state (drive overlay render) ──────────────────────────────────
+  const [activeSub1, setActiveSub1] = useState<string | null>(null)
+  const [activeSub2, setActiveSub2] = useState<string | null>(null)
+  const [showSub, setShowSub] = useState(true)
+  const [subOffset, setSubOffset] = useState(0)
+  const [showHelp, setShowHelp] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
+  const [subSettings, setSubSettings] = useState<SubtitleSettings>(DEFAULT_SUBTITLE_SETTINGS)
+
+  // Load settings từ localStorage khi mount
+  useEffect(() => { setSubSettings(getSubtitleSettings()) }, [])
 
   useEffect(() => {
     progressKeyRef.current = progressKey
     onProgressRef.current = onProgress
     onEndedRef.current = onEnded
   }, [progressKey, onProgress, onEnded])
+
+  // Sync subtitle arrays vào ref khi props thay đổi
+  useEffect(() => { subtitles1Ref.current = subtitles1 ?? [] }, [subtitles1])
+  useEffect(() => { subtitles2Ref.current = subtitles2 ?? [] }, [subtitles2])
 
   const [seekHint, setSeekHint] = useState<{ side: 'left' | 'right'; key: number } | null>(null)
   const lastTapRef = useRef<{ time: number; side: 'left' | 'right' } | null>(null)
@@ -174,6 +206,18 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           } else if (e.key === 'ArrowDown') {
             e.preventDefault()
             player.volume(Math.max(0, (player.volume() ?? 0) - 0.1))
+          } else if (e.key.toLowerCase() === 'c') {
+            // Toggle hiển thị phụ đề
+            showSubRef.current = !showSubRef.current
+            setShowSub(prev => !prev)
+          } else if (e.key.toLowerCase() === 'z') {
+            // Phụ đề sớm hơn 0.5s
+            subOffsetRef.current = parseFloat((subOffsetRef.current - 0.5).toFixed(1))
+            setSubOffset(subOffsetRef.current)
+          } else if (e.key.toLowerCase() === 'x') {
+            // Phụ đề trễ hơn 0.5s
+            subOffsetRef.current = parseFloat((subOffsetRef.current + 0.5).toFixed(1))
+            setSubOffset(subOffsetRef.current)
           }
         }
         window.addEventListener('keydown', handleKeyDown)
@@ -294,6 +338,32 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
               player.muted(false)
               mutedByAd = false
             }, 150)
+          }
+
+          // ── Subtitle sync (60fps, binary search O(log n)) ──────────────────
+          if (!showSubRef.current) {
+            if (activeSub1Ref.current !== null) { activeSub1Ref.current = null; setActiveSub1(null) }
+            if (activeSub2Ref.current !== null) { activeSub2Ref.current = null; setActiveSub2(null) }
+          } else {
+            let adTimePassed = 0
+            let inAd = false
+            for (const region of adRegions) {
+              if (currentTime >= region.end) {
+                adTimePassed += region.end - region.start
+              } else if (currentTime >= region.start && currentTime < region.end) {
+                inAd = true; break
+              } else { break }
+            }
+            if (inAd) {
+              if (activeSub1Ref.current !== null) { activeSub1Ref.current = null; setActiveSub1(null) }
+              if (activeSub2Ref.current !== null) { activeSub2Ref.current = null; setActiveSub2(null) }
+            } else {
+              const realTime = currentTime - adTimePassed + subOffsetRef.current
+              const cue1 = findActiveSub(subtitles1Ref.current, realTime)
+              if (cue1 !== activeSub1Ref.current) { activeSub1Ref.current = cue1; setActiveSub1(cue1) }
+              const cue2 = findActiveSub(subtitles2Ref.current, realTime)
+              if (cue2 !== activeSub2Ref.current) { activeSub2Ref.current = cue2; setActiveSub2(cue2) }
+            }
           }
         }
         adRafId = requestAnimationFrame(pollAds)
@@ -434,6 +504,115 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         >
           <div className='rounded-full bg-white/20 p-4 text-2xl'>{seekHint.side === 'left' ? '«' : '»'}</div>
           <span className='text-sm font-semibold drop-shadow'>{seekHint.side === 'right' ? '+10s' : '-10s'}</span>
+        </div>
+      )}
+
+      {/* Subtitle overlay — vị trí và màu theo settings */}
+      {showSub && (activeSub1 || activeSub2) && (
+        <div
+          className='pointer-events-none absolute left-0 right-0 text-center z-40 px-6'
+          style={{ bottom: `${subSettings.bottomOffset}%` }}
+        >
+          {activeSub1 && (
+            <p
+              className='text-base md:text-lg font-semibold leading-snug mb-0.5 inline-block rounded px-1'
+              style={{
+                color: subSettings.sub1Color,
+                backgroundColor: subSettings.bgColor,
+                textShadow: '0 1px 3px #000'
+              }}
+            >
+              {activeSub1}
+            </p>
+          )}
+          {activeSub2 && (
+            <p
+              className='text-sm md:text-base leading-snug inline-block rounded px-1'
+              style={{
+                color: subSettings.sub2Color,
+                backgroundColor: subSettings.bgColor,
+                textShadow: '0 1px 3px #000'
+              }}
+            >
+              {activeSub2}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Sub offset indicator */}
+      {subOffset !== 0 && (
+        <div className='pointer-events-none absolute top-2 right-2 z-50'>
+          <span className='text-xs bg-black/70 text-white rounded px-2 py-1 font-mono'>
+            Sub {subOffset > 0 ? '+' : ''}{subOffset}s
+          </span>
+        </div>
+      )}
+
+      {/* Help button & panel */}
+      <button
+        onClick={() => { setShowHelp(v => !v); setShowSettings(false) }}
+        className='absolute top-2 left-2 z-50 w-6 h-6 rounded-full bg-black/50 text-white text-xs flex items-center justify-center hover:bg-black/80 transition-opacity opacity-30 hover:opacity-100'
+        title='Hướng dẫn phím tắt'
+      >
+        ?
+      </button>
+
+      {/* Settings button */}
+      <button
+        onClick={() => { setShowSettings(v => !v); setShowHelp(false) }}
+        className='absolute top-2 left-9 z-50 w-6 h-6 rounded-full bg-black/50 text-white text-xs flex items-center justify-center hover:bg-black/80 transition-opacity opacity-30 hover:opacity-100'
+        title='Cài đặt phụ đề'
+      >
+        ⚙
+      </button>
+
+      {/* Click outside overlay */}
+      {(showHelp || showSettings) && (
+        <div
+          className='absolute inset-0 z-40 cursor-default'
+          onClick={(e) => {
+            e.stopPropagation()
+            setShowHelp(false)
+            setShowSettings(false)
+          }}
+          onTouchEnd={(e) => {
+            e.stopPropagation()
+            setShowHelp(false)
+            setShowSettings(false)
+          }}
+        />
+      )}
+
+      {showHelp && (
+        <div className='absolute top-9 left-2 z-50 bg-black/85 text-white rounded-lg p-3 text-xs space-y-1 min-w-[220px] backdrop-blur-sm'>
+          <p className='font-semibold text-gray-300 mb-2'>⌨ Phím tắt</p>
+          <div className='grid grid-cols-[auto_1fr] gap-x-3 gap-y-1'>
+            <kbd className='font-mono bg-white/10 rounded px-1'>Space</kbd><span>Tạm dừng / Phát</span>
+            <kbd className='font-mono bg-white/10 rounded px-1'>← →</kbd><span>Tua ±10 giây</span>
+            <kbd className='font-mono bg-white/10 rounded px-1'>↑ ↓</kbd><span>Âm lượng ±10%</span>
+            <kbd className='font-mono bg-white/10 rounded px-1'>0–9</kbd><span>Nhảy đến % thời gian</span>
+            <kbd className='font-mono bg-white/10 rounded px-1'>[ ]</kbd><span>Tốc độ phát</span>
+            <kbd className='font-mono bg-white/10 rounded px-1'>M</kbd><span>Tắt / Bật tiếng</span>
+            <kbd className='font-mono bg-white/10 rounded px-1'>F</kbd><span>Toàn màn hình</span>
+            <kbd className='font-mono bg-white/10 rounded px-1'>T</kbd><span>Picture-in-Picture</span>
+            <kbd className='font-mono bg-white/10 rounded px-1'>C</kbd><span>Ẩn / Hiện phụ đề</span>
+            <kbd className='font-mono bg-white/10 rounded px-1'>Z / X</kbd><span>Phụ đề sớm / trễ 0.5s</span>
+          </div>
+        </div>
+      )}
+
+      {showSettings && (
+        <div className='absolute top-9 left-2 z-50 bg-black/90 rounded-lg p-4 min-w-[260px] backdrop-blur-sm'>
+          <p className='text-white text-xs font-semibold mb-3'>⚙ Cài đặt phụ đề</p>
+          <SubtitleSettingsPanel
+            compact
+            settings={subSettings}
+            onChange={s => {
+              setSubSettings(s)
+              saveSubtitleSettings(s)
+            }}
+          />
         </div>
       )}
       <style jsx global>{`

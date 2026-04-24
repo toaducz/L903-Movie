@@ -1,10 +1,12 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { getDetailMovie } from '@/api/kkphim/get-detail-movie'
+import { getSubtitles } from '@/api/proxy/get-subtitles'
 import EpisodeList from '@/component/interactive/episode-list'
+import SubtitleBadges from '@/component/interactive/subtitle-badges'
 import ReactPlayer from 'react-player'
 import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
@@ -15,6 +17,7 @@ import { saveViewHistory } from '@/utils/local-storage'
 import VideoPlayer from '@/component/player/custom-player'
 import { useAuth } from '@/app/auth-provider'
 import MovieReview from '@/component/interactive/movie-review'
+import type { SubtitleParams, SubtitleCue } from '@/types/subtitle'
 
 const AUTOPLAY_COUNTDOWN = 5
 
@@ -34,6 +37,47 @@ export default function WatchPage() {
   const epParam = searchParams.get('ep')
   const tParam = Number(searchParams.get('t') ?? 0) || 0
   const isAvailable = data?.movie?.episode_current === 'Trailer'
+
+  const { season: detectedSeason, isSeasonFallback } = useMemo(() => {
+    const originName = data?.movie?.origin_name ?? ''
+    // Ưu tiên lấy bằng regex từ origin_name (bắt "season N")
+    const match = originName.match(/Season\s*(\d+)/i)
+    if (match) return { season: parseInt(match[1], 10), isSeasonFallback: false }
+
+    return { season: 1, isSeasonFallback: true }
+  }, [data?.movie?.origin_name])
+
+  // ─── Detect số tập từ ep trên URL (e.g. "Tập 5" → 5) ───────────────────────
+  // Dùng epParam thay vì episodeToPlay?.name vì episodeToPlay chưa được define
+  // ở thời điểm này (nó nằm sau early returns loading/error).
+  // epParam và episodeToPlay.name là cùng giá trị vì handleSelectEpisode
+  // luôn set params.set('ep', ep.name).
+  const currentEpisodeNumber = useMemo(() => {
+    const name = epParam ?? ''
+    const match = name.match(/(\d+)/)
+    return match ? parseInt(match[1], 10) : 1
+  }, [epParam])
+
+  const subtitleParams = useMemo((): SubtitleParams | null => {
+    const tmdbId = data?.movie?.tmdb?.id
+    if (!tmdbId || !isWatching) return null
+    const isSeries = data.movie.type === 'series'
+    if (isSeries) {
+      return { tmdbId, type: 'series', season: detectedSeason, episode: currentEpisodeNumber }
+    }
+    return { tmdbId, type: 'movie' }
+  }, [data?.movie?.tmdb?.id, data?.movie?.type, isWatching, detectedSeason, currentEpisodeNumber])
+
+  const { data: subtitleData, isLoading: isSubLoading, error } = useQuery(getSubtitles(subtitleParams))
+  const errorMessage =
+    error != null
+      ? typeof error === 'object' && 'message' in error
+        ? String((error as { message: unknown }).message)
+        : 'Lỗi không xác định'
+      : undefined
+
+  const [subtitles1, setSubtitles1] = useState<SubtitleCue[]>([])
+  const [subtitles2, setSubtitles2] = useState<SubtitleCue[]>([])
 
   const goBack = () => {
     const params = new URLSearchParams(searchParams.toString())
@@ -351,6 +395,26 @@ export default function WatchPage() {
             <div>
               <div className='bg-gray-700 p-4'>
                 <h2 className='text-xl font-semibold'>{episodeToPlay.name}</h2>
+                {/* Phụ đề khả dụng (đi ăn trộm) */}
+                <SubtitleBadges
+                  data={subtitleData ?? null}
+                  isLoading={isSubLoading}
+                  errorMessage={errorMessage}
+                  isSeasonFallback={data?.movie?.type === 'series' && isSeasonFallback}
+                  onSub1Change={setSubtitles1}
+                  onSub2Change={setSubtitles2}
+                />
+                <details className='mt-3 border-t border-gray-600/50 pt-2 text-xs text-gray-400 group'>
+                  <summary className='cursor-pointer select-none italic hover:text-gray-300 list-none flex items-center gap-1'>
+                    <span className='transition-transform group-open:rotate-90 text-[10px]'>▶</span>
+                    Mẹo: Cách chỉnh độ trễ phụ đề (Sync)
+                  </summary>
+                  <div className='pl-4 mt-2 italic leading-relaxed text-gray-400'>
+                    Nhấn phím <kbd className='bg-gray-600 px-1 rounded text-gray-200'>Z</kbd> /{' '}
+                    <kbd className='bg-gray-600 px-1 rounded text-gray-200'>X</kbd> để ép phụ đề hiện sớm hoặc trễ hơn
+                    0.5s (lệch tiếng nhiều lắm, cái này chịu :D).
+                  </div>
+                </details>
               </div>
               <div className='flex justify-center my-4'>
                 <button
@@ -397,7 +461,7 @@ export default function WatchPage() {
                       responsive: false,
                       fluid: false,
                       poster: thumbnail.src,
-                      
+
                       sources: [
                         {
                           src: episodeToPlay.link_m3u8,
@@ -405,6 +469,8 @@ export default function WatchPage() {
                         }
                       ]
                     }}
+                    subtitles1={subtitles1}
+                    subtitles2={subtitles2}
                   />
                 ) : (
                   <div className='absolute top-0 left-0 w-full h-full'>

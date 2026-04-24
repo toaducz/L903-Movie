@@ -7,8 +7,21 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing url' }, { status: 400 })
   }
 
-  const res = await fetch(targetUrl)
-  const data = await res.json()
+  const cookieHeader = req.headers.get('cookie')
+  const headers = cookieHeader ? { cookie: cookieHeader } : undefined
 
-  return NextResponse.json(data)
+  const res = await fetch(targetUrl, { headers })
+  const contentType = res.headers.get('content-type') ?? ''
+
+  // Trả về text thẳng nếu không phải JSON (ví dụ: file .srt)
+  if (!contentType.includes('application/json')) {
+    const text = await res.text()
+    return new NextResponse(text, {
+      status: res.status,
+      headers: { 'Content-Type': contentType || 'text/plain; charset=utf-8' }
+    })
+  }
+
+  const data = await res.json()
+  return NextResponse.json(data, { status: res.status })
 }
