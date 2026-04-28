@@ -127,13 +127,14 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`w-screen fixed top-0 z-50 transition-transform duration-300 border-b ${
+      className={`w-full inset-x-0 fixed top-0 z-[9999] transition-transform duration-300 border-b ${
         isVisible ? 'translate-y-0' : '-translate-y-full'
       }`}
       style={{
         backdropFilter: 'blur(20px)',
         background: 'rgba(13,10,20,.75)',
-        borderColor: 'var(--c-line)'
+        borderColor: 'var(--c-line)',
+        zIndex: 9999
       }}
     >
       <div className='max-w-[1400px] mx-auto px-5 sm:px-10 py-4 flex items-center justify-between gap-6'>
@@ -164,7 +165,7 @@ export default function Navbar() {
 
                   {openMenu === menuKey && (
                     <div
-                      className='absolute left-0 top-full mt-2 w-48 max-h-72 overflow-y-auto rounded-xl shadow-xl z-50 border'
+                      className='absolute left-0 top-full mt-2 w-48 max-h-72 overflow-y-auto rounded-xl shadow-xl z-[9999] border'
                       style={{ background: 'var(--c-card)', borderColor: 'var(--c-line)' }}
                     >
                       {getItems().map(item => {
@@ -228,7 +229,7 @@ export default function Navbar() {
           </form>
           {showSuggestions && suggestions.length > 0 && (
             <div
-              className='absolute top-full left-0 mt-2 w-80 rounded-xl shadow-xl z-50 overflow-hidden border'
+              className='absolute top-full left-0 mt-2 w-80 rounded-xl shadow-xl z-[9999] overflow-hidden border'
               style={{ background: 'var(--c-card)', borderColor: 'var(--c-line)' }}
             >
               {suggestions.map(movie => (
@@ -313,7 +314,7 @@ export default function Navbar() {
             </form>
             {showSuggestions && suggestions.length > 0 && (
               <div
-                className='absolute top-full left-0 mt-2 w-full rounded-xl shadow-xl z-50 overflow-hidden border'
+                className='absolute top-full left-0 mt-2 w-full rounded-xl shadow-xl z-[9999] overflow-hidden border'
                 style={{ background: 'var(--c-card)', borderColor: 'var(--c-line)' }}
               >
                 {suggestions.map(movie => (

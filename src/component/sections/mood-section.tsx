@@ -15,9 +15,7 @@ export default function MoodSection() {
         }}
       >
         <div>
-          <p className='text-3xl sm:text-4xl font-black tracking-tight mb-2 text-white'>
-            Không biết xem gì?
-          </p>
+          <p className='text-3xl sm:text-4xl font-black tracking-tight mb-2 text-white'>Không biết xem gì?</p>
           <p className='text-white/85 text-base sm:text-lg mb-6 max-w-xl leading-relaxed'>
             Hỏi mình đi! AI Agent tìm phim 24/7, không quảng cáo, không spam, không lừa. Chỉ cần mô tả mood là xong.
           </p>
@@ -31,16 +29,15 @@ export default function MoodSection() {
             }}
             title='Tính năng đang phát triển'
           >
-            Hỏi mình ›
-            <span className='text-[10px] font-normal text-white/60 ml-1'>(sắp ra mắt)</span>
+            Hỏi mình ›<span className='text-[10px] font-normal text-white/60 ml-1'>(sắp ra mắt)</span>
           </button>
         </div>
 
         {/* Decorative placeholder */}
-        <div className='hidden sm:flex w-48 h-32 rounded-2xl items-center justify-center text-5xl select-none'
+        {/* <div className='hidden sm:flex w-48 h-32 rounded-2xl items-center justify-center text-5xl select-none'
           style={{ background: 'rgba(13,10,20,.35)' }}>
           🤖
-        </div>
+        </div> */}
       </div>
     </section>
   )

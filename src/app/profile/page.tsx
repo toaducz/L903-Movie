@@ -79,7 +79,7 @@ export default function ProfilePage() {
   if (isLoading) return <Loading />
 
   return (
-    <div className='pt-25 pb-20 px-4 max-w-4xl mx-auto bg-black text-white'>
+    <div className='pt-16 pb-20 px-4 max-w-4xl mx-auto bg-transparent text-white'>
       {user && <p className='mb-6'>Đăng nhập bằng: {user.email}</p>}
       <section className='mb-8'>
         <h2 className='text-xl font-semibold mb-3'>Phim đã xem gần đây</h2>

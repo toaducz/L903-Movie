@@ -40,9 +40,9 @@ export default function RootLayout({
             <div className='c-app'>
               <Navbar />
               {children}
-              <ChatWidget />
               <Footer />
             </div>
+            <ChatWidget />
           </AuthProvider>
         </QueryProvider>
       </body>
