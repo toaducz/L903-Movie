@@ -204,163 +204,147 @@ export default function WatchPage() {
   // Giao diện thông tin phim
   if (!isWatching) {
     return (
-      <div className='min-h-screen bg-gradient-to-b from-gray-900 to-black text-white pb-16 scale-91'>
-        <div className='max-w-6xl mx-auto px-4'>
-          {/* Header với backdrop */}
+      <div className='min-h-screen bg-[var(--c-bg)] text-white pb-16'>
+        <div className='max-w-6xl mx-auto px-5 sm:px-10 py-8'>
+          {/* Header Banner with tilted hard shadow */}
           <div
-            className='relative w-full h-80 rounded-xl mb-8 overflow-hidden bg-cover bg-center'
+            className='relative w-full h-[280px] sm:h-[360px] rounded-3xl mb-10 overflow-hidden bg-cover bg-center border border-[var(--c-line)]'
             style={{
               backgroundImage: `url(${movie.poster_url})`,
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)'
+              boxShadow: '12px 12px 0 var(--c-pink)'
             }}
           >
-            <div className='absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent' />
-            <div className='absolute bottom-0 left-0 w-full p-8'>
-              <h1 className='text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-lg'>{movie.name}</h1>
-              <p className='text-xl text-gray-300 italic drop-shadow-md'>{movie.origin_name}</p>
+            <div className='absolute inset-0 bg-gradient-to-t from-[var(--c-bg)] via-[var(--c-bg)]/60 to-transparent' />
+            <div className='absolute bottom-0 left-0 w-full p-6 sm:p-10'>
+              <span className='c-sticker mb-3 inline-block'>
+                ★ {movie.quality} · {movie.lang}
+              </span>
+              <h1 className='text-3xl sm:text-5xl font-black tracking-tight text-white mb-2 drop-shadow-lg'>
+                {movie.name}
+              </h1>
+              <p className='text-lg sm:text-xl text-[var(--c-cyan)] font-bold drop-shadow-md'>{movie.origin_name}</p>
             </div>
           </div>
 
-          <div className='md:flex gap-8'>
-            {/* Poster */}
-            <div className='md:w-1/3 flex flex-col'>
-              <div className='rounded-xl overflow-hidden shadow-2xl transform transition hover:scale-[1.02] duration-300'>
+          <div className='grid grid-cols-1 md:grid-cols-[320px_1fr] gap-10 items-start'>
+            {/* Left Column: Poster + CTA */}
+            <div className='flex flex-col gap-6'>
+              <div
+                className='rounded-2xl overflow-hidden border-2 border-[var(--c-line)] bg-black'
+                style={{
+                  boxShadow: '10px 10px 0 var(--c-yel)',
+                  transform: 'rotate(-1.5deg)'
+                }}
+              >
                 <Image
                   unoptimized
-                  // priority
                   loading='lazy'
                   width={400}
                   height={600}
                   src={movie.poster_url}
                   alt={movie.name}
-                  className='w-full h-auto'
+                  className='w-full h-auto object-cover'
                 />
               </div>
 
               <button
-                className='mt-6 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-blue-500/50 w-full flex justify-center items-center gap-2 cursor-pointer'
+                className='w-full py-3.5 rounded-xl font-black text-sm tracking-wider text-[var(--c-bg)] bg-[var(--c-pink)] hover:opacity-90 transition-all duration-150 cursor-pointer flex justify-center items-center gap-2 shadow-lg'
+                style={{ boxShadow: '5px 5px 0 var(--c-yel)' }}
                 onClick={() => {
                   const firstEp = data?.episodes?.[0]?.server_data?.[0]
                   if (firstEp) handleSelectEpisode(firstEp.link_embed, firstEp.link_m3u8, firstEp.name)
                   window.scrollTo({ top: 0, behavior: 'smooth' })
                 }}
               >
-                <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
-                  <path
-                    fillRule='evenodd'
-                    d='M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z'
-                    clipRule='evenodd'
-                  />
-                </svg>
-                Xem phim
+                ▶ XEM PHIM
               </button>
 
               <div>
                 <FavoriteButton slug={movie?.slug} image={movie?.poster_url} name={movie.name} />
               </div>
 
-              <div className='mt-6 bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 shadow-lg'>
+              {/* Fast Info */}
+              <div className='rounded-2xl p-5 border border-[var(--c-line)]' style={{ background: 'var(--c-card)' }}>
                 {movie.tmdb?.vote_average > 0 && (
-                  <div className='flex items-center gap-3 mb-4 p-3 bg-gray-700/50 rounded-lg'>
-                    <div className='bg-yellow-500 text-black font-bold rounded-full w-14 h-14 flex items-center justify-center text-xl shadow-lg shrink-0'>
+                  <div className='flex items-center gap-3 mb-4 p-3 bg-white/5 rounded-xl border border-white/10'>
+                    <div className='bg-[var(--c-yel)] text-[var(--c-bg)] font-black rounded-xl w-12 h-12 flex items-center justify-center text-lg shadow-md shrink-0'>
                       {movie.tmdb.vote_average.toFixed(1)}
                     </div>
                     <div>
-                      <p className='text-xs text-yellow-400 font-semibold uppercase tracking-wide'>TMDB</p>
-                      <p className='text-sm text-gray-300'>{movie.tmdb.vote_count.toLocaleString()} lượt đánh giá</p>
+                      <p className='text-[10px] text-[var(--c-pink)] font-black uppercase tracking-wider'>
+                        TMDB RATING
+                      </p>
+                      <p className='text-xs text-white/60'>{movie.tmdb.vote_count.toLocaleString()} votes</p>
                     </div>
                   </div>
                 )}
 
-                <div className='grid grid-cols-2 gap-y-2 text-sm text-gray-300'>
+                <div className='grid grid-cols-1 gap-y-2 text-sm text-white/80 font-medium'>
                   <div>
-                    <span className='font-semibold text-gray-200'>Năm:</span> {movie.year}
+                    <span className='text-white/40'>Năm:</span> {movie.year}
                   </div>
                   <div>
-                    <span className='font-semibold text-gray-200'>Chất lượng:</span> {movie.quality}
-                  </div>
-                  <div>
-                    <span className='font-semibold text-gray-200'>Ngôn ngữ:</span> {movie.lang}
-                  </div>
-                  <div>
-                    <span className='font-semibold text-gray-200'>Thời lượng:</span> {movie.time}
+                    <span className='text-white/40'>Thời lượng:</span> {movie.time}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Thông tin phim */}
-            <div className='md:w-2/3 mt-6 md:mt-0'>
-              <div className='bg-gray-800/30 backdrop-blur-sm rounded-xl p-6 shadow-lg mb-6'>
-                <h2 className='text-2xl font-bold mb-4 border-l-4 border-blue-500 pl-4'>Thông tin chi tiết</h2>
+            {/* Right Column: Details */}
+            <div className='flex flex-col gap-8'>
+              <div className='rounded-2xl p-6 border border-[var(--c-line)]' style={{ background: 'var(--c-card)' }}>
+                <h2 className='text-xl font-black tracking-tight text-white flex items-center gap-2 mb-5'>
+                  <span className='c-marker cyan' />
+                  Chi Tiết
+                </h2>
 
-                <div className='space-y-3 text-gray-300'>
+                <div className='space-y-3 text-sm text-white/80'>
                   <p>
-                    <span className='inline-block w-28 font-semibold text-gray-200'>Quốc gia:</span>
+                    <span className='font-semibold text-[var(--c-cyan)] inline-block w-28'>Quốc gia:</span>{' '}
                     {movie.country.map(c => c.name).join(', ')}
                   </p>
                   <p>
-                    <span className='inline-block w-28 font-semibold text-gray-200'>Thể loại:</span>
+                    <span className='font-semibold text-[var(--c-cyan)] inline-block w-28'>Thể loại:</span>{' '}
                     {movie.category.map(c => c.name).join(', ')}
                   </p>
                   <p>
-                    <span className='inline-block w-28 font-semibold text-gray-200'>Diễn viên:</span>
+                    <span className='font-semibold text-[var(--c-cyan)] inline-block w-28'>Diễn viên:</span>{' '}
                     {movie.actor.join(', ')}
                   </p>
                   <p>
-                    <span className='inline-block w-28 font-semibold text-gray-200'>Đạo diễn:</span>
+                    <span className='font-semibold text-[var(--c-cyan)] inline-block w-28'>Đạo diễn:</span>{' '}
                     {movie.director.join(', ')}
                   </p>
                   <p>
-                    <span className='inline-block w-28 font-semibold text-gray-200'>Tập hiện tại:</span>
+                    <span className='font-semibold text-[var(--c-cyan)] inline-block w-28'>Tập hiện tại:</span>{' '}
                     {movie.episode_current === 'Full' ? 'Full' : `${movie.episode_current} / ${movie.episode_total}`}
                   </p>
                 </div>
               </div>
 
-              <div className='bg-gray-800/30 backdrop-blur-sm rounded-xl p-6 shadow-lg'>
-                <h2 className='text-2xl font-bold mb-4 border-l-4 border-blue-500 pl-4'>Nội dung</h2>
-                <p className='text-gray-300 leading-relaxed'>{movie.content}</p>
+              <div className='rounded-2xl p-6 border border-[var(--c-line)]' style={{ background: 'var(--c-card)' }}>
+                <h2 className='text-xl font-black tracking-tight text-white flex items-center gap-2 mb-4'>
+                  <span className='c-marker pink' />
+                  Nội Dung
+                </h2>
+                <p className='text-white/70 leading-relaxed text-sm'>{movie.content}</p>
               </div>
 
-              {/* Thể loại tags */}
-              <div className='mt-6'>
-                <h2 className='text-xl font-bold mb-3'>Thể loại:</h2>
-                <div className='flex flex-wrap gap-2'>
-                  {movie.category.map(cat => (
-                    <span
-                      key={cat.name}
-                      className='px-3 py-1 bg-blue-600/20 border border-blue-500/30 text-blue-400 rounded-full text-sm'
-                    >
-                      {cat.name}
-                    </span>
-                  ))}
+              {movie.trailer_url && (
+                <div>
+                  <h2 className='text-xl font-black tracking-tight text-white flex items-center gap-2 mb-4'>
+                    <span className='c-marker yel' />
+                    Trailer
+                  </h2>
+                  <div className='rounded-2xl overflow-hidden border border-[var(--c-line)] shadow-2xl'>
+                    <ReactPlayer url={movie.trailer_url} controls width='100%' height='400px' />
+                  </div>
                 </div>
-              </div>
+              )}
+
+              <MovieReview slug={movie.slug} name={movie.name} image={movie.poster_url} />
             </div>
           </div>
-
-          {/* Trailer */}
-          {movie.trailer_url && (
-            <div className='mt-12'>
-              <h2 className='text-2xl font-bold mb-4 border-l-4 border-red-500 pl-4'>Trailer</h2>
-              <div className='rounded-xl overflow-hidden shadow-2xl'>
-                <ReactPlayer
-                  url={movie.trailer_url}
-                  controls
-                  width='100%'
-                  height='500px'
-                  config={{
-                    youtube: {
-                      playerVars: { showinfo: 1 }
-                    }
-                  }}
-                />
-              </div>
-            </div>
-          )}
-
-          <MovieReview slug={movie.slug} name={movie.name} image={movie.poster_url} />
         </div>
       </div>
     )
@@ -368,34 +352,34 @@ export default function WatchPage() {
 
   // Giao diện phát video
   return (
-    <div className='min-h-screen bg-gradient-to-b from-gray-900 to-black text-white pt-10 pb-16'>
-      <div className='max-w-6xl mx-auto px-4'>
+    <div className='min-h-screen bg-[var(--c-bg)] text-white pb-16 '>
+      <div className='max-w-6xl mx-auto px-5 sm:px-10 py-8'>
         <button
-          className='mb-6 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition duration-300 flex items-center gap-2 shadow-lg'
+          className='mb-6 px-4 py-2 bg-white/5 hover:bg-white/10 border border-[var(--c-line)] rounded-xl transition duration-300 flex items-center gap-2 text-sm font-bold text-[var(--c-cyan)] shadow-lg cursor-pointer'
           onClick={() => goBack()}
         >
-          <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
-            <path
-              fillRule='evenodd'
-              d='M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z'
-              clipRule='evenodd'
-            />
-          </svg>
-          Quay lại thông tin phim
+          ◀ Quay lại thông tin phim
         </button>
 
-        <div className='flex items-center gap-4 mb-6'>
-          <h1 className='text-3xl font-bold'>{movie.name}</h1>
-          <span className='text-gray-400 italic'>{movie.origin_name}</span>
+        <div className='flex flex-col sm:flex-row sm:items-end gap-2 mb-6'>
+          <h1 className='text-2xl sm:text-3xl font-black tracking-tight text-white'>{movie.name}</h1>
+          <span className='text-[var(--c-pink)] text-sm font-bold italic sm:mb-1'>{movie.origin_name}</span>
         </div>
 
         {/* Player trong card */}
-        <div className='bg-gray-800/50 backdrop-blur-sm rounded-xl overflow-hidden shadow-2xl mb-8'>
+        <div
+          className='rounded-2xl overflow-hidden border-2 border-[var(--c-line)] mb-8 bg-black'
+          style={{ boxShadow: '12px 12px 0 var(--c-pink)' }}
+        >
           {selectedEpisode && episodeToPlay ? (
             <div>
-              <div className='bg-gray-700 p-4'>
-                <h2 className='text-xl font-semibold'>{episodeToPlay.name}</h2>
-                {/* Phụ đề khả dụng (đi ăn trộm) */}
+              <div className='bg-white/5 p-5 border-b border-[var(--c-line)] flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
+                <div>
+                  <span className='c-marker yel mr-2 inline-block align-middle' />
+                  <span className='text-lg font-black align-middle'>{episodeToPlay.name}</span>
+                </div>
+
+                {/* Phụ đề khả dụng */}
                 <SubtitleBadges
                   data={subtitleData ?? null}
                   isLoading={isSubLoading}
@@ -404,34 +388,24 @@ export default function WatchPage() {
                   onSub1Change={setSubtitles1}
                   onSub2Change={setSubtitles2}
                 />
-                <details className='mt-3 border-t border-gray-600/50 pt-2 text-xs text-gray-400 group'>
-                  <summary className='cursor-pointer select-none italic hover:text-gray-300 list-none flex items-center gap-1'>
-                    <span className='transition-transform group-open:rotate-90 text-[10px]'>▶</span>
-                    Mẹo: Cách chỉnh độ trễ phụ đề (Sync)
-                  </summary>
-                  <div className='pl-4 mt-2 italic leading-relaxed text-gray-400'>
-                    Nhấn phím <kbd className='bg-gray-600 px-1 rounded text-gray-200'>Z</kbd> /{' '}
-                    <kbd className='bg-gray-600 px-1 rounded text-gray-200'>X</kbd> để ép phụ đề hiện sớm hoặc trễ hơn
-                    0.5s (lệch tiếng nhiều lắm, cái này chịu :D).
-                  </div>
-                </details>
               </div>
-              <div className='flex justify-center my-4'>
+
+              <div className='flex justify-center py-3 bg-white/2'>
                 <button
                   onClick={() => setUseBackupPlayer(prev => !prev)}
-                  className={`px-4 py-2 text-sm font-medium rounded transition cursor-pointer
-            ${
-              useBackupPlayer
-                ? 'bg-green-500 hover:bg-green-600 text-white'
-                : 'bg-blue-500 hover:bg-blue-600 text-white'
-            }`}
+                  className={`px-4 py-1.5 text-xs font-bold rounded-full transition cursor-pointer border
+                    ${
+                      useBackupPlayer
+                        ? 'bg-[var(--c-yel)] text-[var(--c-bg)] border-[var(--c-yel)]'
+                        : 'bg-transparent text-[var(--c-cyan)] border-[var(--c-cyan)] hover:bg-[var(--c-cyan)]/10'
+                    }`}
                 >
-                  {useBackupPlayer ? 'Đang dùng dự phòng - Đổi về Server chính' : 'Link dự phòng (Có quảng cáo)'}
+                  {useBackupPlayer ? '⚡ DỰ PHÒNG - ĐỔI VỀ SERVER CHÍNH' : '⇄ DÙNG LINK DỰ PHÒNG (CÓ QUẢNG CÁO)'}
                 </button>
               </div>
 
               {/* Wrapper giữ tỉ lệ 16:9 */}
-              <div className='relative pt-[56.25%] rounded-xl overflow-hidden shadow-2xl bg-black'>
+              <div className='relative pt-[56.25%] bg-black'>
                 {!useBackupPlayer ? (
                   <VideoPlayer
                     progressKey={`${slug}_${episodeToPlay.name}`}
@@ -461,7 +435,6 @@ export default function WatchPage() {
                       responsive: false,
                       fluid: false,
                       poster: thumbnail.src,
-
                       sources: [
                         {
                           src: episodeToPlay.link_m3u8,
@@ -476,7 +449,7 @@ export default function WatchPage() {
                   <div className='absolute top-0 left-0 w-full h-full'>
                     {iframeLoading && (
                       <div className='absolute inset-0 flex items-center justify-center bg-black/80 z-10'>
-                        <span className='text-white text-xs italic opacity-70'>(Đang tải video dự phòng...)</span>
+                        <span className='text-white/60 text-xs italic'>(Đang tải video dự phòng...)</span>
                       </div>
                     )}
                     <iframe
@@ -491,22 +464,24 @@ export default function WatchPage() {
 
                 {/* Overlay auto-play tập tiếp theo */}
                 {autoplayCountdown !== null && currentIndex < flatEpisodes.length - 1 && (
-                  <div className='absolute inset-0 flex items-center justify-center bg-black/75 z-20'>
-                    <div className='text-center bg-gray-900/90 rounded-2xl p-8 shadow-2xl max-w-sm w-full mx-4'>
-                      <p className='text-gray-400 text-sm mb-1'>Tập tiếp theo</p>
+                  <div className='absolute inset-0 flex items-center justify-center bg-[var(--c-bg)]/90 z-20'>
+                    <div className='text-center bg-[var(--c-card)] rounded-2xl p-8 border-2 border-[var(--c-line)] max-w-sm w-full mx-4 shadow-2xl'>
+                      <p className='text-white/50 text-[10px] font-black uppercase tracking-wider mb-1'>
+                        Tập tiếp theo
+                      </p>
                       <p className='text-white font-bold text-lg mb-6 line-clamp-1'>
                         {flatEpisodes[currentIndex + 1]?.name}
                       </p>
                       {/* Vòng đếm ngược */}
                       <div className='relative w-20 h-20 mx-auto mb-6'>
                         <svg className='w-20 h-20 -rotate-90' viewBox='0 0 80 80'>
-                          <circle cx='40' cy='40' r='34' fill='none' stroke='#374151' strokeWidth='6' />
+                          <circle cx='40' cy='40' r='34' fill='none' stroke='rgba(255,255,255,.1)' strokeWidth='6' />
                           <circle
                             cx='40'
                             cy='40'
                             r='34'
                             fill='none'
-                            stroke='#3b82f6'
+                            stroke='var(--c-pink)'
                             strokeWidth='6'
                             strokeDasharray={`${2 * Math.PI * 34}`}
                             strokeDashoffset={`${2 * Math.PI * 34 * (1 - autoplayCountdown / AUTOPLAY_COUNTDOWN)}`}
@@ -514,7 +489,7 @@ export default function WatchPage() {
                             className='transition-all duration-1000 ease-linear'
                           />
                         </svg>
-                        <span className='absolute inset-0 flex items-center justify-center text-white text-2xl font-bold'>
+                        <span className='absolute inset-0 flex items-center justify-center text-white text-2xl font-black font-mono'>
                           {autoplayCountdown}
                         </span>
                       </div>
@@ -524,13 +499,13 @@ export default function WatchPage() {
                             const nextEp = flatEpisodes[currentIndex + 1]
                             handleSelectEpisode(nextEp.link_embed, nextEp.link_m3u8, nextEp.name)
                           }}
-                          className='px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition cursor-pointer'
+                          className='px-5 py-2 rounded-xl font-bold text-sm text-[var(--c-bg)] bg-[var(--c-pink)] hover:opacity-90 transition cursor-pointer'
                         >
                           Xem ngay
                         </button>
                         <button
                           onClick={() => setAutoplayCountdown(null)}
-                          className='px-5 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition cursor-pointer'
+                          className='px-5 py-2 rounded-xl font-bold text-sm text-white/60 bg-white/5 border border-white/10 hover:bg-white/10 transition cursor-pointer'
                         >
                           Huỷ
                         </button>
@@ -541,126 +516,97 @@ export default function WatchPage() {
               </div>
             </div>
           ) : (
-            /* Loading state */
-            <div className='flex items-center justify-center h-96 text-xl'>
-              {!isAvailable ? (
-                <div className='flex items-center'>
-                  <svg className='animate-spin -ml-1 mr-3 h-8 w-8 text-blue-500' viewBox='0 0 24 24'>
-                    <circle
-                      className='opacity-25'
-                      cx='12'
-                      cy='12'
-                      r='10'
-                      stroke='currentColor'
-                      strokeWidth='4'
-                    ></circle>
-                    <path
-                      className='opacity-75'
-                      fill='currentColor'
-                      d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                    ></path>
-                  </svg>
-                  Đang tải tập phim...
-                </div>
-              ) : (
-                <div>Phim chưa cập nhật...</div>
-              )}
+            <div className='flex items-center justify-center h-96 text-white/40 text-sm italic'>
+              {!isAvailable ? 'Đang tải tập phim...' : 'Phim chưa cập nhật tập mới...'}
             </div>
           )}
         </div>
 
         {/* Điều hướng tập */}
         {selectedEpisode && episodeToPlay && (
-          <div className='flex justify-between mb-8'>
+          <div className='flex justify-between mb-10'>
             <button
-              className='px-5 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition duration-300 flex items-center gap-2 shadow-lg disabled:cursor-not-allowed cursor-pointer'
+              className='px-4 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-sm font-bold rounded-xl disabled:opacity-30 transition duration-300 flex items-center gap-2 disabled:cursor-not-allowed cursor-pointer'
               disabled={currentIndex <= 0}
               onClick={() => {
                 const ep = flatEpisodes[currentIndex - 1]
                 handleSelectEpisode(ep.link_embed, ep.link_m3u8, ep.name)
               }}
             >
-              <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
-                <path
-                  fillRule='evenodd'
-                  d='M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z'
-                  clipRule='evenodd'
-                />
-              </svg>
-              Tập trước
+              ◀ Tập trước
             </button>
             <button
-              className='px-5 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition duration-300 flex items-center gap-2 shadow-lg disabled:cursor-not-allowed cursor-pointer'
+              className='px-4 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-sm font-bold rounded-xl disabled:opacity-30 transition duration-300 flex items-center gap-2 disabled:cursor-not-allowed cursor-pointer text-[var(--c-cyan)]'
               disabled={currentIndex >= flatEpisodes.length - 1}
               onClick={() => {
                 const ep = flatEpisodes[currentIndex + 1]
                 handleSelectEpisode(ep.link_embed, ep.link_m3u8, ep.name)
               }}
             >
-              Tập sau
-              <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
-                <path
-                  fillRule='evenodd'
-                  d='M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z'
-                  clipRule='evenodd'
-                />
-              </svg>
+              Tập sau ▶
             </button>
           </div>
         )}
 
-        <div className='grid md:grid-cols-3 gap-8'>
+        <div className='grid md:grid-cols-3 gap-8 items-start'>
           {/* Thông tin phim tóm tắt */}
-          <div className='md:col-span-1'>
-            <div className='bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 shadow-lg mb-6'>
-              <h3 className='text-xl font-bold mb-4 border-l-4 border-blue-500 pl-3'>Thông tin phim</h3>
+          <div className='md:col-span-1 flex flex-col gap-6'>
+            <div className='rounded-2xl p-6 border border-[var(--c-line)]' style={{ background: 'var(--c-card)' }}>
+              <h3 className='text-lg font-black tracking-tight text-white mb-4 flex items-center gap-2'>
+                <span className='c-marker cyan' />
+                Thông tin
+              </h3>
 
-              <div className='space-y-3 text-sm text-gray-300'>
-                <div className='flex items-center'>
+              <div className='space-y-3 text-sm text-white/80'>
+                <div className='flex items-center gap-4 mb-4'>
                   <Image
                     unoptimized
                     width={100}
                     height={150}
                     src={movie.poster_url}
                     alt={movie.name}
-                    className='w-20 h-auto rounded-lg mr-4'
+                    className='w-16 h-24 object-cover rounded-xl border border-white/10 shadow-md'
                   />
-                  <div>
+                  <div className='space-y-1'>
                     <div>
-                      <span className='font-semibold text-gray-200'>Năm:</span> {movie.year}
+                      <span className='text-white/40'>Năm:</span> {movie.year}
                     </div>
                     <div>
-                      <span className='font-semibold text-gray-200'>Chất lượng:</span> {movie.quality}
+                      <span className='text-white/40'>Chất lượng:</span> {movie.quality}
                     </div>
                     <div>
-                      <span className='font-semibold text-gray-200'>Ngôn ngữ:</span> {movie.lang}
+                      <span className='text-white/40'>Ngôn ngữ:</span> {movie.lang}
                     </div>
                   </div>
                 </div>
 
                 <p>
-                  <span className='font-semibold text-gray-200'>Quốc gia:</span>{' '}
+                  <span className='text-white/40 inline-block w-20'>Quốc gia:</span>{' '}
                   {movie.country.map(c => c.name).join(', ')}
                 </p>
                 <p>
-                  <span className='font-semibold text-gray-200'>Thể loại:</span>{' '}
+                  <span className='text-white/40 inline-block w-20'>Thể loại:</span>{' '}
                   {movie.category.map(c => c.name).join(', ')}
                 </p>
               </div>
 
-              <div className='mt-4 pt-4 border-t border-gray-700'>
-                <p className='text-sm text-gray-300 line-clamp-4'>{movie.content}</p>
-                <button className='text-blue-400 text-sm mt-2 hover:text-blue-300'>Xem thêm</button>
+              <div className='mt-4 pt-4 border-t border-[var(--c-line)] text-xs text-white/60 leading-relaxed'>
+                {movie.content}
               </div>
             </div>
           </div>
 
           {/* Danh sách tập */}
           <div className='md:col-span-2'>
-            <div className='bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 shadow-lg'>
-              <h3 className='text-xl font-bold mb-4 border-l-4 border-blue-500 pl-3'>Danh sách tập</h3>
+            <div className='rounded-2xl p-6 border border-[var(--c-line)]' style={{ background: 'var(--c-card)' }}>
+              <h3 className='text-lg font-black tracking-tight text-white mb-4 flex items-center gap-2'>
+                <span className='c-marker pink' />
+                Danh Sách Tập
+              </h3>
               {isAvailable ? (
-                <div className='italic'>Phim sẽ cập nhật trong thời gian sớm nhất, mong bạn thông cảm! </div>
+                <div className='text-sm text-white/40 italic'>
+                  Phim sẽ cập nhật trong thời gian sớm nhất, mong bạn thông cảm!
+                </div>
               ) : (
                 data?.episodes && (
                   <EpisodeList
