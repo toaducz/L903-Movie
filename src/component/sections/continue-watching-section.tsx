@@ -76,9 +76,17 @@ export default function ContinueWatchingSection() {
   if (isLoading || items.length === 0) return null
 
   return (
-    <div className='px-2 sm:px-4 pt-6 pb-2'>
-      <h1 className='text-white font-bold text-xl mb-4'>Đang xem</h1>
-      <div className='relative group/row'>
+    <div className='px-5 sm:px-10 pt-8 pb-2'>
+      {/* Section header */}
+      <div className='max-w-[1400px] mx-auto flex items-end justify-between mb-5'>
+        <h2 className='text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-3'>
+          <span className='c-marker' />
+          Đang xem dở
+        </h2>
+      </div>
+
+      {/* Scrollable row */}
+      <div className='max-w-[1400px] mx-auto relative group/row'>
         {canScrollLeft && (
           <button
             onClick={() => scroll('left')}
@@ -114,48 +122,56 @@ export default function ContinueWatchingSection() {
           </button>
         )}
         <div ref={scrollRef} className='flex gap-4 overflow-x-auto pb-2 no-scrollbar'>
-          {items.map(item => (
+          {items.map((item, i) => (
             <Link
               key={item.slug}
-              href={`/detail-movie/${item.slug}?watch=1&ep=${encodeURIComponent(item.episodeName ?? '')}&t=${Math.floor(
-                item.progress
-              )}`}
-              className='flex-shrink-0 w-36 sm:w-44 group'
+              href={`/detail-movie/${item.slug}?watch=1&ep=${encodeURIComponent(item.episodeName ?? '')}&t=${Math.floor(item.progress)}`}
+              className='flex-shrink-0 w-36 sm:w-44 group/card block'
+              style={{
+                transform: i % 2 === 0 ? 'rotate(-1deg)' : 'rotate(1deg)',
+                transition: 'transform .2s',
+              }}
+              onMouseEnter={e => ((e.currentTarget as HTMLElement).style.transform = 'rotate(0deg) scale(1.04)')}
+              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.transform = i % 2 === 0 ? 'rotate(-1deg)' : 'rotate(1deg)')}
             >
-              <div className='relative rounded-lg overflow-hidden bg-gray-800'>
+              {/* Art + progress */}
+              <div className='relative rounded-xl overflow-hidden border border-white/10 bg-[var(--c-card)]'>
                 <Image
                   src={`https://wsrv.nl/?url=${encodeURIComponent(item.image)}&w=400&h=600&fit=cover`}
                   alt={item.name}
                   width={176}
                   height={264}
                   unoptimized
-                  className='w-full h-52 sm:h-64 object-cover group-hover:opacity-75 transition-opacity duration-200'
+                  className='w-full h-52 sm:h-64 object-cover group-hover/card:opacity-80 transition-opacity duration-200'
                 />
-                <div className='absolute bottom-0 left-0 right-0 h-1 bg-gray-600'>
-                  <div className='h-full bg-red-500' style={{ width: `${item.percent}%` }} />
+                {/* Percent badge */}
+                <span
+                  className='absolute top-2 right-2 font-mono text-[11px] font-bold px-1.5 py-0.5 rounded-md border border-[var(--c-cyan)]'
+                  style={{ background: 'rgba(13,10,20,.85)', color: 'var(--c-cyan)' }}
+                >
+                  {item.percent}%
+                </span>
+                {/* Progress bar */}
+                <div className='absolute bottom-0 left-0 right-0 h-1 bg-white/10'>
+                  <div
+                    className='h-full'
+                    style={{ width: `${item.percent}%`, background: 'var(--c-pink)' }}
+                  />
                 </div>
-                <div className='absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200'>
+                {/* Play hover */}
+                <div className='absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-200'>
                   <div className='bg-black/60 rounded-full p-2'>
-                    <svg
-                      xmlns='http://www.w3.org/2000/svg'
-                      className='h-8 w-8 text-white'
-                      viewBox='0 0 20 20'
-                      fill='currentColor'
-                    >
-                      <path
-                        fillRule='evenodd'
-                        d='M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z'
-                        clipRule='evenodd'
-                      />
+                    <svg xmlns='http://www.w3.org/2000/svg' className='h-8 w-8 text-white' viewBox='0 0 20 20' fill='currentColor'>
+                      <path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z' clipRule='evenodd' />
                     </svg>
                   </div>
                 </div>
               </div>
-              <div className='mt-2 px-1'>
-                <p className='text-white text-sm font-medium line-clamp-1'>{item.name}</p>
-                <p className='text-gray-400 text-xs mt-0.5'>
-                  {item.episodeName} · {item.percent}%
-                </p>
+
+              {/* Text */}
+              <div className='mt-2.5 px-0.5'>
+                <p className='text-white text-[13px] font-bold line-clamp-1'>{item.name}</p>
+                <p className='text-white/40 text-[11px] mt-0.5 font-mono'>{item.episodeName}</p>
               </div>
             </Link>
           ))}

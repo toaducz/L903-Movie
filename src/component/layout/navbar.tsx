@@ -127,19 +127,25 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`bg-slate-900 text-white shadow-md w-screen fixed top-0 z-50 transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'
-        }`}
+      className={`w-screen fixed top-0 z-50 transition-transform duration-300 border-b ${
+        isVisible ? 'translate-y-0' : '-translate-y-full'
+      }`}
+      style={{
+        backdropFilter: 'blur(20px)',
+        background: 'rgba(13,10,20,.75)',
+        borderColor: 'var(--c-line)'
+      }}
     >
-      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between'>
+      <div className='max-w-[1400px] mx-auto px-5 sm:px-10 py-4 flex items-center justify-between gap-6'>
         <Link
           href='/'
-          className='text-2xl font-bold text-white hover:text-slate-300 transition-colors duration-200 hover:scale-105'
+          className='text-[20px] font-black tracking-tight text-white hover:opacity-90 transition-opacity shrink-0'
         >
-          L903 Movie
+          L903<span className='text-[var(--c-yel)] mx-0.5 text-sm align-[2px]'>★</span>movie
         </Link>
 
         {/* Navigation Items - Desktop */}
-        <div className='hidden lg:flex items-center gap-8 text-base font-medium relative'>
+        <div className='hidden lg:flex items-center gap-6 text-sm font-medium relative'>
           {navLinks.map((link, i) => {
             const isDropdown = ['Thể loại', 'Quốc Gia', 'Năm'].includes(link.label)
 
@@ -150,25 +156,27 @@ export default function Navbar() {
                 <div key={i} className='relative group'>
                   <button
                     onClick={() => setOpenMenu(openMenu === menuKey ? null : menuKey)}
-                    className='flex items-center gap-1 text-white hover:text-slate-300 transition-colors duration-200 cursor-pointer '
+                    className='flex items-center gap-1 text-white/60 hover:text-white transition-colors duration-150 cursor-pointer'
                   >
                     {link.label}
-                    <span className='transition-transform duration-200 text-[10px] leading-none'>▼</span>
-                    <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-slate-300 transition-all duration-300 group-hover:w-full'></span>
+                    <span className='text-[9px] leading-none transition-transform duration-200'>▼</span>
                   </button>
 
                   {openMenu === menuKey && (
-                    <div className='absolute left-0 top-full mt-2 w-48 max-h-72 overflow-y-auto bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-50'>
+                    <div
+                      className='absolute left-0 top-full mt-2 w-48 max-h-72 overflow-y-auto rounded-xl shadow-xl z-50 border'
+                      style={{ background: 'var(--c-card)', borderColor: 'var(--c-line)' }}
+                    >
                       {getItems().map(item => {
                         const href = `/list-movie/${menuKey}?${menuKey}=${item.slug}&page=1`
-
                         return (
                           <Link
                             key={item.slug}
                             href={item.slug === 'loading' ? '#' : href}
                             onClick={() => setOpenMenu(null)}
-                            className={`block w-full text-left px-4 py-2 text-sm text-white hover:bg-slate-700 ${item.slug === 'loading' ? 'opacity-50 pointer-events-none' : ''
-                              }`}
+                            className={`block w-full text-left px-3.5 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors ${
+                              item.slug === 'loading' ? 'opacity-50 pointer-events-none' : ''
+                            }`}
                           >
                             {item.name}
                           </Link>
@@ -184,52 +192,64 @@ export default function Navbar() {
               <Link
                 key={i}
                 href={link.href}
-                className='relative text-white hover:text-slate-300 transition-colors duration-200 group'
+                className='text-white/60 hover:text-white transition-colors duration-150'
               >
                 {link.label}
-                <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-slate-300 transition-all duration-300 group-hover:w-full'></span>
               </Link>
             )
           })}
         </div>
 
-        {/* Search - Desktop */}
-        <div ref={suggestionRef} className='hidden sm:flex items-center space-x-2 relative'>
-          <form onSubmit={handleSearch} className='flex items-center space-x-2'>
-            <input
-              type='text'
-              placeholder='Tìm theo tên phim'
-              className='px-4 py-2 rounded-lg bg-slate-800 text-white border border-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-600 placeholder-slate-400 text-sm transition-all duration-200'
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              onFocus={() => setShowSuggestions(true)}
-              autoComplete='off'
-            />
+        {/* Search — Desktop */}
+        <div ref={suggestionRef} className='hidden sm:flex items-center gap-2 relative'>
+          <form onSubmit={handleSearch} className='flex items-center gap-2'>
+            <div className='flex items-center gap-2 rounded-xl px-3 py-2 min-w-[220px] cursor-text text-sm border'
+              style={{ background: 'rgba(255,255,255,.05)', borderColor: 'var(--c-line)' }}
+            >
+              <svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' className='text-white/40 shrink-0'>
+                <circle cx='11' cy='11' r='7'/><path d='M21 21l-4.3-4.3' strokeLinecap='round'/>
+              </svg>
+              <input
+                type='text'
+                placeholder='Tìm phim đi mại dô…'
+                className='bg-transparent text-white text-sm focus:outline-none placeholder-white/30 flex-1 min-w-0'
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                onFocus={() => setShowSuggestions(true)}
+                autoComplete='off'
+              />
+              <span className='font-mono text-[10px] text-white/25 border border-white/15 rounded px-1.5 py-0.5 shrink-0'>⌘K</span>
+            </div>
             <button
               type='submit'
-              className='px-4 py-2 bg-slate-800 text-white rounded-lg shadow-md hover:bg-slate-900 hover:scale-105 disabled:bg-slate-600 disabled:text-slate-400 disabled:shadow-none transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-600'
+              className='sr-only'
               disabled={!search.trim()}
-            >
-              Tìm
-            </button>
+            />
           </form>
           {showSuggestions && suggestions.length > 0 && (
-            <div className='absolute top-full left-0 mt-2 w-80 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50 overflow-hidden'>
+            <div
+              className='absolute top-full left-0 mt-2 w-80 rounded-xl shadow-xl z-50 overflow-hidden border'
+              style={{ background: 'var(--c-card)', borderColor: 'var(--c-line)' }}
+            >
               {suggestions.map(movie => (
                 <button
                   key={movie.slug}
-                  className='flex items-center gap-3 w-full px-3 py-2 hover:bg-slate-700 transition-colors text-left'
+                  className='flex items-center gap-3 w-full px-3 py-2.5 hover:bg-white/5 transition-colors text-left'
                   onMouseDown={() => {
                     router.push(`/detail-movie/${movie.slug}`)
                     setSearch('')
                     setShowSuggestions(false)
                   }}
                 >
-                  <img src={`https://wsrv.nl/?url=${encodeURIComponent(movie.thumb_url?.startsWith('http') ? movie.thumb_url : `https://phimimg.com/${movie.thumb_url?.replace(/^\/+/, '')}`)}&w=80&h=112&fit=cover`} alt={movie.name} className='w-10 h-14 object-cover rounded flex-shrink-0' />
+                  <img
+                    src={`https://wsrv.nl/?url=${encodeURIComponent(movie.thumb_url?.startsWith('http') ? movie.thumb_url : `https://phimimg.com/${movie.thumb_url?.replace(/^\/+/, '')}`)}&w=80&h=112&fit=cover`}
+                    alt={movie.name}
+                    className='w-9 h-12 object-cover rounded-lg flex-shrink-0 border border-white/10'
+                  />
                   <div className='min-w-0'>
-                    <p className='text-white text-sm font-medium truncate'>{movie.name}</p>
-                    <p className='text-slate-400 text-xs truncate'>{movie.origin_name}</p>
-                    <p className='text-slate-500 text-xs'>{movie.year} · {movie.episode_current}</p>
+                    <p className='text-white text-[13px] font-semibold truncate'>{movie.name}</p>
+                    <p className='text-white/40 text-xs truncate'>{movie.origin_name}</p>
+                    <p className='text-white/30 text-xs font-mono'>{movie.year} · {movie.episode_current}</p>
                   </div>
                 </button>
               ))}
@@ -237,10 +257,9 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Hamburger Menu - Mobile */}
+        {/* Hamburger — Mobile */}
         <button className='lg:hidden focus:outline-none' onClick={toggleMenu} aria-label='Toggle menu'>
           {isMenuOpen ? (
-            // Icon đóng (dùng dấu X bằng CSS)
             <span className='block w-6 h-6 relative'>
               <span className='absolute left-0 top-1/2 w-6 h-0.5 bg-white rotate-45'></span>
               <span className='absolute left-0 top-1/2 w-6 h-0.5 bg-white -rotate-45'></span>
@@ -250,25 +269,34 @@ export default function Navbar() {
           )}
         </button>
 
+        {/* User avatar / login */}
         <Link
           key={'user-icon'}
           href={user?.id !== undefined || null ? '/profile' : '/login'}
-          className='bg-gray-700 rounded-full p-2 hover:bg-white transition duration-300'
+          className='rounded-full p-1.5 transition-all duration-200 hover:opacity-80'
+          style={{ background: 'rgba(255,255,255,.08)' }}
         >
-          <Image src={userIcon} alt='user' width={35} height={35}></Image>
+          <Image src={userIcon} alt='user' width={32} height={32} className='rounded-full' />
         </Link>
       </div>
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className='lg:hidden bg-slate-900 px-4 py-4 flex flex-col gap-4 text-base font-medium border-t border-slate-800'>
-          {/* Search - Mobile */}
+        <div
+          className='lg:hidden px-5 py-5 flex flex-col gap-4 text-sm font-medium border-t'
+          style={{ background: 'var(--c-bg-2)', borderColor: 'var(--c-line)' }}
+        >
+          {/* Search — Mobile */}
           <div className='relative'>
-            <form onSubmit={handleSearch} className='flex items-center space-x-2'>
+            <form onSubmit={handleSearch} className='flex items-center gap-2'>
               <input
                 type='text'
                 placeholder='Tìm theo tên phim'
-                className='flex-1 px-4 py-2 rounded-lg bg-slate-800 text-white border border-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-600 placeholder-slate-400 text-sm transition-all duration-200'
+                className='flex-1 px-4 py-2.5 rounded-xl text-white text-sm focus:outline-none border'
+                style={{
+                  background: 'rgba(255,255,255,.06)',
+                  borderColor: 'var(--c-line)',
+                }}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 onFocus={() => setShowSuggestions(true)}
@@ -276,18 +304,22 @@ export default function Navbar() {
               />
               <button
                 type='submit'
-                className='px-4 py-2 bg-slate-800 text-white rounded-lg shadow-md hover:bg-slate-900 hover:scale-105 disabled:bg-slate-600 disabled:text-slate-400 disabled:shadow-none transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-600'
+                className='px-4 py-2.5 rounded-xl text-sm font-bold transition-colors disabled:opacity-40 text-white'
+                style={{ background: 'var(--c-pink)' }}
                 disabled={!search.trim()}
               >
                 Tìm
               </button>
             </form>
             {showSuggestions && suggestions.length > 0 && (
-              <div className='absolute top-full left-0 mt-2 w-full bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50 overflow-hidden'>
+              <div
+                className='absolute top-full left-0 mt-2 w-full rounded-xl shadow-xl z-50 overflow-hidden border'
+                style={{ background: 'var(--c-card)', borderColor: 'var(--c-line)' }}
+              >
                 {suggestions.map(movie => (
                   <button
                     key={movie.slug}
-                    className='flex items-center gap-3 w-full px-3 py-2 hover:bg-slate-700 transition-colors text-left'
+                    className='flex items-center gap-3 w-full px-3 py-2.5 hover:bg-white/5 transition-colors text-left'
                     onMouseDown={() => {
                       router.push(`/detail-movie/${movie.slug}`)
                       setSearch('')
@@ -295,11 +327,15 @@ export default function Navbar() {
                       setIsMenuOpen(false)
                     }}
                   >
-                    <img src={`https://wsrv.nl/?url=${encodeURIComponent(movie.thumb_url?.startsWith('http') ? movie.thumb_url : `https://phimimg.com/${movie.thumb_url?.replace(/^\/+/, '')}`)}&w=80&h=112&fit=cover`} alt={movie.name} className='w-10 h-14 object-cover rounded flex-shrink-0' />
+                    <img
+                      src={`https://wsrv.nl/?url=${encodeURIComponent(movie.thumb_url?.startsWith('http') ? movie.thumb_url : `https://phimimg.com/${movie.thumb_url?.replace(/^\/+/, '')}`)}&w=80&h=112&fit=cover`}
+                      alt={movie.name}
+                      className='w-9 h-12 object-cover rounded-lg flex-shrink-0'
+                    />
                     <div className='min-w-0'>
-                      <p className='text-white text-sm font-medium truncate'>{movie.name}</p>
-                      <p className='text-slate-400 text-xs truncate'>{movie.origin_name}</p>
-                      <p className='text-slate-500 text-xs'>{movie.year} · {movie.episode_current}</p>
+                      <p className='text-white text-[13px] font-semibold truncate'>{movie.name}</p>
+                      <p className='text-white/40 text-xs truncate'>{movie.origin_name}</p>
+                      <p className='text-white/30 text-xs font-mono'>{movie.year} · {movie.episode_current}</p>
                     </div>
                   </button>
                 ))}
@@ -307,12 +343,12 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Navigation Items - Mobile */}
+          {/* Nav links — Mobile */}
           {navLinks.map((link, i) => (
             <Link
               key={i}
               href={link.href}
-              className='text-white hover:text-slate-300 transition-colors duration-200'
+              className='text-white/60 hover:text-white transition-colors duration-150'
               onClick={() => setIsMenuOpen(false)}
             >
               {link.label}

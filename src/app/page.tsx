@@ -2,148 +2,125 @@
 
 import { useState } from 'react'
 import MovieItem from '@/component/item/movie-item'
-import MovieRankItem from '@/component/item/movie-rank-item'
 import { useQuery } from '@tanstack/react-query'
-import { getLatestUpdateMovieList, Movie } from '@/api/kkphim/get-update-movie'
+import { getLatestUpdateMovieList } from '@/api/kkphim/get-update-movie'
 import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
 import { useRouter } from 'next/navigation'
 import { getListMovie } from '@/api/kkphim/get-list-movie'
 import ContinueWatchingSection from '@/component/sections/continue-watching-section'
-import RecommendationsSection from '@/component/sections/recommendations-section'
+import HeroSection from '@/component/sections/hero-section'
+import SeriesRowSection from '@/component/sections/series-row-section'
+import MoviesRowSection from '@/component/sections/movies-row-section'
+import AnimeRowSection from '@/component/sections/anime-row-section'
+import MoodSection from '@/component/sections/mood-section'
 
 export default function Home() {
   const router = useRouter()
-  const [showRecommendations, setShowRecommendations] = useState(false)
+  const [tab, setTab] = useState<'all' | 'phim-bo' | 'phim-le' | 'hoat-hinh'>('all')
 
-  // API Calls
   const { data: updateMovie, isLoading, isError } = useQuery(getLatestUpdateMovieList({ page: 1 }))
-  const {
-    data: phimbo,
-    isLoading: isLoadingPhimBo,
-    isError: isErrorPhimBo
-  } = useQuery(getListMovie({ typelist: 'phim-bo', page: 1, limit: 5 }))
-  const {
-    data: phimle,
-    isLoading: isLoadingPhimLe,
-    isError: isErrorPhimLe
-  } = useQuery(getListMovie({ typelist: 'phim-le', page: 1, limit: 5 }))
-  const {
-    data: hoathinh,
-    isLoading: isLoadingHoatHinh,
-    isError: isErrorHoatHinh
-  } = useQuery(getListMovie({ typelist: 'hoat-hinh', page: 1, limit: 5 }))
+  const { data: phimbo } = useQuery(getListMovie({ typelist: 'phim-bo', page: 1, limit: 5 }))
+  const { data: phimle } = useQuery(getListMovie({ typelist: 'phim-le', page: 1, limit: 4 }))
+  const { data: hoathinh } = useQuery(getListMovie({ typelist: 'hoat-hinh', country: 'nhat-ban', page: 1, limit: 6 }))
 
   if (isLoading) return <Loading />
   if (isError) return <Error />
 
+  const allMovies = updateMovie?.items ?? []
+  const featuredMovie = allMovies[0]
+
+  // Tab-filtered grid (excludes the hero item)
+  const gridMovies = (() => {
+    const pool = allMovies.slice(1)
+    if (tab === 'phim-bo') return pool.filter(m => m.type === 'series')
+    if (tab === 'phim-le') return pool.filter(m => m.type === 'single')
+    if (tab === 'hoat-hinh') return pool.filter(m => m.type === 'hoathinh')
+    return pool
+  })()
+
+  const TABS = [
+    { key: 'all', label: 'Tất cả' },
+    { key: 'phim-bo', label: 'Phim bộ' },
+    { key: 'phim-le', label: 'Phim lẻ' },
+    { key: 'hoat-hinh', label: 'Anime' }
+  ] as const
+
   return (
-    <main className='min-h-screen bg-gray-900 text-white pb-10'>
-      {/* Top Sections: Full Width Container */}
-      <div className='max-w-[1800px] mx-auto px-4 pt-20'>
-        <ContinueWatchingSection />
+    <main className='min-h-screen pb-16' style={{ paddingTop: '72px' }}>
+      {/* ── Hero ─────────────────────────────────────── */}
+      {featuredMovie && <HeroSection movie={featuredMovie} />}
 
-        <div className='py-6 flex justify-center'>
-          {!showRecommendations ? (
-            <button
-              onClick={() => setShowRecommendations(true)}
-              className='px-6 py-2 bg-blue-600 hover:bg-blue-500 font-semibold rounded-lg shadow-md transition-all cursor-pointer'
-            >
-              Xem gì hôm nay?
-            </button>
-          ) : (
-            <div className='w-full'>
-              <RecommendationsSection />
-              <div className='flex justify-center mt-6'>
+      {/* ── Continue Watching ────────────────────────── */}
+      <ContinueWatchingSection />
+
+      {/* ── New Releases grid ────────────────────────── */}
+      <section className='px-5 sm:px-10 py-8'>
+        <div className='max-w-[1400px] mx-auto'>
+          {/* Header + tabs */}
+          <div className='flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-4'>
+            <h2 className='text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-3'>
+              <span className='c-marker yel' />
+              Mới ra lò
+            </h2>
+
+            {/* Tab pills */}
+            <div className='flex gap-2 flex-wrap'>
+              {TABS.map(t => (
                 <button
-                  onClick={() => setShowRecommendations(false)}
-                  className='px-6 py-2 bg-blue-600 hover:bg-blue-500 font-semibold rounded-lg shadow-md transition-all cursor-pointer'
+                  key={t.key}
+                  onClick={() => setTab(t.key)}
+                  className='px-3.5 py-1.5 text-[13px] rounded-full border transition-all duration-150 cursor-pointer font-semibold'
+                  style={
+                    tab === t.key
+                      ? {
+                          background: 'var(--c-yel)',
+                          color: 'var(--c-bg)',
+                          borderColor: 'var(--c-yel)'
+                        }
+                      : {
+                          background: 'transparent',
+                          color: 'rgba(255,255,255,.55)',
+                          borderColor: 'rgba(255,255,255,.10)'
+                        }
+                  }
                 >
-                  Đóng gợi ý
+                  {t.label}
                 </button>
-              </div>
+              ))}
             </div>
-          )}
-        </div>
-      </div>
+          </div>
 
-      {/* Main Content Layout */}
-      <div className='max-w-[1800px] mx-auto px-4 flex flex-col md:flex-row gap-8'>
-        {/* LEFT COLUMN: Movie Grid (Phần chính) */}
-        <div className='flex-1'>
-          <h1 className='text-2xl sm:text-4xl font-bold mb-8 text-left border-l-4 border-blue-600 pl-4'>
-            Phim Mới Cập Nhật
-          </h1>
-
-          {/* Grid đã fix: Tự động nhảy cột dựa trên không gian thực tế */}
-          <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6'>
-            {updateMovie?.items.map((movie, index) => (
+          {/* Movie grid */}
+          <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-5 sm:gap-6'>
+            {gridMovies.map((movie, index) => (
               <MovieItem key={movie._id} movie={movie} index={index} />
             ))}
           </div>
 
-          <div className='mt-10 flex justify-center md:justify-start'>
+          {/* See more */}
+          <div className='mt-10 flex justify-center'>
             <button
               onClick={() => router.push('/all-movie')}
-              className='text-gray-400 hover:text-blue-500 underline transition-colors cursor-pointer'
+              className='text-sm text-white/40 hover:text-[var(--c-cyan)] transition-colors underline cursor-pointer'
             >
               Xem thêm tất cả phim mới
             </button>
           </div>
         </div>
+      </section>
 
-        {/* RIGHT COLUMN: Sidebar (Phim bộ, lẻ, hoạt hình) */}
-        <aside className='hidden md:block w-full md:w-[19rem] shrink-0 space-y-10'>
-          {/* Section Phim Bộ */}
-          <div>
-            <h2 className='text-xl font-bold mb-4 border-b border-gray-700 pb-2 text-blue-400'>Phim bộ mới</h2>
-            {renderMovieList(isLoadingPhimBo, isErrorPhimBo, phimbo?.data.items)}
-            <button
-              onClick={() => router.push('/list-movie?typelist=phim-bo')}
-              className='mt-2 text-sm text-gray-400 hover:text-blue-400 underline cursor-pointer'
-            >
-              Xem tất cả phim bộ
-            </button>
-          </div>
+      {/* ── Phim bộ row ──────────────────────────────── */}
+      {(phimbo?.data?.items?.length ?? 0) > 0 && <SeriesRowSection movies={phimbo!.data.items} />}
 
-          {/* Section Phim Lẻ */}
-          <div>
-            <h2 className='text-xl font-bold mb-4 border-b border-gray-700 pb-2 text-red-400'>Phim lẻ mới</h2>
-            {renderMovieList(isLoadingPhimLe, isErrorPhimLe, phimle?.data.items)}
-            <button
-              onClick={() => router.push('/list-movie?typelist=phim-le')}
-              className='mt-2 text-sm text-gray-400 hover:text-blue-400 underline cursor-pointer'
-            >
-              Xem tất cả phim lẻ
-            </button>
-          </div>
+      {/* ── Phim lẻ row ──────────────────────────────── */}
+      {(phimle?.data?.items?.length ?? 0) > 0 && <MoviesRowSection movies={phimle!.data.items} />}
 
-          {/* Section Hoạt Hình */}
-          <div>
-            <h2 className='text-xl font-bold mb-4 border-b border-gray-700 pb-2 text-green-400'>Hoạt hình mới</h2>
-            {renderMovieList(isLoadingHoatHinh, isErrorHoatHinh, hoathinh?.data.items)}
-            <button
-              onClick={() => router.push('/list-movie?typelist=hoat-hinh')}
-              className='mt-2 text-sm text-gray-400 hover:text-blue-400 underline cursor-pointer'
-            >
-              Xem tất cả hoạt hình
-            </button>
-          </div>
-        </aside>
-      </div>
+      {/* ── Anime row ────────────────────────────────── */}
+      {(hoathinh?.data?.items?.length ?? 0) > 0 && <AnimeRowSection movies={hoathinh!.data.items} />}
+
+      {/* ── Mood / AI Agent placeholder ──────────────── */}
+      <MoodSection />
     </main>
-  )
-}
-
-// Helper function giữ nguyên nhưng bọc div gọn hơn
-function renderMovieList(isLoading: boolean, isError: boolean, items?: Movie[]) {
-  if (isLoading) return <div className='animate-pulse text-gray-500'>Đang tải...</div>
-  if (isError) return <div className='text-red-500 text-sm'>Lỗi tải dữ liệu.</div>
-  return (
-    <div className='flex flex-col gap-4'>
-      {items?.map((movie, index) => (
-        <MovieRankItem key={movie._id} index={index} movie={movie} />
-      ))}
-    </div>
   )
 }

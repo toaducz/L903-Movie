@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 export default function Footer() {
@@ -8,54 +9,30 @@ export default function Footer() {
   if (pathname === '/login') return null
 
   return (
-    <footer className='bg-gray-800 text-gray-300 pb-8 pt-12 px-4 text-sm'>
-      <div className='max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6'>
-        <div>
-          <h2 className='text-white font-semibold mb-2'>L903 Movie</h2>
-          <p>Trang xem phim trực tuyến.</p>
-        </div>
+    <footer className='mt-16 px-5 sm:px-10 py-8 border-t' style={{ borderColor: 'var(--c-line)' }}>
+      <div className='max-w-[1400px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4'>
+        {/* Logo */}
+        <Link href='/' className='text-xl font-black tracking-tight text-white cursor-pointer'>
+          L903<span className='text-[var(--c-yel)] mx-0.5 text-sm align-[2px]'></span>Movie
+        </Link>
 
-        <div>
-          <h3 className='text-white font-semibold mb-2'>Liên kết</h3>
-          <ul className='space-y-1'>
-            <li>
-              <a href='/about' className='hover:text-white'>
-                Giới thiệu
-              </a>
-            </li>
-            <li>
-              <a href='/policy' className='hover:text-white'>
-                Chính sách
-              </a>
-            </li>
-            <li>
-              <a href='/contact' className='hover:text-white'>
-                Liên hệ
-              </a>
-            </li>
-          </ul>
-        </div>
+        {/* Links */}
+        <nav className='flex gap-5 text-sm text-white/40'>
+          <Link href='/about' className='hover:text-white transition-colors'>
+            Giới thiệu
+          </Link>
+          <Link href='/policy' className='hover:text-white transition-colors'>
+            Chính sách
+          </Link>
+          <Link href='/contact' className='hover:text-white transition-colors'>
+            Liên hệ
+          </Link>
+        </nav>
 
-        <div>
-          <h3 className='text-white font-semibold mb-2'>Liên hệ</h3>
-          <p>
-            Email:{' '}
-            <a href='mailto:hehe@l903truyentranh.vn' className='hover:text-white'>
-              support@l903movie.vn
-            </a>
-          </p>
-          <p>
-            Fanpage:{' '}
-            <a href='https://facebook.com/' target='_blank' rel='noopener noreferrer' className='hover:text-white'>
-              Facebook
-            </a>
-          </p>
-        </div>
-      </div>
-
-      {/* Dòng bản quyền */}
-      <div className='border-t border-gray-700 mt-6 pt-4 text-center text-gray-500 text-xs'>
-        © {new Date().getFullYear()} L903 Movie. Made by the L903 team.
+        {/* Tagline */}
+        <p className='text-xs text-white/30'>
+          Trang xem phim trực tuyến · không quảng cáo · made by L903 team · {new Date().getFullYear()}
+        </p>
       </div>
     </footer>
   )

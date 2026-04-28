@@ -16,9 +16,27 @@
     }
   }
 
+/* ============================================================
+   Direction C — Anime / Neon Design Tokens
+   Pink #ec4899 + Yellow #fbbf24 + Cyan #22d3ee on #0d0a14
+   ============================================================ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0d0a14;
+  --foreground: #ffffff;
+
+  /* Brand colours */
+  --c-bg:    #0d0a14;
+  --c-bg-2:  #15101f;
+  --c-card:  #1a1326;
+  --c-pink:  #ec4899;
+  --c-pink-d:#db2777;
+  --c-yel:   #fbbf24;
+  --c-cyan:  #22d3ee;
+  --c-orange:#f97316;
+  --c-fg:    #ffffff;
+  --c-dim:   rgba(255,255,255,.55);
+  --c-faint: rgba(255,255,255,.35);
+  --c-line:  rgba(255,255,255,.10);
 }
 
 @theme inline {
@@ -28,17 +46,11 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--c-bg);
+  color: var(--c-fg);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* globals.css hoặc styles.css */
@@ -60,7 +72,102 @@ input[type='number']::-webkit-inner-spin-button {
 }
 
 html, body {
-  background-color: #000000;
+  background-color: var(--c-bg);
   margin: 0;
   padding: 0;
+}
+
+/* ============================================================
+   Direction C — Global Utility Classes
+   ============================================================ */
+
+/* Background ambient glows */
+.c-app {
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+.c-app::before {
+  content: '';
+  position: fixed;
+  top: -10%; left: -10%;
+  width: 50%; height: 60%;
+  background: radial-gradient(circle, rgba(236,72,153,.14), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+.c-app::after {
+  content: '';
+  position: fixed;
+  top: 30%; right: -15%;
+  width: 60%; height: 60%;
+  background: radial-gradient(circle, rgba(34,211,238,.10), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+.c-app > * { position: relative; z-index: 1; }
+
+/* Skew marker accent */
+.c-marker {
+  display: inline-block;
+  width: 10px;
+  height: 24px;
+  background: var(--c-pink);
+  transform: skewX(-12deg);
+  flex-shrink: 0;
+}
+.c-marker.yel  { background: var(--c-yel); }
+.c-marker.cyan { background: var(--c-cyan); }
+
+/* Sticker badge */
+.c-sticker {
+  display: inline-block;
+  background: var(--c-yel);
+  color: var(--c-bg);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 5px 12px;
+  letter-spacing: .04em;
+  transform: rotate(-2deg);
+  box-shadow: 3px 3px 0 var(--c-bg);
+}
+.c-sticker.pink { background: var(--c-pink); color: #fff; }
+.c-sticker.cyan { background: var(--c-cyan); color: var(--c-bg); }
+
+/* Pill badge */
+.c-pill {
+  display: inline-block;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.c-pill.pink  { background: var(--c-pink);  color: #fff; }
+.c-pill.yel   { background: var(--c-yel);   color: var(--c-bg); }
+.c-pill.cyan  { background: var(--c-cyan);  color: var(--c-bg); }
+.c-pill.ghost {
+  background: rgba(255,255,255,.06);
+  color: #fff;
+  border: 1px solid var(--c-line);
+}
+
+/* Spinning burst star */
+@keyframes c-spin {
+  to { transform: rotate(375deg); }
+}
+.c-burst {
+  display: inline-block;
+  animation: c-spin 6s linear infinite;
+}
+
+/* Dot grid background pattern */
+.c-dot-grid::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(34,211,238,.2) 1px, transparent 1px);
+  background-size: 16px 16px;
+  opacity: .3;
+  border-radius: inherit;
+  pointer-events: none;
 }

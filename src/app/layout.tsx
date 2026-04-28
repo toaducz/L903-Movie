@@ -30,19 +30,19 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang='en'>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-stale-900`}>
+    <html lang='vi'>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <QueryProvider>
           <Suspense>
             <NProgressInit />
           </Suspense>
           <AuthProvider>
-            <Navbar />
-            {/* <div className='pb-25'></div> */}
-            {children}
-            {/* <div className='pb-25'></div> */}
-            <ChatWidget />
-            <Footer />
+            <div className='c-app'>
+              <Navbar />
+              {children}
+              <ChatWidget />
+              <Footer />
+            </div>
           </AuthProvider>
         </QueryProvider>
       </body>
