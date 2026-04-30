@@ -1,6 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 
 // Import động Deep Chat, tắt chế độ SSR
@@ -9,6 +10,9 @@ const DeepChat = dynamic(() => import('deep-chat-react').then(mod => mod.DeepCha
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false)
   const [hidden, setHidden] = useState(false)
+  const pathname = usePathname()
+
+  if (pathname == '/login') return null
 
   // Đã ẩn thì không render gì hết
   if (hidden) return null
@@ -44,7 +48,7 @@ export default function ChatWidget() {
             }}
             // request={{ handler: handleChatRequest }}
             textInput={{ placeholder: { text: 'Hỏi phim gì đi...' } }}
-            // initialMessages={[{ role: 'ai', text: 'Chào bạn! Mình là AI Agent tìm phim. Mình có thể giúp gì?' }]}
+          // initialMessages={[{ role: 'ai', text: 'Chào bạn! Mình là AI Agent tìm phim. Mình có thể giúp gì?' }]}
           />
         </div>
       )}
