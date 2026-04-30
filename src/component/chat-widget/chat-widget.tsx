@@ -1,4 +1,4 @@
-'use client' // Bắt buộc phải có để báo Next.js đây là Client Component
+'use client'
 
 import dynamic from 'next/dynamic'
 import { useState } from 'react'
@@ -7,22 +7,18 @@ import { useState } from 'react'
 const DeepChat = dynamic(() => import('deep-chat-react').then(mod => mod.DeepChat), { ssr: false })
 
 export default function ChatWidget() {
-  // State quản lý việc đóng/mở bong bóng chat
   const [isOpen, setIsOpen] = useState(false)
+  const [hidden, setHidden] = useState(false)
+
+  // Đã ẩn thì không render gì hết
+  if (hidden) return null
 
   // Hàm xử lý logic khi user gõ tin nhắn và bấm gửi
   //   const handleChatRequest = async (body: any, signals: any) => {
   //     const userMessage = body.messages[0].text
-
-  //     // Bật hiệu ứng typing
   //     signals.onResponse({ text: 'Đang xử lý...', overwrite: true })
-
   //     try {
-  //       // TẠI ĐÂY: Bạn sẽ gọi tới cái AniMapper API hoặc backend của bạn
-  //       // Ví dụ giả lập độ trễ API:
   //       await new Promise(resolve => setTimeout(resolve, 1500))
-
-  //       // Trả kết quả về cho cửa sổ chat
   //       signals.onResponse({
   //         text: `Tôi đã nhận được yêu cầu: "${userMessage}". API của bạn sẽ gắn vào đây!`,
   //         overwrite: true
@@ -33,10 +29,10 @@ export default function ChatWidget() {
   //   }
 
   return (
-    <div className='fixed bottom-6 right-6 z-50 flex flex-col items-end'>
-      {/* Khung chat Deep Chat */}
+    <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 50, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+      {/* Khung chat */}
       {isOpen && (
-        <div className='mb-4 shadow-2xl rounded-xl overflow-hidden bg-white'>
+        <div style={{ marginBottom: '12px', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,.5)' }}>
           <DeepChat
             demo={true}
             style={{ width: '350px', height: '500px', borderRadius: '12px' }}
@@ -53,26 +49,64 @@ export default function ChatWidget() {
         </div>
       )}
 
-      {/* Nút bấm (Bong bóng) để mở/tắt chat */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className='w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 transition-colors'
-      >
-        {isOpen ? (
-          <svg className='w-6 h-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M6 18L18 6M6 6l12 12' />
-          </svg>
-        ) : (
-          <svg className='w-6 h-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-            <path
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              strokeWidth='2'
-              d='M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z'
-            />
-          </svg>
+      {/* Hàng nút: [Chat AI] [Ẩn] */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          style={{
+            height: '38px',
+            padding: '0 20px',
+            background: isOpen ? 'rgba(30,30,50,.95)' : 'var(--c-yel, #ffd23c)',
+            color: isOpen ? 'rgba(255,255,255,.75)' : '#1a1a2e',
+            border: isOpen ? '1px solid rgba(255,255,255,.15)' : 'none',
+            borderRadius: '20px',
+            fontSize: '13px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            boxShadow: '0 4px 16px rgba(0,0,0,.35)',
+            transition: 'background .2s, color .2s',
+            letterSpacing: '.02em',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          {isOpen ? 'Đóng' : 'Chat AI'}
+        </button>
+
+        {/* Nút ẩn widget — thiết kế tinh tế dạng nút close nhỏ */}
+        {!isOpen && (
+          <button
+            onClick={() => setHidden(true)}
+            title='Ẩn Chat AI'
+            style={{
+              width: '26px',
+              height: '26px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'rgba(30,30,50,.6)',
+              color: 'rgba(255,255,255,.4)',
+              border: '1px solid rgba(255,255,255,.08)',
+              borderRadius: '50%',
+              fontSize: '14px',
+              cursor: 'pointer',
+              transition: 'all .2s ease',
+              padding: 0
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.color = 'rgba(255,255,255,.9)'
+              e.currentTarget.style.background = 'rgba(50,50,70,.8)'
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,.2)'
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.color = 'rgba(255,255,255,.4)'
+              e.currentTarget.style.background = 'rgba(30,30,50,.6)'
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,.08)'
+            }}
+          >
+            ✕
+          </button>
         )}
-      </button>
+      </div>
     </div>
   )
 }

@@ -14,6 +14,7 @@ import SeriesRowSection from '@/component/sections/series-row-section'
 import MoviesRowSection from '@/component/sections/movies-row-section'
 import AnimeRowSection from '@/component/sections/anime-row-section'
 import MoodSection from '@/component/sections/mood-section'
+import LateNightNotice from '@/component/notice/late-night-notice'
 
 export default function Home() {
   const router = useRouter()
@@ -121,6 +122,10 @@ export default function Home() {
 
       {/* ── Mood / AI Agent placeholder ──────────────── */}
       <MoodSection />
+
+      {/* ── Late-night server lag notice ─────────────────── */}
+      <LateNightNotice />
     </main>
   )
 }
+
