@@ -56,7 +56,7 @@ export default function HistoryPage() {
   if (isLoading) return <Loading />
 
   return (
-    <div className='pt-25 px-4 max-w-5xl mx-auto min-h-screen'>
+    <div className='pt-16 px-4 max-w-5xl mx-auto min-h-screen'>
       <h1 className='text-2xl font-bold mb-6'>Lịch sử xem</h1>
 
       {visibleMovies.length > 0 ? (

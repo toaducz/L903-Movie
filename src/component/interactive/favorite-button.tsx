@@ -93,7 +93,7 @@ export default function FavoriteButton({ slug, name, image }: FavoriteButtonProp
   }
 
   const baseStyle =
-    'mt-6 px-6 py-3 rounded-lg text-white font-semibold transition-all duration-300 transform shadow-lg w-full flex justify-center items-center gap-2 cursor-pointer'
+    'px-6 py-3 rounded-lg text-white font-semibold transition-all duration-300 transform shadow-lg w-full flex justify-center items-center gap-2 cursor-pointer'
 
   const activeStyle = isFavorite
     ? 'bg-red-500 hover:bg-red-600 hover:-translate-y-1 hover:shadow-red-500/50'

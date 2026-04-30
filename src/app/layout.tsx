@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Be_Vietnam_Pro } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/component/layout/navbar'
 import QueryProvider from '@/app/provider'
@@ -9,14 +9,10 @@ import { AuthProvider } from './auth-provider'
 import Footer from '@/component/layout/footer'
 import ChatWidget from '@/component/chat-widget/chat-widget'
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin']
-})
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin']
+const beVietnamPro = Be_Vietnam_Pro({
+  variable: '--font-be-vietnam-pro',
+  subsets: ['latin', 'vietnamese'],
+  weight: ['300', '400', '500', '600', '700', '800', '900']
 })
 
 export const metadata: Metadata = {
@@ -30,19 +26,19 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang='en'>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-stale-900`}>
+    <html lang='vi'>
+      <body className={`${beVietnamPro.variable} antialiased`}>
         <QueryProvider>
           <Suspense>
             <NProgressInit />
           </Suspense>
           <AuthProvider>
-            <Navbar />
-            {/* <div className='pb-25'></div> */}
-            {children}
-            {/* <div className='pb-25'></div> */}
+            <div className='c-app'>
+              <Navbar />
+              {children}
+              <Footer />
+            </div>
             <ChatWidget />
-            <Footer />
           </AuthProvider>
         </QueryProvider>
       </body>
