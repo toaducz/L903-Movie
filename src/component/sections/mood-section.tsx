@@ -18,7 +18,7 @@ export default function MoodSection() {
         <div>
           <p className='text-3xl sm:text-4xl font-black tracking-tight mb-2 text-white'>Không biết xem gì?</p>
           <p className='text-white/85 text-base sm:text-lg mb-6 max-w-xl leading-relaxed'>
-            Hỏi mình đi! AI Agent tìm phim 24/7, không quảng cáo, không spam, không lừa. Chỉ cần mô tả mood là xong.
+            Để tui gợi ý cho bạn nhe he he :D
           </p>
           <button
             onClick={() => setShowRec(!showRec)}
@@ -29,7 +29,7 @@ export default function MoodSection() {
             }}
             title='Xem gợi ý'
           >
-            Hỏi mình ›
+            Xem gợi ý ›
           </button>
         </div>
 
