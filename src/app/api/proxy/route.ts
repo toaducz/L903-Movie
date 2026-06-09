@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
   let targetUrl: URL
   try {
     targetUrl = new URL(targetUrlParam)
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: 'Invalid URL format' }, { status: 400 })
   }
 
