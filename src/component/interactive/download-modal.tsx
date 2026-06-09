@@ -61,7 +61,7 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({ isOpen, onClose, m
         return { text, finalUrl: url }
       }
       throw new Error(`Direct fetch failed: ${res.status}`)
-    } catch (e) {
+    } catch {
       // Fallback to proxy
       const proxyUrl = `/api/proxy?url=${encodeURIComponent(url)}`
       const res = await fetch(proxyUrl, { signal })
@@ -175,7 +175,7 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({ isOpen, onClose, m
               } else {
                 throw new Error(`Direct segment fetch code: ${res.status}`)
               }
-            } catch (err) {
+            } catch {
               // Thử qua proxy nếu tải trực tiếp lỗi (e.g. CORS)
               try {
                 const proxyUrl = `/api/proxy?url=${encodeURIComponent(url)}`
@@ -183,7 +183,7 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({ isOpen, onClose, m
                 if (res.ok) {
                   buffer = await res.arrayBuffer()
                 }
-              } catch (proxyErr) {
+              } catch {
                 attempt++
                 if (attempt >= maxAttempts) {
                   throw new Error(`Không thể tải đoạn phim số ${currentIdx + 1}. Vui lòng thử lại.`)
@@ -233,13 +233,13 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({ isOpen, onClose, m
         onClose()
       }, 2000)
 
-    } catch (error: any) {
-      if (error.name === 'AbortError' || signal.aborted) {
+    } catch (error: unknown) {
+      if ((error as { name: string }).name === 'AbortError' || signal.aborted) {
         console.log('Download aborted.')
         return
       }
       console.error('Download error:', error)
-      setErrorMessage(error.message || 'Lỗi không xác định xảy ra trong quá trình tải.')
+      setErrorMessage((error as { message: string }).message || 'Lỗi không xác định xảy ra trong quá trình tải.')
       setStatus('error')
     }
   }
