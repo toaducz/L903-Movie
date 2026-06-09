@@ -1,27 +1,122 @@
-// phải viết proxy vì bị CORS không có content-type: application/json
 import { NextRequest, NextResponse } from 'next/server'
+import { kkphim, nguonc, ophim, ophimV1, proxyApiUrl } from '@/utils/env'
+
+const getHostName = (urlStr: string): string => {
+  try {
+    const formattedUrl = urlStr.startsWith('http') ? urlStr : `https://${urlStr}`
+    return new URL(formattedUrl).hostname
+  } catch {
+    return ''
+  }
+}
+
+// Lấy hostnames động từ file env.ts để tránh hardcode
+const ENV_DOMAINS = [
+  getHostName(kkphim),
+  getHostName(nguonc),
+  getHostName(ophim),
+  getHostName(ophimV1),
+  getHostName(proxyApiUrl)
+].filter(Boolean)
+
+// Các regex whitelist cho CDN và phụ đề ngoài
+const EXTERNAL_DOMAINS_PATTERNS = [
+  /^(.+\.)?opstream\.me$/,
+  /^(.+\.)?akamaized\.net$/,
+  /^(.+\.)?opensubtitles\.org$/,
+  /^(.+\.)?opensubtitles\.com$/,
+  /^(.+\.)?oscdn\.net$/,
+  /^(.+\.)?strem\.io$/
+]
+
+function isAllowedDomain(hostname: string): boolean {
+  const isEnvMatch = ENV_DOMAINS.some(envHost => {
+    return hostname === envHost || hostname.endsWith('.' + envHost)
+  })
+  if (isEnvMatch) return true
+
+  return EXTERNAL_DOMAINS_PATTERNS.some(pattern => pattern.test(hostname))
+}
 
 export async function GET(req: NextRequest) {
-  const targetUrl = req.nextUrl.searchParams.get('url')
-  if (!targetUrl) {
-    return NextResponse.json({ error: 'Missing url' }, { status: 400 })
+  const targetUrlParam = req.nextUrl.searchParams.get('url')
+
+  if (!targetUrlParam) {
+    return NextResponse.json({ error: 'Missing url parameter' }, { status: 400 })
   }
 
-  const cookieHeader = req.headers.get('cookie')
-  const headers = cookieHeader ? { cookie: cookieHeader } : undefined
+  let targetUrl: URL
+  try {
+    targetUrl = new URL(targetUrlParam)
+  } catch (e) {
+    return NextResponse.json({ error: 'Invalid URL format' }, { status: 400 })
+  }
 
-  const res = await fetch(targetUrl, { headers })
-  const contentType = res.headers.get('content-type') ?? ''
+  if (!isAllowedDomain(targetUrl.hostname)) {
+    return NextResponse.json({ error: 'Domain not allowed' }, { status: 403 })
+  }
 
-  // Trả về text thẳng nếu không phải JSON (ví dụ: file .srt)
-  if (!contentType.includes('application/json')) {
-    const text = await res.text()
-    return new NextResponse(text, {
-      status: res.status,
-      headers: { 'Content-Type': contentType || 'text/plain; charset=utf-8' }
+  const forwardedHeaders = new Headers()
+  const allowedHeaders = [
+    'user-agent',
+    'accept',
+    'accept-language',
+    'referer',
+    'sec-ch-ua',
+    'sec-ch-ua-mobile',
+    'sec-ch-ua-platform',
+    'sec-fetch-dest',
+    'sec-fetch-mode',
+    'sec-fetch-site'
+  ]
+
+  if (targetUrl.hostname === 'l903-movie-proxy.toanduz.workers.dev') {
+    allowedHeaders.push('cookie')
+  }
+
+  req.headers.forEach((value, key) => {
+    if (allowedHeaders.includes(key.toLowerCase())) {
+      forwardedHeaders.set(key, value)
+    }
+  })
+
+  try {
+    const res = await fetch(targetUrl.toString(), { 
+      method: 'GET',
+      headers: forwardedHeaders 
     })
-  }
+    
+    const contentType = res.headers.get('content-type') || ''
 
-  const data = await res.json()
-  return NextResponse.json(data, { status: res.status })
+    if (contentType.includes('application/json')) {
+      const data = await res.json()
+      return NextResponse.json(data, { status: res.status })
+    }
+    const isSafeType = 
+      contentType.includes('text/plain') || 
+      contentType.includes('text/vtt') || 
+      contentType.includes('text/srt') || 
+      contentType.includes('application/x-subrip') || 
+      contentType.includes('application/x-mpegurl') || 
+      contentType.includes('video/mp2t')
+
+    const safeContentType = isSafeType ? contentType : 'application/octet-stream'
+
+    return new NextResponse(res.body, {
+      status: res.status,
+      headers: { 
+        'Content-Type': safeContentType,
+        'X-Content-Type-Options': 'nosniff',
+        'Content-Security-Policy': "default-src 'none'",
+        'Access-Control-Allow-Origin': '*'
+      }
+    })
+    
+  } catch (error) {
+    console.error('Proxy Fetch Error:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch from target URL' }, 
+      { status: 500 }
+    )
+  }
 }

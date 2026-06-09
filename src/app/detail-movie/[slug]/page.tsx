@@ -19,6 +19,7 @@ import VideoPlayer from '@/component/player/custom-player'
 import { useAuth } from '@/app/auth-provider'
 import MovieReview from '@/component/interactive/movie-review'
 import type { SubtitleParams, SubtitleCue } from '@/types/subtitle'
+import { DownloadModal } from '@/component/interactive/download-modal'
 
 const AUTOPLAY_COUNTDOWN = 5
 
@@ -36,6 +37,7 @@ export default function WatchPage() {
   const [useBackupPlayer, setUseBackupPlayer] = useState(false)
   const [iframeLoading, setIframeLoading] = useState(true)
   const [autoplayCountdown, setAutoplayCountdown] = useState<number | null>(null)
+  const [showDownloadModal, setShowDownloadModal] = useState(false)
 
   const isWatching = searchParams.get('watch') === '1'
   const epParam = searchParams.get('ep')
@@ -477,7 +479,7 @@ export default function WatchPage() {
                 />
               </div>
 
-              <div className='flex justify-center py-3 bg-white/2'>
+              <div className='flex flex-wrap justify-center gap-3 py-3 bg-white/2'>
                 <button
                   onClick={() => setUseBackupPlayer(prev => !prev)}
                   className={`px-4 py-1.5 text-xs font-bold rounded-full transition cursor-pointer border
@@ -489,6 +491,15 @@ export default function WatchPage() {
                 >
                   {useBackupPlayer ? '⚡ DỰ PHÒNG - ĐỔI VỀ SERVER CHÍNH' : '⇄ DÙNG LINK DỰ PHÒNG (CÓ QUẢNG CÁO)'}
                 </button>
+
+                {episodeToPlay?.link_m3u8 && (
+                  <button
+                    onClick={() => setShowDownloadModal(true)}
+                    className='px-4 py-1.5 text-xs font-black rounded-full transition cursor-pointer border border-[var(--c-pink)] bg-transparent text-[var(--c-pink)] hover:bg-[var(--c-pink)] hover:text-white shadow-[0_0_10px_rgba(236,72,153,0.15)] hover:shadow-[0_0_15px_rgba(236,72,153,0.3)]'
+                  >
+                    ⬇ TẢI PHIM (.MP4)
+                  </button>
+                )}
               </div>
 
               {/* Wrapper giữ tỉ lệ 16:9 */}
@@ -750,6 +761,18 @@ export default function WatchPage() {
         </div>
 
         <MovieReview slug={movie.slug} name={movie.name} image={movie.poster_url} />
+
+        {selectedEpisode && episodeToPlay && (
+          <DownloadModal
+            isOpen={showDownloadModal}
+            onClose={() => setShowDownloadModal(false)}
+            m3u8Url={episodeToPlay.link_m3u8}
+            fileName={(() => {
+              const rawName = `[${source}] ${movie.name} ${episodeToPlay.name}.mp4`
+              return rawName.replace(/[\\/:*?"<>|]/g, '') // sanitize
+            })()}
+          />
+        )}
       </div>
     </div>
   )
