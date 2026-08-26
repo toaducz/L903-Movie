@@ -80,6 +80,16 @@ export async function GET(req: NextRequest) {
     }
   })
 
+  if (!forwardedHeaders.has('user-agent')) {
+    forwardedHeaders.set(
+      'user-agent',
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36'
+    )
+  }
+  if (!forwardedHeaders.has('accept')) {
+    forwardedHeaders.set('accept', 'application/json, text/plain, */*')
+  }
+
   try {
     const res = await fetch(targetUrl.toString(), { 
       method: 'GET',
