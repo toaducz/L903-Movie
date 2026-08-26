@@ -3,11 +3,10 @@
 import { useState } from 'react'
 import MovieItem from '@/component/item/movie-item'
 import { useQuery } from '@tanstack/react-query'
-import { getUpdateMovieOptions } from '@/api/ophim/get-update-movie'
+import { getLatestMovies, getListMovies } from '@/services/movie-service'
 import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
 import { useRouter } from 'next/navigation'
-import { getListMovie } from '@/api/ophim/list-movie/get-list-movie'
 import ContinueWatchingSection from '@/component/sections/continue-watching-section'
 import HeroSection from '@/component/sections/hero-section'
 import SeriesRowSection from '@/component/sections/series-row-section'
@@ -15,33 +14,30 @@ import MoviesRowSection from '@/component/sections/movies-row-section'
 import AnimeRowSection from '@/component/sections/anime-row-section'
 import MoodSection from '@/component/sections/mood-section'
 import LateNightNotice from '@/component/notice/late-night-notice'
-import { Movie } from '@/api/kkphim/get-update-movie'
+import type { MovieItem as MovieItemType } from '@/types/movie'
+
 
 export default function Home() {
   const router = useRouter()
   const [tab, setTab] = useState<'all' | 'phim-bo' | 'phim-le' | 'hoat-hinh'>('all')
 
-  const { data: updateMovie, isLoading, isError } = useQuery(getUpdateMovieOptions({ page: 1 }))
-  const { data: phimbo } = useQuery(getListMovie({ typelist: 'phim-bo', page: 1, limit: 5 }))
-  const { data: phimle } = useQuery(getListMovie({ typelist: 'phim-le', page: 1, limit: 4 }))
-  const { data: hoathinh } = useQuery(getListMovie({ typelist: 'hoat-hinh', country: 'nhat-ban', page: 1, limit: 6 }))
-
-  // console.log('hoathinh', hoathinh)
-  // console.log('phimle', phimle)
-  // console.log('phimbo', phimbo)
+  const { data: updateMovie, isLoading, isError } = useQuery(getLatestMovies({ page: 1 }))
+  const { data: phimbo } = useQuery(getListMovies({ typelist: 'phim-bo', page: 1, limit: 5 }))
+  const { data: phimle } = useQuery(getListMovies({ typelist: 'phim-le', page: 1, limit: 4 }))
+  const { data: hoathinh } = useQuery(getListMovies({ typelist: 'hoat-hinh', country: 'nhat-ban', page: 1, limit: 6 }))
 
   if (isLoading) return <Loading />
   if (isError) return <Error />
 
-  const allMovies = updateMovie?.movies ?? []
+  const allMovies = updateMovie?.items ?? []
   const featuredMovie = allMovies[0]
 
   // Tab-filtered grid (excludes the hero item)
   const gridMovies = (() => {
     const pool = allMovies.slice(1)
-    if (tab === 'phim-bo') return pool.filter((m: Movie) => m.type === 'series')
-    if (tab === 'phim-le') return pool.filter((m: Movie) => m.type === 'single')
-    if (tab === 'hoat-hinh') return pool.filter((m: Movie) => m.type === 'hoathinh')
+    if (tab === 'phim-bo') return pool.filter((m: MovieItemType) => m.type === 'series')
+    if (tab === 'phim-le') return pool.filter((m: MovieItemType) => m.type === 'single')
+    if (tab === 'hoat-hinh') return pool.filter((m: MovieItemType) => m.type === 'hoathinh')
     return pool
   })()
 
@@ -99,8 +95,8 @@ export default function Home() {
 
           {/* Movie grid */}
           <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-5 sm:gap-6'>
-            {gridMovies.map((movie: Movie, index: number) => (
-              <MovieItem key={movie._id} movie={movie} index={index} />
+            {gridMovies.map((movie: MovieItemType, index: number) => (
+              <MovieItem key={movie._id ?? movie.slug} movie={movie} index={index} cdnDomain={updateMovie?.APP_DOMAIN_CDN_IMAGE} source={movie.source} />
             ))}
           </div>
 
@@ -133,3 +129,4 @@ export default function Home() {
     </main>
   )
 }
+

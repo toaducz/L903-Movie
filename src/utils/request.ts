@@ -9,7 +9,11 @@ export async function request<T>(
     params = '?' + new URLSearchParams(payload as Record<string, string>).toString()
   }
 
-  const proxyUrl = `/api/proxy?url=${encodeURIComponent(`${apiUrl}${endpoint}${params}`)}`
+  const cleanApiUrl = apiUrl.replace(/\/+$/, '')
+  const cleanEndpoint = endpoint.replace(/^\/+/, '')
+  const fullUrl = `${cleanApiUrl}/${cleanEndpoint}${params}`
+
+  const proxyUrl = `/api/proxy?url=${encodeURIComponent(fullUrl)}`
 
   const res = await fetch(proxyUrl)
   try {

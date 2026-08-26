@@ -1,8 +1,8 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { getCategorySlug } from '@/api/ophim/filter/get-category-slug'
-import { getCountrySlug } from '@/api/ophim/filter/get-country-slug'
+import { getCategories, getCountries } from '@/services/movie-service'
+
 
 type FilterProps = {
   country: string
@@ -27,8 +27,9 @@ export default function MovieFilter({
   onSubmit,
   onReset
 }: FilterProps) {
-  const { data: categoryData } = useQuery(getCategorySlug())
-  const { data: countryData } = useQuery(getCountrySlug())
+  const { data: categoryData } = useQuery(getCategories())
+  const { data: countryData } = useQuery(getCountries())
+
 
   const years = Array.from({ length: new Date().getFullYear() - 1970 + 1 }, (_, index) => ({
     slug: String(1970 + index),

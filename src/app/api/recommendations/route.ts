@@ -3,10 +3,25 @@ import { NextRequest, NextResponse } from 'next/server'
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
 async function searchKKPhim(name: string) {
+  const norm = (u: string, cdn: string) => {
+    if (!u) return ''
+    if (u.startsWith('http')) return u
+    return `${cdn.replace(/\/+$/, '')}/${u.replace(/^\/+/, '')}`
+  }
+
   // thử tìm full tên trước
   const res = await fetch(`https://phimapi.com/v1/api/tim-kiem?keyword=${encodeURIComponent(name)}&page=1&limit=1`)
   const data = await res.json()
-  if (data?.data?.items?.[0]) return data.data.items[0]
+  const raw = data?.data?.items?.[0]
+  if (raw) {
+    const cdn = data?.data?.APP_DOMAIN_CDN_IMAGE || 'https://phimimg.com'
+    return {
+      ...raw,
+      poster_url: norm(raw.thumb_url, cdn),
+      thumb_url: norm(raw.poster_url, cdn),
+      source: 'kkphim'
+    }
+  }
 
   // fallback: tìm với 2-3 từ đầu
   const shortName = name.split(/[\s:,]/)[0]
@@ -15,7 +30,17 @@ async function searchKKPhim(name: string) {
     `https://phimapi.com/v1/api/tim-kiem?keyword=${encodeURIComponent(shortName)}&page=1&limit=1`
   )
   const data2 = await res2.json()
-  return data2?.data?.items?.[0] ?? null
+  const raw2 = data2?.data?.items?.[0]
+  if (raw2) {
+    const cdn = data2?.data?.APP_DOMAIN_CDN_IMAGE || 'https://phimimg.com'
+    return {
+      ...raw2,
+      poster_url: norm(raw2.thumb_url, cdn),
+      thumb_url: norm(raw2.poster_url, cdn),
+      source: 'kkphim'
+    }
+  }
+  return null
 }
 
 export async function POST(req: NextRequest) {

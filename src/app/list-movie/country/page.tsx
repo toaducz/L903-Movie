@@ -3,7 +3,7 @@
 import { Suspense, useState, useEffect } from 'react'
 import { notFound, useSearchParams, useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { getListMovieByCountry } from '@/api/ophim/list-movie/get-list-movie-by-country'
+import { getMoviesByCountry } from '@/services/movie-service'
 import MovieListPage from '@/page/movie-list-page'
 import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
@@ -37,7 +37,7 @@ function MovieListPageContent() {
     isLoading,
     isError
   } = useQuery(
-    getListMovieByCountry({
+    getMoviesByCountry({
       country: countryParam!,
       page: pageParam,
       sort_field: filter.sortField || undefined,

@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Movie } from '@/api/kkphim/get-update-movie'
+import type { MovieItem as Movie } from '@/types/movie'
 import { getOptimizedImage } from '@/utils/common'
 
 type Props = {
@@ -37,7 +37,7 @@ export default function MoviesRowSection({
       {/* Horizontal 16:10 card grid */}
       <div className='max-w-[1400px] mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5'>
         {movies.map(movie => {
-          const optimized = getOptimizedImage(movie.thumb_url, movie.poster_url, 'poster', 480, 300, 65)
+          const optimized = getOptimizedImage(movie.thumb_url, movie.poster_url, 'thumb')
 
           return (
             <Link

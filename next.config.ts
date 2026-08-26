@@ -45,6 +45,16 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'phim.nguonc.com',
         pathname: '/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.ophim.live',
+        pathname: '/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'ophim1.com',
+        pathname: '/**'
       }
     ]
   },

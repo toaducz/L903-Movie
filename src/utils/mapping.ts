@@ -104,7 +104,7 @@ export function mapToDetailMovie(movie: MovieNguonc, episodes?: EpisodeNguonc[])
 
 export function mapOphimUpdateItemToMovie(item: OphimUpdateItem, cdnImageDomain?: string): Movie {
   const getImageUrl = (url: string) => {
-    if (!url || !cdnImageDomain) return url
+    if (!url) return ''
     if (url.startsWith('http')) return url
     return getOphimImageMovie(cdnImageDomain, url) ?? url
   }
@@ -146,7 +146,7 @@ export function mapOphimToDetailMovie(
   cdnImageDomain?: string
 ): DetailMovie {
   const getImageUrl = (url: string) => {
-    if (!url || !cdnImageDomain) return url
+    if (!url) return ''
     if (url.startsWith('http')) return url
     return getOphimImageMovie(cdnImageDomain, url) ?? url
   }

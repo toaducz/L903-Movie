@@ -3,7 +3,7 @@
 import { Suspense, useEffect } from 'react'
 import { notFound, useSearchParams, useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { getListMovie } from '@/api/ophim/list-movie/get-list-movie'
+import { getListMovies } from '@/services/movie-service'
 import MovieListPage from '@/page/movie-list-page'
 import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
@@ -34,7 +34,7 @@ function MovieListPageContent() {
     isLoading,
     isError
   } = useQuery(
-    getListMovie({
+    getListMovies({
       typelist: query,
       page: pageParam,
       country

@@ -141,7 +141,7 @@ export default function ContinueWatchingSection() {
               {/* Art + progress */}
               <div className='relative rounded-xl overflow-hidden border border-white/10 bg-[var(--c-card)]'>
                 <Image
-                  src={`https://wsrv.nl/?url=${encodeURIComponent(item.image)}&w=400&h=600&fit=cover`}
+                  src={item.image || 'https://via.placeholder.com/400x600?text=No+Poster'}
                   alt={item.name}
                   width={176}
                   height={264}

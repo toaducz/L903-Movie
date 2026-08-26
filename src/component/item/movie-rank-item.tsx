@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { Movie } from '@/api/kkphim/get-update-movie'
+import type { MovieItem as Movie } from '@/types/movie'
 import Link from 'next/link'
 
 type Props = {
@@ -8,9 +8,7 @@ type Props = {
 }
 
 export default function MovieRankItem({ movie, index }: Props) {
-  if (!movie.thumb_url.includes('https://phimimg.com/')) {
-    movie.thumb_url = 'https://phimimg.com/' + movie.thumb_url
-  }
+  const imageSrc = movie.poster_url || movie.thumb_url || 'https://via.placeholder.com/80x80'
 
   return (
     <Link href={`/detail-movie/${movie.slug}`} className='block'>
@@ -19,7 +17,7 @@ export default function MovieRankItem({ movie, index }: Props) {
         <Image
           unoptimized
           priority
-          src={movie.thumb_url}
+          src={imageSrc}
           alt={movie.name}
           width={80}
           height={80}

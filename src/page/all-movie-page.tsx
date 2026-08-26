@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 // import { useMemo } from 'react'
 import MovieItem from '@/component/item/movie-item'
-import { getLatestUpdateMovieList } from '@/api/kkphim/get-update-movie'
+import { getLatestMovies } from '@/services/movie-service'
 import Pagination from '@/component/interactive/pagination'
 import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
@@ -24,7 +24,7 @@ export default function AllMoviePage({ page }: Readonly<Props>) {
     isLoading,
     isError
   } = useQuery(
-    getLatestUpdateMovieList({
+    getLatestMovies({
       page: page
     })
   )

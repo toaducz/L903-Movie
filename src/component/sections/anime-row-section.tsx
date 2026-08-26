@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Movie } from '@/api/kkphim/get-update-movie'
+import type { MovieItem as Movie } from '@/types/movie'
 import { getOptimizedImage } from '@/utils/common'
 
 type Props = {
@@ -46,7 +46,7 @@ export default function AnimeRowSection({
         {/* 6-column anime grid */}
         <div className='relative z-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4'>
           {movies.map(movie => {
-            const optimized = getOptimizedImage(movie.thumb_url, movie.poster_url, 'thumb', 200, 300, 60)
+            const optimized = getOptimizedImage(movie.thumb_url, movie.poster_url, 'poster')
 
             return (
               <Link key={movie._id} href={`/detail-movie/${movie.slug}`} className='group block cursor-pointer'>

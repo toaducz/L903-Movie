@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { getDetailMovie } from '@/api/kkphim/get-detail-movie'
-import { getDetailMovieOptions as getDetailMovieOphim } from '@/api/ophim/get-detail-movie'
+import { getMovieDetail } from '@/services/movie-service'
+import { DEFAULT_MOVIE_SOURCE } from '@/utils/env'
 import { getSubtitles } from '@/api/proxy/get-subtitles'
 import EpisodeList from '@/component/interactive/episode-list'
 import SubtitleBadges from '@/component/interactive/subtitle-badges'
@@ -28,9 +28,9 @@ export default function WatchPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user } = useAuth()
-  const source = searchParams.get('source') ?? 'ophim'
+  const source = searchParams.get('source') ?? DEFAULT_MOVIE_SOURCE
   const { data, isLoading, isError } = useQuery(
-    source === 'ophim' ? getDetailMovieOphim({ slug: String(slug) }) : getDetailMovie({ slug: String(slug) })
+    getMovieDetail({ slug: String(slug), source: source as 'kkphim' | 'ophim' | 'nguonc' })
   )
   const [selectedEpisode, setSelectedEpisode] = useState<string | null>(null)
   const [useBackup, setUseBackup] = useState<string | null>(null)
@@ -170,7 +170,7 @@ export default function WatchPage() {
             <strong className='text-white uppercase'>{source}</strong>. Hãy thử tìm ở các nguồn dự phòng khác bên dưới:
           </p>
           <div className='flex flex-col gap-3'>
-            {['ophim', 'kkphim', 'nguonc']
+            {['kkphim', 'ophim', 'nguonc']
               .filter(s => s !== source)
               .map(s => (
                 <button
@@ -258,7 +258,7 @@ export default function WatchPage() {
           <div
             className='relative w-full h-[280px] sm:h-[360px] rounded-3xl mb-10 overflow-hidden bg-cover bg-center border border-[var(--c-line)]'
             style={{
-              backgroundImage: `url(${movie.poster_url})`,
+              backgroundImage: `url(${movie.thumb_url || movie.poster_url})`,
               boxShadow: '12px 12px 0 var(--c-pink)'
             }}
           >
@@ -287,7 +287,7 @@ export default function WatchPage() {
               {/* Nút Đổi Nguồn (Source Switcher) */}
               <div className='mt-4 flex flex-wrap gap-2 items-center'>
                 <span className='text-xs text-white/60 font-medium uppercase tracking-wider mr-2'>Nguồn:</span>
-                {['ophim', 'kkphim', 'nguonc'].map(s => (
+                {['kkphim', 'ophim', 'nguonc'].map(s => (
                   <button
                     key={s}
                     onClick={() => {
@@ -328,7 +328,7 @@ export default function WatchPage() {
                   loading='lazy'
                   width={400}
                   height={600}
-                  src={movie.thumb_url}
+                  src={movie.poster_url || movie.thumb_url}
                   alt={movie.name}
                   className='w-full h-auto object-cover'
                 />
@@ -664,7 +664,7 @@ export default function WatchPage() {
         {/* Nút Đổi Nguồn (Source Switcher) */}
         <div className='flex flex-wrap gap-2 items-center mb-6'>
           <span className='text-xs text-white/60 font-medium uppercase tracking-wider mr-2'>Nguồn:</span>
-          {['ophim', 'kkphim', 'nguonc'].map(s => (
+          {['kkphim', 'ophim', 'nguonc'].map(s => (
             <button
               key={s}
               onClick={() => {

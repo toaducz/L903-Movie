@@ -84,54 +84,67 @@ export default function SearchResultPage({
     return <Warning message='Từ khóa quá dài' />
   }
 
+  const totalCount =
+    result?.pagination?.totalItems && result.pagination.totalItems > 0
+      ? result.pagination.totalItems
+      : (result?.items?.length ?? 0)
+
   return (
     <div className='min-h-screen flex flex-col items-center justify-start pt-10 pb-20 px-4 bg-slate-900'>
       <div className='w-full max-w-7xl flex flex-col items-center'>
         <div className={`flex flex-col ${headTitle ? 'pt-5' : 'pt-10'} items-center w-full`}>
-          <h6 className='font-semibold text-gray-100 mb-6 italic'>Có {result?.pagination.totalItems} kết quả</h6>
-        {result?.pagination?.totalItems === 0 ? (
-          <div className='flex flex-col items-center justify-center gap-4'>
-            <Image
-              unoptimized
-              src={errorImage}
-              alt='Loading...'
-              width={200}
-              height={200}
-              className='object-contain'
-              priority
+          <h6 className='font-semibold text-gray-100 mb-6 italic'>
+            Có {totalCount} kết quả
+          </h6>
+          {totalCount === 0 ? (
+            <div className='flex flex-col items-center justify-center gap-4 my-8'>
+              <Image
+                unoptimized
+                src={errorImage}
+                alt='Không có kết quả'
+                width={200}
+                height={200}
+                className='object-contain'
+                priority
+              />
+              <p className='text-gray-400 text-sm'>Không tìm thấy phim phù hợp với từ khóa &ldquo;{keyword}&rdquo;</p>
+              <Link
+                href={`/nguonc/search?q=${encodeURIComponent(keyword)}&page=1`}
+                style={{ color: 'white', textDecoration: 'underline' }}
+                className='text-sm text-cyan-400 hover:underline'
+              >
+                Thử tìm kiếm với Nguonc.com nha
+              </Link>
+            </div>
+          ) : (
+            result?.hasDuplicates && (
+              <button
+                onClick={() => setShowAll(!showAll)}
+                className='mb-4 text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-widest cursor-pointer'
+              >
+                {showAll ? 'Ẩn kết quả trùng' : 'Hiện tất cả kết quả (bao gồm trùng lặp)'}
+              </button>
+            )
+          )}
+        </div>
+        {totalCount > 0 && (
+          <>
+            <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-5 p-3 w-full'>
+              {(showAll ? result?.allItems : result?.items)?.map((movie: CombinedMovie) => (
+                <div key={`${movie._id}_${movie.source}`}>
+                  <MovieItem movie={movie} cdnDomain={result?.APP_DOMAIN_CDN_IMAGE} source={movie.source} />
+                </div>
+              ))}
+            </div>
+
+            <Pagination
+              currentPage={result?.pagination?.currentPage ?? 1}
+              totalPages={result?.pagination?.totalPages ?? 1}
+              onPageChange={handlePageChange}
             />
-            <Link
-              href={`/nguonc/search?q=${encodeURIComponent(keyword)}&page=1`}
-              style={{ color: 'white', textDecoration: 'underline' }}
-            >
-              Không có kết quả? Thử với Nguonc.com nha
-            </Link>
-          </div>
-        ) : (
-          result?.hasDuplicates && (
-            <button
-              onClick={() => setShowAll(!showAll)}
-              className='mb-4 text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-widest cursor-pointer'
-            >
-              {showAll ? 'Ẩn kết quả trùng' : 'Hiện tất cả kết quả (bao gồm trùng lặp)'}
-            </button>
-          )
+          </>
         )}
       </div>
-      <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-5 p-3 w-full'>
-        {(showAll ? result?.allItems : result?.items)?.map((movie: CombinedMovie) => (
-          <div key={`${movie._id}_${movie.source}`}>
-            <MovieItem movie={movie} cdnDomain={result?.APP_DOMAIN_CDN_IMAGE} source={movie.source} />
-          </div>
-        ))}
-      </div>
-
-      <Pagination
-        currentPage={result?.pagination.currentPage ?? 1}
-        totalPages={result?.pagination.totalPages ?? 1}
-        onPageChange={handlePageChange}
-      />
     </div>
-  </div>
   )
 }

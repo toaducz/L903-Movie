@@ -2,12 +2,12 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Movie } from '@/api/kkphim/get-update-movie'
+import type { MovieItem as MovieItemType } from '@/types/movie'
 import React, { useState } from 'react'
 import { getOphimImageMovie } from '@/utils/common'
 
 type Props = {
-  movie: Movie
+  movie: MovieItemType
   color?: string
   source?: string
   index?: number
@@ -23,29 +23,25 @@ export default function MovieItem({ movie, color, source, index, cdnDomain }: Re
     if (temp === '{}' || temp === '') return null
 
     // If it's already a full URL, return it (e.g. processed by mapping or returned by API)
-    if (temp.startsWith('http')) return temp
+    if (temp.startsWith('http://') || temp.startsWith('https://')) return temp
 
     const cleanPath = temp.replace(/^\/+/, '')
 
     // Handle relative paths based on source (as fallback)
     switch (source) {
       case 'ophim':
-        return getOphimImageMovie(cdnDomain ?? '', url)
+        return getOphimImageMovie(cdnDomain || 'https://img.ophim.live', url as string)
       case 'nguonc':
         return `https://phim.nguonc.com/uploads/movies/${cleanPath}`
       default:
         // Default to KKPhim domain
-        return `${cdnDomain}/${cleanPath}`
+        return `${(cdnDomain || 'https://phimimg.com').replace(/\/+$/, '')}/${cleanPath}`
     }
   }
 
   const poster = normalizePosterUrl(movie.poster_url)
   const thumb = normalizePosterUrl(movie.thumb_url)
-
-  const optimizedUrl = (url: string | null) => {
-    if (!url) return ''
-    return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=250&h=375&fit=cover&output=webp&q=60`
-  }
+  const imageSrc = poster || thumb || 'https://via.placeholder.com/250x375?text=No+Poster'
 
   const isPriority = index !== undefined && index < 6
 
@@ -79,7 +75,7 @@ export default function MovieItem({ movie, color, source, index, cdnDomain }: Re
           {!isLoaded && <div className='absolute inset-0 bg-white/5 animate-pulse' />}
 
           <Image
-            src={optimizedUrl(thumb ?? poster) || 'https://via.placeholder.com/250x375?text=No+Poster'}
+            src={imageSrc}
             alt={movie.name}
             fill
             sizes='(max-width: 640px) 50vw, (max-width: 1024px) 25vw, (max-width: 1536px) 20vw, 15vw'

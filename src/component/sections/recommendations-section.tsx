@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 // import { getViewHistory } from '@/utils/local-storage'
-import { Movie } from '@/api/kkphim/get-update-movie'
+import type { MovieItem as Movie } from '@/types/movie'
 import MovieItem from '@/component/item/movie-item'
 
 export default function RecommendationsSection() {

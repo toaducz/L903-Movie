@@ -6,14 +6,13 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 import menu from '@/assets/menu.png'
 import { useQuery } from '@tanstack/react-query'
-import { getCategorySlug } from '@/api/ophim/filter/get-category-slug'
-import { getCountrySlug } from '@/api/ophim/filter/get-country-slug'
+import { getCategories, getCountries, getSearchSuggestions } from '@/services/movie-service'
+import { DEFAULT_MOVIE_SOURCE } from '@/utils/env'
 import userIcon from '@/assets/user-icons.png'
 import { useAuth } from '@/app/auth-provider'
-import { getSearchMovieListOphim } from '@/api/ophim/search/get-search'
 import NotificationBell from '@/component/layout/notification-bell'
 
-type DropdownItem = { _id: string; slug: string; name: string }
+type DropdownItem = { _id?: string; id?: string; slug: string; name: string }
 
 export default function Navbar() {
   const router = useRouter()
@@ -30,11 +29,11 @@ export default function Navbar() {
   const isPublicPage = pathname === '/login' || pathname === '/home'
 
   const { data: categoryData, isLoading: categoryLoading } = useQuery({
-    ...getCategorySlug(),
+    ...getCategories(DEFAULT_MOVIE_SOURCE),
     enabled: !isPublicPage
   })
   const { data: countryData, isLoading: countryLoading } = useQuery({
-    ...getCountrySlug(),
+    ...getCountries(DEFAULT_MOVIE_SOURCE),
     enabled: !isPublicPage
   })
 
@@ -44,10 +43,10 @@ export default function Navbar() {
   }, [search])
 
   const { data: suggestionData } = useQuery({
-    ...getSearchMovieListOphim({ keyword: debouncedSearch, page: 1, limit: 6 }),
+    ...getSearchSuggestions({ keyword: debouncedSearch, limit: 6, source: DEFAULT_MOVIE_SOURCE }),
     enabled: debouncedSearch.length >= 2
   })
-  const suggestions = suggestionData?.movies?.slice(0, 6) ?? []
+  const suggestions = (suggestionData ?? []).slice(0, 6)
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -69,11 +68,11 @@ export default function Navbar() {
   const getItems = (): DropdownItem[] => {
     if (openMenu === 'category') {
       if (categoryLoading) return [{ _id: 'loading', slug: 'loading', name: 'Đang tải...' }]
-      return categoryData ?? []
+      return (categoryData ?? []).map(c => ({ ...c, _id: c.id }))
     }
     if (openMenu === 'country') {
       if (countryLoading) return [{ _id: 'loading', slug: 'loading', name: 'Đang tải...' }]
-      return countryData ?? []
+      return (countryData ?? []).map(c => ({ ...c, _id: c.id }))
     }
     if (openMenu === 'year') return years
     return []
@@ -114,6 +113,11 @@ export default function Navbar() {
     setIsMenuOpen(prev => !prev)
   }
 
+  // Nguồn phụ trợ linh hoạt: nếu nguồn chính là kkphim thì nút phụ là ophim, và ngược lại
+  const secondarySource = DEFAULT_MOVIE_SOURCE === 'kkphim' ? 'ophim' : 'kkphim'
+  const secondarySourceLabel = secondarySource === 'ophim' ? 'OPhim' : 'KKPhim'
+  const secondarySourceHref = secondarySource === 'ophim' ? '/ophim/home' : '/kkphim/home'
+
   const navLinks = [
     { href: { pathname: '/list-movie', query: { typelist: 'phim-vietsub', page: 1 } }, label: 'Vietsub' },
     { href: { pathname: '/list-movie', query: { typelist: 'phim-long-tieng', page: 1 } }, label: 'Lồng tiếng' },
@@ -131,9 +135,9 @@ export default function Navbar() {
       tooltip: 'Ở đây cũng nhiều phim chất lắm, mỗi tội có quảng cáo :v'
     },
     {
-      href: { pathname: '/kkphim/home', query: { page: 1 } },
-      label: 'KKPhim',
-      tooltip: 'Nguồn phụ trợ (KKPhim)'
+      href: { pathname: secondarySourceHref, query: { page: 1 } },
+      label: secondarySourceLabel,
+      tooltip: `Nguồn phụ trợ (${secondarySourceLabel})`
     }
   ]
 
@@ -261,11 +265,11 @@ export default function Navbar() {
                   }}
                 >
                   <img
-                    src={`https://wsrv.nl/?url=${encodeURIComponent(
-                      movie.thumb_url?.startsWith('http')
-                        ? movie.thumb_url
-                        : `https://phimimg.com/${movie.thumb_url?.replace(/^\/+/, '')}`
-                    )}&w=80&h=112&fit=cover`}
+                    src={
+                      (movie.poster_url || movie.thumb_url)?.startsWith('http')
+                        ? (movie.poster_url || movie.thumb_url)
+                        : `https://phimimg.com/${(movie.poster_url || movie.thumb_url)?.replace(/^\/+/, '')}`
+                    }
                     alt={movie.name}
                     className='w-9 h-12 object-cover rounded-lg flex-shrink-0 border border-white/10'
                   />
@@ -359,11 +363,11 @@ export default function Navbar() {
                     }}
                   >
                     <img
-                      src={`https://wsrv.nl/?url=${encodeURIComponent(
-                        movie.thumb_url?.startsWith('http')
-                          ? movie.thumb_url
-                          : `https://phimimg.com/${movie.thumb_url?.replace(/^\/+/, '')}`
-                      )}&w=80&h=112&fit=cover`}
+                      src={
+                        (movie.poster_url || movie.thumb_url)?.startsWith('http')
+                          ? (movie.poster_url || movie.thumb_url)
+                          : `https://phimimg.com/${(movie.poster_url || movie.thumb_url)?.replace(/^\/+/, '')}`
+                      }
                       alt={movie.name}
                       className='w-9 h-12 object-cover rounded-lg flex-shrink-0'
                     />

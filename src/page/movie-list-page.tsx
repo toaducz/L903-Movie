@@ -5,7 +5,7 @@ import Pagination from '@/component/interactive/pagination'
 import Image from 'next/image'
 import errorImage from '@/assets/error.jpg'
 import Error from '@/component/status/error'
-import { Movie } from '@/api/kkphim/get-update-movie'
+import type { MovieItem as Movie } from '@/types/movie'
 import { Pagination as PaginationType } from '@/api/pagination'
 
 interface MovieListPageProps {

@@ -9,7 +9,7 @@ import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
 import Image from 'next/image'
 import errorImage from '@/assets/error.jpg'
-import { getLatestUpdateMovieList } from '@/api/kkphim/get-update-movie'
+import { getLatestMovies } from '@/services/movie-service'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,7 +17,7 @@ function MovieListContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const page = parseInt(searchParams.get('page') ?? '1', 10)
-  const { data: listMovie, isLoading, isError } = useQuery(getLatestUpdateMovieList({ page }))
+  const { data: listMovie, isLoading, isError } = useQuery(getLatestMovies({ page, source: 'kkphim' }))
 
   const handlePageChange = (newPage: number) => {
     router.push(`/kkphim/home?page=${newPage}`)

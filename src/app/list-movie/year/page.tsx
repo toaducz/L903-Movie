@@ -3,7 +3,7 @@
 import { Suspense, useState, useEffect } from 'react'
 import { notFound, useSearchParams, useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { getListMovieByYear } from '@/api/ophim/list-movie/get-list-movie-by-year'
+import { getMoviesByYear } from '@/services/movie-service'
 import MovieListPage from '@/page/movie-list-page'
 import Loading from '@/component/status/loading'
 import Error from '@/component/status/error'
@@ -37,7 +37,7 @@ function MovieListPageContent() {
     isLoading,
     isError
   } = useQuery(
-    getListMovieByYear({
+    getMoviesByYear({
       year: yearParam!,
       page: pageParam,
       country: filter.country || undefined,

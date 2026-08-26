@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Movie } from '@/api/kkphim/get-update-movie'
+import type { MovieItem as Movie } from '@/types/movie'
 
 type Props = {
   movie: Movie
@@ -20,9 +20,7 @@ export default function HeroSection({ movie }: Props) {
   }
 
   const poster = normalizePosterUrl(movie.poster_url) ?? normalizePosterUrl(movie.thumb_url)
-  const optimizedPoster = poster
-    ? `https://wsrv.nl/?url=${encodeURIComponent(poster)}&w=480&h=720&fit=cover&output=webp&q=80`
-    : null
+  const optimizedPoster = poster || null
 
   return (
     <section className='px-5 sm:px-10 py-10 sm:py-14'>
