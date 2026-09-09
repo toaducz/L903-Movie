@@ -1,6 +1,6 @@
 # 📚 L903 Movie
 
-**L903-Movie** sử dụng dữ liệu từ [kkphim](https://kkphim.com/)
+**L903-Movie**
 
 ![demo_1](./src/assets/demo1.png) <!-- [image] -->
 
